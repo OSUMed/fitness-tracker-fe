@@ -1,8 +1,6 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import { Flex, Text, Button } from "@radix-ui/themes";
 import "./App.css";
+import Login from "./components/Login";
 
 function App() {
   return (
@@ -14,6 +12,7 @@ function App() {
         <Text>Hello from Radix Themes :)</Text>
         <Button>Let's go</Button>
       </Flex>
+      <Login />
     </>
   );
 }
