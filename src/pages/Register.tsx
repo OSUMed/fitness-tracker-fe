@@ -34,18 +34,24 @@ const Register = () => {
     }
   });
   return (
-    <div className="max-w-xl m-5">
+    <div>
+      <Text
+        as="div"
+        className="text-2xl font-bold text-center text-gray-800 mb-4 pb-2"
+      >
+        Register
+      </Text>
       {error && (
         <Callout.Root color="red" className="m-5">
           <Callout.Text className="text-sm text-gray-500">{error}</Callout.Text>
         </Callout.Root>
       )}
       <form className="flex flex-col space-y-3" onSubmit={onSubmit}>
-        <TextField.Root className="flex flex-col space-y-4 p-5">
+        <TextField.Root className="flex flex-col  p-2 mt-1">
           <TextField.Input placeholder="Username" {...register("username")} />
         </TextField.Root>
         <ErrorMessage>{errors.username?.message}</ErrorMessage>
-        <TextField.Root className="flex flex-col space-y-4 p-5">
+        <TextField.Root className="flex flex-col  p-2 mt-1">
           <TextField.Input
             placeholder="Password"
             type="password"
