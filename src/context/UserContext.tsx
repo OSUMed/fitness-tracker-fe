@@ -32,7 +32,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
       "Basic " + btoa("user:d5b60771-492f-4713-99d4-23b9d3229480")
     );
 
-    fetch("http://localhost:8080/private", { headers })
+    fetch("http://localhost:8080/free", { headers })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -40,7 +40,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
         return response.json();
       })
       .then((data: PrivateResponse) => {
-        setUsername(data.username);
+        setUsername("trance");
         console.log(data);
       })
       .catch((error) => {
