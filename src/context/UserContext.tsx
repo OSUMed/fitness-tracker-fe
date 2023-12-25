@@ -26,36 +26,24 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    const headers = new Headers();
-    headers.append(
-      "Authorization",
-      "Basic " + btoa("user:d5b60771-492f-4713-99d4-23b9d3229480")
-    );
+    // Retrieve the JWT token from local storage
+    const jwtToken = localStorage.getItem("jwtToken");
 
-    fetch("http://localhost:8080/free", { headers })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data: PrivateResponse) => {
-        setUsername("trance");
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
-
-    // axios
-    //   .get("http://localhost:8080/users")
-    //   .then(({ data }) => {
-    //     setUsername("Srikanth");
-    //     console.log("The useEffect data is: ", data);
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
+    if (jwtToken) {
+      axios
+        .get("http://localhost:8080/account", {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        })
+        .then((response) => {
+          // Assuming the API returns an object with a username field
+          setUsername(response.data.username);
+        })
+        .catch((error) => {
+          console.error("Error fetching user info:", error);
+        });
+    }
   }, []);
 
   return (
