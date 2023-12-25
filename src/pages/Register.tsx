@@ -6,6 +6,7 @@ import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerLoginSchema } from "../schemas/registerLoginSchema";
 import { z } from "zod";
+import ErrorMessage from "../components/ErrorMessage";
 
 type RegisterLoginForm = z.infer<typeof registerLoginSchema>;
 
@@ -42,7 +43,7 @@ const Register = () => {
         <TextField.Root className="flex flex-col space-y-4 p-5">
           <TextField.Input placeholder="Username" {...register("username")} />
         </TextField.Root>
-        {errors.username && <Text color="red">{errors.username.message}</Text>}
+        <ErrorMessage>{errors.username?.message}</ErrorMessage>
         <TextField.Root className="flex flex-col space-y-4 p-5">
           <TextField.Input
             placeholder="Password"
@@ -50,8 +51,7 @@ const Register = () => {
             {...register("password")}
           />
         </TextField.Root>
-        {errors.password && <Text color="red">{errors.password.message}</Text>}
-
+        <ErrorMessage>{errors.password?.message}</ErrorMessage>
         <Button className="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
           Register User
         </Button>
