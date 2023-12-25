@@ -22,10 +22,12 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const onSubmit = handleSubmit(async (data) => {
+    console.log("data is: ", data);
     try {
       setIsSubmitting(true);
-      const response = await axios.get("http://localhost:8080/free");
-      console.log(response);
+      const response = await axios.post("http://localhost:8080/register", data);
+      console.log(response.data);
+      setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
       setError(`There was a problem with the fetch operation:", ${error}`);
