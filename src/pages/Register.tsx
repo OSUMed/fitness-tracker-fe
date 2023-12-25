@@ -21,7 +21,16 @@ const Register = () => {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmitting(true);
+      const response = await axios.get("http://localhost:8080/free");
+      console.log(response);
+    } catch (error) {
+      setIsSubmitting(false);
+      setError(`There was a problem with the fetch operation:", ${error}`);
+    }
+  });
   return (
     <div className="max-w-xl m-5">
       {error && (
@@ -29,21 +38,7 @@ const Register = () => {
           <Callout.Text className="text-sm text-gray-500">{error}</Callout.Text>
         </Callout.Root>
       )}
-      <form
-        className="flex flex-col space-y-3"
-        onSubmit={handleSubmit(async (data) => {
-          try {
-            setIsSubmitting(true);
-            const response = await axios.get("http://localhost:8080/free");
-            console.log(response);
-          } catch (error) {
-            setIsSubmitting(false);
-            setError(
-              `There was a problem with the fetch operation:", ${error}`
-            );
-          }
-        })}
-      >
+      <form className="flex flex-col space-y-3" onSubmit={onSubmit}>
         <TextField.Root className="flex flex-col space-y-4 p-5">
           <TextField.Input placeholder="Username" {...register("username")} />
         </TextField.Root>
