@@ -34,7 +34,9 @@ const Login = () => {
     console.log("data is: ", data);
     try {
       setIsSubmitting(true);
-      const response = await axios.post("http://localhost:8080/login", data);
+      const response = await axios.post("http://localhost:8080/login", data, {
+        withCredentials: true,
+      });
       console.log("response.data is: ", response.data);
       localStorage.setItem("accessToken", response.data.accessToken);
       localStorage.setItem("refreshToken", response.data.refreshToken);

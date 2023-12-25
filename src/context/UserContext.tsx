@@ -33,6 +33,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
     if (jwtToken) {
       axios
         .get("http://localhost:8080/account", {
+          withCredentials: true,
           headers: {
             Authorization: `Bearer ${jwtToken}`,
           },

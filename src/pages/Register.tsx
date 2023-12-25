@@ -25,7 +25,11 @@ const Register = () => {
     console.log("data is: ", data);
     try {
       setIsSubmitting(true);
-      const response = await axios.post("http://localhost:8080/register", data);
+      const response = await axios.post(
+        "http://localhost:8080/register",
+        data,
+        { withCredentials: true }
+      );
       console.log(response.data);
       setIsSubmitting(false);
     } catch (error) {
