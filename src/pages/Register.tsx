@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerLoginSchema } from "../schemas/registerLoginSchema";
 import { z } from "zod";
 import ErrorMessage from "../components/ErrorMessage";
+import { Spinner } from "../components/Spinner";
 
 type RegisterLoginForm = z.infer<typeof registerLoginSchema>;
 
@@ -19,6 +20,7 @@ const Register = () => {
     resolver: zodResolver(registerLoginSchema),
   });
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <div className="max-w-xl m-5">
@@ -31,9 +33,11 @@ const Register = () => {
         className="flex flex-col space-y-3"
         onSubmit={handleSubmit(async (data) => {
           try {
+            setIsSubmitting(true);
             const response = await axios.get("http://localhost:8080/free");
             console.log(response);
           } catch (error) {
+            setIsSubmitting(false);
             setError(
               `There was a problem with the fetch operation:", ${error}`
             );
@@ -52,8 +56,11 @@ const Register = () => {
           />
         </TextField.Root>
         <ErrorMessage>{errors.password?.message}</ErrorMessage>
-        <Button className="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
-          Register User
+        <Button
+          disabled={isSubmitting}
+          className="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        >
+          Register User {isSubmitting && <Spinner />}
         </Button>
       </form>
     </div>
