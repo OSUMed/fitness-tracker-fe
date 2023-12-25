@@ -1,8 +1,9 @@
 import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Chat from "../pages/Chat";
-import Register from "../pages/Register";
+
 import { UserContext } from "../context/UserContext";
+import RegisterLogin from "../pages/RegisterLogin";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -20,7 +21,7 @@ const AppRoutes: React.FC = () => {
         {username ? (
           <Route path="/" element={<Chat />} />
         ) : (
-          <Route path="/" element={<Register />} />
+          <Route path="/" element={<RegisterLogin />} />
         )}
       </Routes>
     </Router>
