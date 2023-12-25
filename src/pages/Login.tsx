@@ -16,6 +16,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<RegisterLoginForm>({
     resolver: zodResolver(registerLoginSchema),
@@ -42,6 +43,7 @@ const Login = () => {
       localStorage.setItem("refreshToken", response.data.refreshToken);
       setContextUsername(response.data.username);
       setIsSubmitting(false);
+      reset();
     } catch (error) {
       setIsSubmitting(false);
       setContextUsername(null);

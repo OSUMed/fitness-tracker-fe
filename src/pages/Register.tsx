@@ -11,10 +11,11 @@ import { Spinner } from "../components/Spinner";
 
 type RegisterLoginForm = z.infer<typeof registerLoginSchema>;
 
-const Register = () => {
+const Register = (event) => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<RegisterLoginForm>({
     resolver: zodResolver(registerLoginSchema),
@@ -32,6 +33,7 @@ const Register = () => {
       );
       console.log(response.data);
       setIsSubmitting(false);
+      reset();
     } catch (error) {
       setIsSubmitting(false);
       setError(`There was a problem with the fetch operation:", ${error}`);
