@@ -27,7 +27,8 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
 
   useEffect(() => {
     // Retrieve the JWT token from local storage
-    const jwtToken = localStorage.getItem("jwtToken");
+    const jwtToken = localStorage.getItem("accessToken");
+    console.log("jwtToken is: ", jwtToken);
 
     if (jwtToken) {
       axios
@@ -37,8 +38,8 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
           },
         })
         .then((response) => {
-          // Assuming the API returns an object with a username field
-          setUsername(response.data.username);
+          console.log("response.data is: ", response.data);
+          setUsername(response.data);
         })
         .catch((error) => {
           console.error("Error fetching user info:", error);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import * as Form from "@radix-ui/react-form";
 import { useForm } from "react-hook-form";
 import { Button, Callout, TextField, Text } from "@radix-ui/themes";
@@ -8,6 +8,7 @@ import { registerLoginSchema } from "../schemas/registerLoginSchema";
 import { z } from "zod";
 import ErrorMessage from "../components/ErrorMessage";
 import { Spinner } from "../components/Spinner";
+import { UserContext } from "../context/UserContext";
 
 type RegisterLoginForm = z.infer<typeof registerLoginSchema>;
 
@@ -21,17 +22,27 @@ const Login = () => {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const userContext = useContext(UserContext);
+
+  if (!userContext) {
+    throw new Error("UserContext must be used within a UserContextProvider");
+  }
+
+  const { setUsername: setContextUsername } = userContext;
   const onSubmit = handleSubmit(async (data) => {
     console.log("data is: ", data);
     try {
       setIsSubmitting(true);
       const response = await axios.post("http://localhost:8080/login", data);
-      const token = response.headers.authorization.split(" ")[1];
-      localStorage.setItem("jwtToken", token);
-      console.log(response.data);
+      console.log("response.data is: ", response.data);
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+      setContextUsername(response.data.username);
       setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
+      setContextUsername(null);
       setError(`There was a problem with the fetch operation:", ${error}`);
     }
   });
