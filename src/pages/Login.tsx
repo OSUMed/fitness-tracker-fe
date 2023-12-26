@@ -1,5 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button, Callout, TextField, Text } from "@radix-ui/themes";
 import axios from "axios";
@@ -23,14 +24,15 @@ const Login = () => {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const userContext = useContext(UserContext);
 
   if (!userContext) {
     throw new Error("UserContext must be used within a UserContextProvider");
   }
-
   const { setUsername: setContextUsername } = userContext;
+
   const onSubmit = handleSubmit(async (data) => {
     console.log("data is: ", data);
     try {
@@ -44,6 +46,7 @@ const Login = () => {
       setContextUsername(response.data.username);
       setIsSubmitting(false);
       reset();
+      navigate("/dashboard");
     } catch (error) {
       setIsSubmitting(false);
       setContextUsername(null);
