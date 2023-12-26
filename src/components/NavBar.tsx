@@ -1,9 +1,10 @@
 import axios from "axios";
 import React, { useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import "../custom-styles.css";
 import { IoFitness } from "react-icons/io5";
+import classNames from "classnames";
 
 const NavBar = () => {
   const context = useContext(UserContext);
@@ -12,6 +13,8 @@ const NavBar = () => {
   const { username: contextUsername, setUsername: setContextUsername } =
     context!;
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -62,16 +65,24 @@ const NavBar = () => {
       </Link>
       {contextUsername ? (
         <ul className="flex space-x-8">
-          {authenticatedLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                to={link.href}
-                className="text-blue-500 hover:text-blue-700 transition-colors"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
+          {authenticatedLinks.map((link) => {
+            const isHighlighted =
+              location.pathname === "/" || location.pathname === link.href;
+            return (
+              <li key={link.href}>
+                <Link
+                  to={link.href}
+                  className={classNames({
+                    "text-blue-900": isHighlighted,
+                    "text-blue-500": !isHighlighted,
+                    "hover:text-blue-900 transition-colors": true,
+                  })}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <ul className="flex space-x-8">
