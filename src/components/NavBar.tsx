@@ -7,7 +7,8 @@ const NavBar = () => {
   const context = useContext(UserContext);
 
   // Assert that context is not undefined
-  const { username, setUsername: setContextUsername } = context!;
+  const { username: contextUsername, setUsername: setContextUsername } =
+    context!;
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -36,17 +37,27 @@ const NavBar = () => {
   };
   return (
     <nav>
-      <Link to={"/"}></Link>
       <ul>
-        <li>
-          <Link to={"/dashboard"}>Dashboard</Link>
-        </li>
-        <li>
-          <Link to={"/chat"}>Chat Groups</Link>
-        </li>
-        <li>
-          <button onClick={handleLogout}>Logout</button>
-        </li>
+        {contextUsername ? (
+          <>
+            <li>
+              <Link to="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link to="/chat">Chat Groups</Link>
+            </li>
+            <li>
+              <button onClick={handleLogout}>Logout</button>
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              <Link to="/signin">Sign In</Link>
+              <Link to="/aboutus">About Us</Link>
+            </li>
+          </>
+        )}
       </ul>
     </nav>
   );

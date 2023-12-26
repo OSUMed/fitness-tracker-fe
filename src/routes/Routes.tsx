@@ -10,6 +10,8 @@ import Chat from "../pages/Chat";
 import { UserContext } from "../context/UserContext";
 import RegisterLogin from "../pages/RegisterLogin";
 import Dashboard from "../pages/Dashboard";
+import NavBar from "../components/NavBar";
+import AboutUs from "../pages/About Us";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -23,6 +25,7 @@ const AppRoutes: React.FC = () => {
   console.log("What is the username? ", username);
   return (
     <Router>
+      <NavBar />
       <Routes>
         <Route
           path="/"
@@ -40,6 +43,7 @@ const AppRoutes: React.FC = () => {
         )}
 
         <Route path="/signin" element={<RegisterLogin />} />
+        <Route path="/aboutus" element={<AboutUs />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>

@@ -12,7 +12,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <NavBar />
       <p>Welcome to the Dashboard, {username}</p>
     </div>
   );
