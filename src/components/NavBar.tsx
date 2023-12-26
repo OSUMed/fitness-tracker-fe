@@ -47,17 +47,17 @@ const NavBar = () => {
   ];
   const unauthenticatedLinks = [
     {
-      label: "Sign In",
-      href: "/signin",
-    },
-    {
       label: "About Us",
       href: "/aboutus",
+    },
+    {
+      label: "Sign In",
+      href: "/signin",
     },
   ];
 
   return (
-    <nav className="flex justify-between border-b mb-5 p-5 h-14 items-center">
+    <nav className="flex justify-between border-b border-blue-500 mb-5 p-5 h-14 items-center">
       <Link to="/">
         <Link to="/">
           <IoFitness className="text-3xl custom-icon-color " />
@@ -65,24 +65,28 @@ const NavBar = () => {
       </Link>
       {contextUsername ? (
         <ul className="flex space-x-8">
-          {authenticatedLinks.map((link) => {
-            const isHighlighted =
-              location.pathname === "/" || location.pathname === link.href;
-            return (
-              <li key={link.href}>
+          {authenticatedLinks.map((link) => (
+            <li key={link.href}>
+              {link.label === "Logout" ? (
+                <button
+                  className="text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+                  onClick={handleLogout}
+                >
+                  {link.label}
+                </button>
+              ) : (
                 <Link
                   to={link.href}
                   className={classNames({
-                    "text-blue-900": isHighlighted,
-                    "text-blue-500": !isHighlighted,
-                    "hover:text-blue-900 transition-colors": true,
+                    "text-blue-500 hover:text-blue-700 hover:underline transition-colors":
+                      true,
                   })}
                 >
                   {link.label}
                 </Link>
-              </li>
-            );
-          })}
+              )}
+            </li>
+          ))}
         </ul>
       ) : (
         <ul className="flex space-x-8">
@@ -90,7 +94,7 @@ const NavBar = () => {
             <li key={link.href}>
               <Link
                 to={link.href}
-                className="text-blue-500 hover:text-blue-700 transition-colors"
+                className="text-blue-500 hover:text-blue-700 hover:underline transition-colors"
               >
                 {link.label}
               </Link>
