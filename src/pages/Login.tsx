@@ -50,7 +50,13 @@ const Login = () => {
     } catch (error) {
       setIsSubmitting(false);
       setContextUsername(null);
-      setError(`There was a problem with the fetch operation:", ${error}`);
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setError(`User Not Found.\n Please Review Login Credentials`);
+      } else if (axios.isAxiosError(error)) {
+        setError(`An error occurred: ${error.message}`);
+      } else {
+        setError(`An unexpected error occurred: ${(error as Error).message}`);
+      }
     }
   });
   return (
@@ -62,8 +68,19 @@ const Login = () => {
         Login
       </Text>
       {error && (
-        <Callout.Root color="red" className="m-5">
-          <Callout.Text className="text-sm text-gray-500">{error}</Callout.Text>
+        <Callout.Root
+          color="red"
+          className="mx-auto mb-3"
+          style={{ width: "70%" }}
+        >
+          <div className="flex justify-center">
+            <Callout.Text
+              className="text-sm text-gray-500 text-center"
+              style={{ whiteSpace: "pre-line" }}
+            >
+              {error}
+            </Callout.Text>
+          </div>
         </Callout.Root>
       )}
       <form className="flex flex-col space-y-3" onSubmit={onSubmit}>
