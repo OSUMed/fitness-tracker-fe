@@ -1,0 +1,28 @@
+/* custom-styles.css */
+.custom-icon-color {
+  color: #607d8b;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-icon-color:hover {
+  color: #ffeb3b; /* (#FF5722 is Sunrise Yellow or something) */
+}
+
+/* custom-styles.css */
+.custom-icon-color-modern {
+  color: #795548;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-icon-color-modern:hover {
+  color: #ff5722; /* (#FF5722 is Sunrise Orange) */
+}
+/* custom-styles.css */
+.custom-icon-color-professional {
+  color: #37474f;
+  transition: color 0.2s ease-in-out;
+}
+
+.custom-icon-color-professional:hover {
+  color: #ff5252; /* (#FF5252 is Bright Coral) */
+}

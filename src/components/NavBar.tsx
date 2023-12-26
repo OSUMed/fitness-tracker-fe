@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import "../custom-styles.css";
+import { IoFitness } from "react-icons/io5";
 
 const NavBar = () => {
   const context = useContext(UserContext);
@@ -35,30 +37,56 @@ const NavBar = () => {
       console.error("Logout failed", error);
     }
   };
+  const authenticatedLinks = [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Chat", href: "/chat" },
+    { label: "Logout", href: "/logout" },
+  ];
+  const unauthenticatedLinks = [
+    {
+      label: "Sign In",
+      href: "/signin",
+    },
+    {
+      label: "About Us",
+      href: "/aboutus",
+    },
+  ];
+
   return (
-    <nav>
-      <ul>
-        {contextUsername ? (
-          <>
-            <li>
-              <Link to="/dashboard">Dashboard</Link>
+    <nav className="flex justify-between border-b mb-5 p-5 h-14 items-center">
+      <Link to="/">
+        <Link to="/">
+          <IoFitness className="text-3xl custom-icon-color " />
+        </Link>
+      </Link>
+      {contextUsername ? (
+        <ul className="flex space-x-8">
+          {authenticatedLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                to={link.href}
+                className="text-blue-500 hover:text-blue-700 transition-colors"
+              >
+                {link.label}
+              </Link>
             </li>
-            <li>
-              <Link to="/chat">Chat Groups</Link>
+          ))}
+        </ul>
+      ) : (
+        <ul className="flex space-x-8">
+          {unauthenticatedLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                to={link.href}
+                className="text-blue-500 hover:text-blue-700 transition-colors"
+              >
+                {link.label}
+              </Link>
             </li>
-            <li>
-              <button onClick={handleLogout}>Logout</button>
-            </li>
-          </>
-        ) : (
-          <>
-            <li>
-              <Link to="/signin">Sign In</Link>
-              <Link to="/aboutus">About Us</Link>
-            </li>
-          </>
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
     </nav>
   );
 };
