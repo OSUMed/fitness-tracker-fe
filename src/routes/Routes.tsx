@@ -1,9 +1,15 @@
 import React, { useContext } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Chat from "../pages/Chat";
 
 import { UserContext } from "../context/UserContext";
 import RegisterLogin from "../pages/RegisterLogin";
+import Dashboard from "../pages/Dashboard";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -14,15 +20,26 @@ const AppRoutes: React.FC = () => {
   }
 
   const { username } = userContext;
-
+  console.log("What is the username? ", username);
   return (
     <Router>
       <Routes>
-        {username ? (
-          <Route path="/" element={<Chat />} />
-        ) : (
-          <Route path="/" element={<RegisterLogin />} />
+        <Route
+          path="/"
+          element={
+            username ? <Navigate to="/dashboard" /> : <Navigate to="/signin" />
+          }
+        />
+
+        {/* Authenticated Routes */}
+        {username && (
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/chat" element={<Chat />} />
+          </>
         )}
+
+        <Route path="/signin" element={<RegisterLogin />} />
       </Routes>
     </Router>
   );
