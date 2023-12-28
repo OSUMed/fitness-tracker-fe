@@ -5,19 +5,20 @@ import "@radix-ui/themes/styles.css";
 import { Theme, ThemePanel } from "@radix-ui/themes";
 import { UserContextProvider } from "./context/UserContext";
 import AppRoutes from "./routes/Routes";
+import "@radix-ui/themes/styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <UserContextProvider>
-      <Theme
-        appearance="light"
-        accentColor="grass"
-        grayColor="gray"
-        radius="large"
-      >
+    <Theme>
+      <UserContextProvider>
         <AppRoutes />
         {/* <ThemePanel /> */}
-      </Theme>
-    </UserContextProvider>
+      </UserContextProvider>
+    </Theme>
   </React.StrictMode>
 );
+
+// appearance="light"
+// accentColor="grass"
+// grayColor="gray"
+// radius="large"
