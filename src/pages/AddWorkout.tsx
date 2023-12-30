@@ -358,7 +358,7 @@ const AddWorkout = () => {
                 variant="classic"
                 id="workoutType"
               />
-              <Select.Content>
+              <Select.Content variant="solid" position="popper" sideOffset={2}>
                 <Select.Group>
                   <Select.Label>Workout Types</Select.Label>
                   {Object.values(WorkoutType).map((type) => (
