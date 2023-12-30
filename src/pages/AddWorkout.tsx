@@ -346,7 +346,7 @@ const AddWorkout = () => {
               Add Todays Workout
             </Text>
             <Box className="space-y-4 mt-3">
-              <Box className="flex flex-col justify-center items-center">
+              <Box className="flex flex-col">
                 <Label htmlFor="workoutType">Workout Type</Label>
                 <Select.Root
                   size="3"
@@ -357,7 +357,7 @@ const AddWorkout = () => {
                 >
                   <Select.Trigger
                     placeholder="Pick A Workout Type"
-                    variant="classic"
+                    variant="surface"
                     id="workoutType"
                   />
                   <Select.Content
@@ -405,8 +405,9 @@ const AddWorkout = () => {
                     ))}
 
                     <Button
-                      variant="solid"
+                      variant="soft"
                       color="green"
+                      radius="large"
                       onClick={addSetToCurrentWorkout}
                     >
                       <PlusIcon aria-hidden="true" /> Add Set
@@ -414,9 +415,16 @@ const AddWorkout = () => {
                     <Button
                       variant="soft"
                       color="orange"
+                      radius="large"
                       onClick={deleteLastWorkoutSet}
                     >
-                      <MinusIcon aria-hidden="true" /> Delete Last Set
+                      <MinusIcon aria-hidden="true" />{" "}
+                      <span className="inline md:hidden lg:inline">
+                        Delete Last Set
+                      </span>
+                      <span className=" hidden md:inline lg:hidden">
+                        Delete
+                      </span>
                     </Button>
                   </Flex>
                 </Box>
@@ -426,16 +434,24 @@ const AddWorkout = () => {
                   onClick={addWorkoutToAllWorkouts}
                 >
                   {" "}
-                  <CheckIcon aria-hidden="true" /> Finish Exercise
+                  <CheckIcon width="16" height="16" aria-hidden="true" />{" "}
+                  <span className="inline md:hidden lg:inline">
+                    Submit Exercise
+                  </span>
+                  <span className=" hidden md:inline lg:hidden">Submit</span>
                 </Button>
               </Box>
               <Button
                 className="mt-6"
                 variant="outline"
                 color="gray"
+                highContrast
                 onClick={printCurrentWorkout}
               >
-                Print Current Workout
+                <span className="inline md:hidden lg:inline">
+                  Print Current Workout
+                </span>
+                <span className=" hidden md:inline lg:hidden">Print</span>
               </Button>
             </Box>
           </Box>
