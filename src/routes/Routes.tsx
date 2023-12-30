@@ -12,6 +12,7 @@ import RegisterLogin from "../pages/RegisterLogin";
 import Dashboard from "../pages/Dashboard";
 import NavBar from "../components/NavBar";
 import AboutUs from "../pages/About Us";
+import AddWorkout from "../pages/AddWorkout";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -39,6 +40,7 @@ const AppRoutes: React.FC = () => {
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/addworkout" element={<AddWorkout />} />
           </>
         )}
 

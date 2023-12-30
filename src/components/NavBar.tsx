@@ -43,6 +43,7 @@ const NavBar = () => {
   const authenticatedLinks = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Chat", href: "/chat" },
+    { label: "Add Workout", href: "/addworkout" },
     { label: "Logout", href: "/logout" },
   ];
   const unauthenticatedLinks = [
