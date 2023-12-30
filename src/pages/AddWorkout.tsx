@@ -1,6 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Flex, Select, TextField, Box, Button, Table } from "@radix-ui/themes";
 import { v4 as uuidv4 } from "uuid";
+import { set } from "react-hook-form";
+
+const defaultWorkouts: Workout[] = [
+  {
+    type: "Cardio",
+    exercise_name: "Running",
+    sets: [{ distance: "5 km" }],
+  },
+  {
+    type: "Stretch",
+    exercise_name: "Yoga",
+    sets: [{ seconds: "1800" }],
+  },
+  {
+    type: "Strength",
+    exercise_name: "Deadlift",
+    sets: [
+      { reps: "8", weight: "185 lbs" },
+      { reps: "6", weight: "205 lbs" },
+    ],
+  },
+  {
+    type: "Cardio",
+    exercise_name: "Cycling",
+    sets: [{ distance: "20 km" }],
+  },
+];
+
 type StrengthSet = {
   reps: string;
   weight: string;
@@ -51,7 +79,7 @@ interface workoutFinal {
   workouts: Workout[];
 }
 const AddWorkout = () => {
-  const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
+  const [allWorkouts, setAllWorkouts] = useState<Workout[]>(defaultWorkouts);
 
   const [recordWorkout, setRecordWorkout] = useState<workoutFinal>({
     id: uuidv4(),
@@ -120,7 +148,9 @@ const AddWorkout = () => {
         throw new Error("Unsupported workout type");
     }
   };
-
+  useEffect(() => {
+    console.log("allWorkouts is: ", allWorkouts);
+  }, [allWorkouts]);
   const handleAddWorkout = (
     e: React.ChangeEvent<HTMLInputElement>,
     key: string,
@@ -253,6 +283,25 @@ const AddWorkout = () => {
     setCurrentWorkout(updatedWorkout);
   }
 
+  const handleDeleteWorkout = (index: number) => {
+    const deletedWorkout = allWorkouts.find((workout, i) => i === index);
+    const updatedWorkouts = allWorkouts.filter((workout, i) => i !== index);
+    setAllWorkouts(updatedWorkouts);
+    console.log("delete workout!: ", index, deletedWorkout);
+  };
+
+  const handleUpdateWorkout = (index: number) => {
+    const updateWorkout = allWorkouts.find((workout, i) => i === index);
+    let workouts = [...allWorkouts];
+    workouts.map((workout, i) => {
+      if (i === index) {
+        workout.exercise_name = "Updated Exercise Name";
+      }
+    });
+    setAllWorkouts(workouts);
+    console.log("updateWorkout workout!: ", index, updateWorkout);
+  };
+
   return (
     <div className="w-full max-w ">
       <Flex justify="center" gap="7">
@@ -337,10 +386,14 @@ const AddWorkout = () => {
                   ))}
                 </Table.Cell>
                 <Table.Cell>
-                  <Button>Update</Button>
+                  <Button onClick={() => handleUpdateWorkout(index)}>
+                    Update
+                  </Button>
                 </Table.Cell>
                 <Table.Cell>
-                  <Button>Delete</Button>
+                  <Button onClick={() => handleDeleteWorkout(index)}>
+                    Delete
+                  </Button>
                 </Table.Cell>
               </Table.Row>
             ))}
