@@ -3,6 +3,14 @@ import { Flex, Select, TextField, Box, Button, Table } from "@radix-ui/themes";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "react-hook-form";
 import { format } from "date-fns";
+import {
+  Pencil1Icon,
+  TrashIcon,
+  PlusIcon,
+  CheckIcon,
+  MinusIcon,
+} from "@radix-ui/react-icons";
+
 const defaultWorkouts: Workout[] = [
   {
     type: "Cardio",
@@ -349,13 +357,36 @@ const AddWorkout = () => {
                 </div>
               ))}
 
-              <Button onClick={addSetToCurrentWorkout}>Add Set</Button>
-              <Button onClick={deleteLastWorkoutSet}>Delete Last Set</Button>
+              <Button
+                variant="solid"
+                color="green"
+                onClick={addSetToCurrentWorkout}
+              >
+                <PlusIcon aria-hidden="true" /> Add Set
+              </Button>
+              <Button
+                variant="soft"
+                color="orange"
+                onClick={deleteLastWorkoutSet}
+              >
+                <MinusIcon aria-hidden="true" /> Delete Last Set
+              </Button>
             </Flex>
-            <Button onClick={addWorkoutToAllWorkouts}>Finish Exercise</Button>
+            <Button
+              variant="solid"
+              color="green"
+              onClick={addWorkoutToAllWorkouts}
+            >
+              {" "}
+              <CheckIcon aria-hidden="true" /> Finish Exercise
+            </Button>
           </Box>
-          <Button className="mt-6" onClick={printCurrentWorkout}>
-            {" "}
+          <Button
+            className="mt-6"
+            variant="outline"
+            color="gray"
+            onClick={printCurrentWorkout}
+          >
             Print Current Workout
           </Button>
         </Box>
@@ -374,11 +405,8 @@ const AddWorkout = () => {
               <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
                 Sets
               </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center md:hidden">
+              <Table.ColumnHeaderCell className="text-center">
                 Edit
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                Update
               </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
                 Delete
@@ -429,23 +457,40 @@ const AddWorkout = () => {
                     </div>
                   ))}
                 </Table.Cell>
-                <Table.Cell>
-                  <Box className="md:hidden flex flex-col items-center space-y-2">
-                    <Button onClick={() => handleUpdateWorkout(index)}>
-                      Update
-                    </Button>
-                    <Button onClick={() => handleDeleteWorkout(index)}>
-                      Delete
-                    </Button>
-                  </Box>
-                </Table.Cell>
-                <Table.Cell className="hidden md:table-cell">
-                  <Button onClick={() => handleUpdateWorkout(index)}>
-                    Update
+
+                <Table.Cell className="space-y-4">
+                  <Button
+                    className="p-20"
+                    variant="soft"
+                    radius="large"
+                    color="indigo"
+                    highContrast
+                    onClick={() => handleUpdateWorkout(index)}
+                  >
+                    <Pencil1Icon width="17" height="17" />
+                    Edit
                   </Button>
+                  <span className="block md:hidden ">
+                    <Button
+                      variant="soft"
+                      radius="large"
+                      color="crimson"
+                      highContrast
+                      onClick={() => handleDeleteWorkout(index)}
+                    >
+                      <TrashIcon width="17" height="17" /> Delete
+                    </Button>
+                  </span>
                 </Table.Cell>
                 <Table.Cell className="hidden md:table-cell">
-                  <Button onClick={() => handleDeleteWorkout(index)}>
+                  <Button
+                    variant="soft"
+                    radius="large"
+                    color="crimson"
+                    highContrast
+                    onClick={() => handleDeleteWorkout(index)}
+                  >
+                    <TrashIcon width="17" height="17" />
                     Delete
                   </Button>
                 </Table.Cell>
