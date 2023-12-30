@@ -429,7 +429,7 @@ const AddWorkout = () => {
                     </div>
                   ))}
                 </Table.Cell>
-                <Table.Cell>
+                <Table.Cell className="md:hidden flex">
                   <Box className="md:hidden flex flex-col items-center space-y-2">
                     <Button onClick={() => handleUpdateWorkout(index)}>
                       Update
