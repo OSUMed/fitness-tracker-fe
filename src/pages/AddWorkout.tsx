@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Flex, Select, TextField, Box, Button, Table } from "@radix-ui/themes";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "react-hook-form";
-
+import { format } from "date-fns";
 const defaultWorkouts: Workout[] = [
   {
     type: "Cardio",
@@ -303,9 +303,9 @@ const AddWorkout = () => {
   };
 
   return (
-    <div className="w-full max-w ">
-      <Flex justify="center" gap="7">
-        <Box>
+    <div className="w-full flex justify-center items-center px-4">
+      <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
+        <Box className="space-y-4">
           <Select.Root
             size="3"
             value={selectedWorkoutType ?? ""}
@@ -329,7 +329,7 @@ const AddWorkout = () => {
               </Select.Group>
             </Select.Content>
           </Select.Root>
-          <Box className="mt-3">
+          <Box className="space-y-4">
             {" "}
             <Flex direction="column" gap="2">
               <TextField.Input
@@ -354,43 +354,97 @@ const AddWorkout = () => {
             </Flex>
             <Button onClick={addWorkoutToAllWorkouts}>Finish Exercise</Button>
           </Box>
-          <Button onClick={printCurrentWorkout}> Print Current Workout</Button>
+          <Button className="mt-6" onClick={printCurrentWorkout}>
+            {" "}
+            Print Current Workout
+          </Button>
         </Box>
-        <Table.Root>
+        <Table.Root variant="surface">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Exercise Type</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Exercise Name</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Sets</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Update</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Delete</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center ">
+                Date
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center ">
+                Exercise Type
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Exercise Name
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Sets
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center md:hidden">
+                Edit
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Update
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Delete
+              </Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {allWorkouts.map((workout, index) => (
               <Table.Row key={index}>
                 <Table.Cell>
-                  {new Date(recordWorkout.date).toLocaleDateString()}
+                  {/* {new Date(recordWorkout.date).toDateString()} */}
+                  <span className="hidden sm:block">
+                    {new Date(recordWorkout.date).toDateString()}
+                  </span>
+
+                  <span className="block sm:hidden">
+                    {format(recordWorkout.date, "MM/dd/yyyy")}
+                  </span>
                 </Table.Cell>
-                <Table.Cell>{workout.type}</Table.Cell>
-                <Table.Cell>{workout.exercise_name}</Table.Cell>
                 <Table.Cell>
+                  {workout.type}{" "}
+                  <div className="block md:hidden">{workout.exercise_name}</div>
+                  <div className="block md:hidden">
+                    {workout.sets.map((set, workoutIndex) => (
+                      <div key={workoutIndex}>
+                        {Object.entries(set).map(([key, value], setIndex) => (
+                          <div
+                            className="border-b border-black last:border-b-0 py-2"
+                            key={setIndex}
+                          >{`${key}: ${value}`}</div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
+                  {workout.exercise_name}
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
                   {workout.sets.map((set, workoutIndex) => (
                     <div key={workoutIndex}>
                       {Object.entries(set).map(([key, value], setIndex) => (
-                        <div key={setIndex}>{`${key}: ${value}`}</div>
+                        <div
+                          key={setIndex}
+                          className="border-b border-black last:border-b-0 py-2"
+                        >{`${key}: ${value}`}</div>
                       ))}
-                      <hr />
                     </div>
                   ))}
                 </Table.Cell>
                 <Table.Cell>
+                  <Box className="md:hidden flex flex-col items-center space-y-2">
+                    <Button onClick={() => handleUpdateWorkout(index)}>
+                      Update
+                    </Button>
+                    <Button onClick={() => handleDeleteWorkout(index)}>
+                      Delete
+                    </Button>
+                  </Box>
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
                   <Button onClick={() => handleUpdateWorkout(index)}>
                     Update
                   </Button>
                 </Table.Cell>
-                <Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
                   <Button onClick={() => handleDeleteWorkout(index)}>
                     Delete
                   </Button>
@@ -399,7 +453,7 @@ const AddWorkout = () => {
             ))}
           </Table.Body>
         </Table.Root>
-      </Flex>
+      </Box>
     </div>
   );
 };
