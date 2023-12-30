@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Flex, Select, TextField, Box, Button } from "@radix-ui/themes";
-
+import { Flex, Select, TextField, Box, Button, Table } from "@radix-ui/themes";
+import { v4 as uuidv4 } from "uuid";
 type StrengthSet = {
   reps: string;
   weight: string;
@@ -45,9 +45,19 @@ type AllWorkout = Workout[];
 interface WorkoutSetDataStructure {
   [key: string]: string;
 }
-
+interface workoutFinal {
+  id: string;
+  date: number;
+  workouts: Workout[];
+}
 const AddWorkout = () => {
   const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
+
+  const [recordWorkout, setRecordWorkout] = useState<workoutFinal>({
+    id: uuidv4(),
+    date: Date.now(),
+    workouts: allWorkouts,
+  });
   const [selectedWorkoutType, setSelectedWorkoutType] =
     useState<WorkoutType | null>(null);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
@@ -244,54 +254,99 @@ const AddWorkout = () => {
   }
 
   return (
-    <div className="w-full max-w-sm ">
-      <Select.Root
-        size="3"
-        value={selectedWorkoutType ?? ""}
-        onValueChange={(value) => handleSelectWorkoutType(value as WorkoutType)}
-      >
-        <Select.Trigger
-          placeholder="Pick A Workout Type"
-          variant="classic"
-          radius="full"
-        />
-        <Select.Content>
-          <Select.Group>
-            <Select.Label>Workout Types</Select.Label>
-            {Object.values(WorkoutType).map((type) => (
-              <Select.Item key={type} value={type}>
-                {type}
-              </Select.Item>
-            ))}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
-      <Box className="mt-3">
-        {" "}
-        <Flex direction="column" gap="2">
-          <TextField.Input
-            placeholder="Exercise Name"
-            onChange={(e) => handleAddExerciseName(e)}
-          />
-          {currentWorkout?.sets.map((item, index) => (
-            <div key={index}>
-              <h3>Set {index + 1}</h3>
-              {Object.keys(item).map((key) => (
-                <TextField.Input
-                  key={key}
-                  placeholder={`${key}`}
-                  onChange={(e) => handleAddWorkout(e, key, index)}
-                />
+    <div className="w-full max-w ">
+      <Flex justify="center" gap="7">
+        <Box>
+          <Select.Root
+            size="3"
+            value={selectedWorkoutType ?? ""}
+            onValueChange={(value) =>
+              handleSelectWorkoutType(value as WorkoutType)
+            }
+          >
+            <Select.Trigger
+              placeholder="Pick A Workout Type"
+              variant="classic"
+              radius="full"
+            />
+            <Select.Content>
+              <Select.Group>
+                <Select.Label>Workout Types</Select.Label>
+                {Object.values(WorkoutType).map((type) => (
+                  <Select.Item key={type} value={type}>
+                    {type}
+                  </Select.Item>
+                ))}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+          <Box className="mt-3">
+            {" "}
+            <Flex direction="column" gap="2">
+              <TextField.Input
+                placeholder="Exercise Name"
+                onChange={(e) => handleAddExerciseName(e)}
+              />
+              {currentWorkout?.sets.map((item, index) => (
+                <div key={index}>
+                  <h3>Set {index + 1}</h3>
+                  {Object.keys(item).map((key) => (
+                    <TextField.Input
+                      key={key}
+                      placeholder={`${key}`}
+                      onChange={(e) => handleAddWorkout(e, key, index)}
+                    />
+                  ))}
+                </div>
               ))}
-            </div>
-          ))}
 
-          <Button onClick={addSetToCurrentWorkout}>Add Set</Button>
-          <Button onClick={deleteLastWorkoutSet}>Delete Last Set</Button>
-        </Flex>
-        <Button onClick={addWorkoutToAllWorkouts}>Finish Exercise</Button>
-      </Box>
-      <Button onClick={printCurrentWorkout}> Print Current Workout</Button>
+              <Button onClick={addSetToCurrentWorkout}>Add Set</Button>
+              <Button onClick={deleteLastWorkoutSet}>Delete Last Set</Button>
+            </Flex>
+            <Button onClick={addWorkoutToAllWorkouts}>Finish Exercise</Button>
+          </Box>
+          <Button onClick={printCurrentWorkout}> Print Current Workout</Button>
+        </Box>
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Exercise Type</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Exercise Name</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Sets</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Update</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Delete</Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {allWorkouts.map((workout, index) => (
+              <Table.Row key={index}>
+                <Table.Cell>
+                  {new Date(recordWorkout.date).toLocaleDateString()}
+                </Table.Cell>
+                <Table.Cell>{workout.type}</Table.Cell>
+                <Table.Cell>{workout.exercise_name}</Table.Cell>
+                <Table.Cell>
+                  {workout.sets.map((set, workoutIndex) => (
+                    <div key={workoutIndex}>
+                      {Object.entries(set).map(([key, value], setIndex) => (
+                        <div key={setIndex}>{`${key}: ${value}`}</div>
+                      ))}
+                      <hr />
+                    </div>
+                  ))}
+                </Table.Cell>
+                <Table.Cell>
+                  <Button>Update</Button>
+                </Table.Cell>
+                <Table.Cell>
+                  <Button>Delete</Button>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      </Flex>
     </div>
   );
 };
