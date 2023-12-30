@@ -3,6 +3,17 @@
   color: #607d8b;
   transition: color 0.2s ease-in-out;
 }
+.custom-icon-text-color {
+  color: #607d8b;
+  transition: color 0.2s ease-in-out;
+}
+.custom-yellow-color {
+  color: #ffeb3b;
+}
+.custom-icon-text-color:hover {
+  color: #333333;
+  transition: color 0.2s ease-in-out;
+}
 
 .custom-icon-color:hover {
   color: #ffeb3b; /* (#FF5722 is Sunrise Yellow or something) */
