@@ -338,7 +338,7 @@ const AddWorkout = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center px-4">
+    <Box className="w-full flex justify-center items-center px-4">
       <Box className="px-4 flex flex-col md:flex-row md:items-center md:space-x-7">
         <Card variant="surface" size="3">
           <Box className="flex flex-col justify-center items-center">
@@ -488,11 +488,11 @@ const AddWorkout = () => {
                 <Table.Row key={index}>
                   <Table.Cell>
                     {/* {new Date(recordWorkout.date).toDateString()} */}
-                    <span className="hidden sm:block">
+                    <span className="hidden md:block">
                       {new Date(recordWorkout.date).toDateString()}
                     </span>
 
-                    <span className="block sm:hidden">
+                    <span className="block md:hidden">
                       {format(recordWorkout.date, "MM/dd/yyyy")}
                     </span>
                   </Table.Cell>
@@ -572,7 +572,7 @@ const AddWorkout = () => {
           </Table.Root>
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 
