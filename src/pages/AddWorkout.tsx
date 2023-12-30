@@ -362,7 +362,11 @@ const AddWorkout = () => {
                 <Select.Group>
                   <Select.Label>Workout Types</Select.Label>
                   {Object.values(WorkoutType).map((type) => (
-                    <Select.Item key={type} value={type}>
+                    <Select.Item
+                      key={type}
+                      value={type}
+                      className="focus:bg-yellow-400"
+                    >
                       {type}
                     </Select.Item>
                   ))}
@@ -376,6 +380,7 @@ const AddWorkout = () => {
               <TextField.Input
                 placeholder="Exercise Name"
                 onChange={(e) => handleAddExerciseName(e)}
+                className="focus:border-yellow-400 border-2"
               />
               {currentWorkout?.sets.map((item, index) => (
                 <div key={index}>
@@ -385,6 +390,7 @@ const AddWorkout = () => {
                       key={key}
                       placeholder={`${key}`}
                       onChange={(e) => handleAddWorkout(e, key, index)}
+                      className="focus:border-yellow-400 border-2"
                     />
                   ))}
                 </div>
