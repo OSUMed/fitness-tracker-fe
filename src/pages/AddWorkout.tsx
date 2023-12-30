@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Flex, Select, TextField, Box, Button, Table } from "@radix-ui/themes";
+import {
+  Flex,
+  Select,
+  TextField,
+  Box,
+  Text,
+  Button,
+  Table,
+  Card,
+} from "@radix-ui/themes";
+import { Label } from "@radix-ui/react-label";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "react-hook-form";
 import { format } from "date-fns";
@@ -330,30 +340,36 @@ const AddWorkout = () => {
   return (
     <div className="w-full flex justify-center items-center px-4">
       <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
-        <Box className="space-y-4">
-          <Select.Root
-            size="3"
-            value={selectedWorkoutType ?? ""}
-            onValueChange={(value) =>
-              handleSelectWorkoutType(value as WorkoutType)
-            }
-          >
-            <Select.Trigger
-              placeholder="Pick A Workout Type"
-              variant="classic"
-              radius="full"
-            />
-            <Select.Content>
-              <Select.Group>
-                <Select.Label>Workout Types</Select.Label>
-                {Object.values(WorkoutType).map((type) => (
-                  <Select.Item key={type} value={type}>
-                    {type}
-                  </Select.Item>
-                ))}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
+        <Text mb="3" size="4" weight="bold" className="m-2">
+          Add Todays Workout
+        </Text>
+        <Box className="space-y-4 mt-3">
+          <Box className="flex flex-col ">
+            <Label htmlFor="workoutType">Workout Type</Label>
+            <Select.Root
+              size="3"
+              value={selectedWorkoutType ?? ""}
+              onValueChange={(value) =>
+                handleSelectWorkoutType(value as WorkoutType)
+              }
+            >
+              <Select.Trigger
+                placeholder="Pick A Workout Type"
+                variant="classic"
+                id="workoutType"
+              />
+              <Select.Content>
+                <Select.Group>
+                  <Select.Label>Workout Types</Select.Label>
+                  {Object.values(WorkoutType).map((type) => (
+                    <Select.Item key={type} value={type}>
+                      {type}
+                    </Select.Item>
+                  ))}
+                </Select.Group>
+              </Select.Content>
+            </Select.Root>
+          </Box>
           <Box className="space-y-4">
             {" "}
             <Flex direction="column" gap="2">
