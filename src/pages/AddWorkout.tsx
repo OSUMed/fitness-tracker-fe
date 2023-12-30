@@ -1,5 +1,33 @@
-import React, { useState } from "react";
-import { Flex, Select, TextField, Box, Button } from "@radix-ui/themes";
+import React, { useEffect, useState } from "react";
+import { Flex, Select, TextField, Box, Button, Table } from "@radix-ui/themes";
+import { v4 as uuidv4 } from "uuid";
+import { set } from "react-hook-form";
+import { format } from "date-fns";
+const defaultWorkouts: Workout[] = [
+  {
+    type: "Cardio",
+    exercise_name: "Running",
+    sets: [{ distance: "5 km" }],
+  },
+  {
+    type: "Stretch",
+    exercise_name: "Yoga",
+    sets: [{ seconds: "1800" }],
+  },
+  {
+    type: "Strength",
+    exercise_name: "Deadlift",
+    sets: [
+      { reps: "8", weight: "185 lbs" },
+      { reps: "6", weight: "205 lbs" },
+    ],
+  },
+  {
+    type: "Cardio",
+    exercise_name: "Cycling",
+    sets: [{ distance: "20 km" }],
+  },
+];
 
 type StrengthSet = {
   reps: string;
@@ -45,9 +73,19 @@ type AllWorkout = Workout[];
 interface WorkoutSetDataStructure {
   [key: string]: string;
 }
-
+interface workoutFinal {
+  id: string;
+  date: number;
+  workouts: Workout[];
+}
 const AddWorkout = () => {
-  const [allWorkouts, setAllWorkouts] = useState<Workout[]>([]);
+  const [allWorkouts, setAllWorkouts] = useState<Workout[]>(defaultWorkouts);
+
+  const [recordWorkout, setRecordWorkout] = useState<workoutFinal>({
+    id: uuidv4(),
+    date: Date.now(),
+    workouts: allWorkouts,
+  });
   const [selectedWorkoutType, setSelectedWorkoutType] =
     useState<WorkoutType | null>(null);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
@@ -110,7 +148,9 @@ const AddWorkout = () => {
         throw new Error("Unsupported workout type");
     }
   };
-
+  useEffect(() => {
+    console.log("allWorkouts is: ", allWorkouts);
+  }, [allWorkouts]);
   const handleAddWorkout = (
     e: React.ChangeEvent<HTMLInputElement>,
     key: string,
@@ -243,55 +283,177 @@ const AddWorkout = () => {
     setCurrentWorkout(updatedWorkout);
   }
 
-  return (
-    <div className="w-full max-w-sm ">
-      <Select.Root
-        size="3"
-        value={selectedWorkoutType ?? ""}
-        onValueChange={(value) => handleSelectWorkoutType(value as WorkoutType)}
-      >
-        <Select.Trigger
-          placeholder="Pick A Workout Type"
-          variant="classic"
-          radius="full"
-        />
-        <Select.Content>
-          <Select.Group>
-            <Select.Label>Workout Types</Select.Label>
-            {Object.values(WorkoutType).map((type) => (
-              <Select.Item key={type} value={type}>
-                {type}
-              </Select.Item>
-            ))}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
-      <Box className="mt-3">
-        {" "}
-        <Flex direction="column" gap="2">
-          <TextField.Input
-            placeholder="Exercise Name"
-            onChange={(e) => handleAddExerciseName(e)}
-          />
-          {currentWorkout?.sets.map((item, index) => (
-            <div key={index}>
-              <h3>Set {index + 1}</h3>
-              {Object.keys(item).map((key) => (
-                <TextField.Input
-                  key={key}
-                  placeholder={`${key}`}
-                  onChange={(e) => handleAddWorkout(e, key, index)}
-                />
-              ))}
-            </div>
-          ))}
+  const handleDeleteWorkout = (index: number) => {
+    const deletedWorkout = allWorkouts.find((workout, i) => i === index);
+    const updatedWorkouts = allWorkouts.filter((workout, i) => i !== index);
+    setAllWorkouts(updatedWorkouts);
+    console.log("delete workout!: ", index, deletedWorkout);
+  };
 
-          <Button onClick={addSetToCurrentWorkout}>Add Set</Button>
-          <Button onClick={deleteLastWorkoutSet}>Delete Last Set</Button>
-        </Flex>
-        <Button onClick={addWorkoutToAllWorkouts}>Finish Exercise</Button>
+  const handleUpdateWorkout = (index: number) => {
+    const updateWorkout = allWorkouts.find((workout, i) => i === index);
+    let workouts = [...allWorkouts];
+    workouts.map((workout, i) => {
+      if (i === index) {
+        workout.exercise_name = "Updated Exercise Name";
+      }
+    });
+    setAllWorkouts(workouts);
+    console.log("updateWorkout workout!: ", index, updateWorkout);
+  };
+
+  return (
+    <div className="w-full flex justify-center items-center px-4">
+      <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
+        <Box className="space-y-4">
+          <Select.Root
+            size="3"
+            value={selectedWorkoutType ?? ""}
+            onValueChange={(value) =>
+              handleSelectWorkoutType(value as WorkoutType)
+            }
+          >
+            <Select.Trigger
+              placeholder="Pick A Workout Type"
+              variant="classic"
+              radius="full"
+            />
+            <Select.Content>
+              <Select.Group>
+                <Select.Label>Workout Types</Select.Label>
+                {Object.values(WorkoutType).map((type) => (
+                  <Select.Item key={type} value={type}>
+                    {type}
+                  </Select.Item>
+                ))}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+          <Box className="space-y-4">
+            {" "}
+            <Flex direction="column" gap="2">
+              <TextField.Input
+                placeholder="Exercise Name"
+                onChange={(e) => handleAddExerciseName(e)}
+              />
+              {currentWorkout?.sets.map((item, index) => (
+                <div key={index}>
+                  <h3>Set {index + 1}</h3>
+                  {Object.keys(item).map((key) => (
+                    <TextField.Input
+                      key={key}
+                      placeholder={`${key}`}
+                      onChange={(e) => handleAddWorkout(e, key, index)}
+                    />
+                  ))}
+                </div>
+              ))}
+
+              <Button onClick={addSetToCurrentWorkout}>Add Set</Button>
+              <Button onClick={deleteLastWorkoutSet}>Delete Last Set</Button>
+            </Flex>
+            <Button onClick={addWorkoutToAllWorkouts}>Finish Exercise</Button>
+          </Box>
+          <Button className="mt-6" onClick={printCurrentWorkout}>
+            {" "}
+            Print Current Workout
+          </Button>
+        </Box>
+        <Table.Root variant="surface">
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeaderCell className="text-center ">
+                Date
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center ">
+                Exercise Type
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Exercise Name
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Sets
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center md:hidden">
+                Edit
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Update
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                Delete
+              </Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {allWorkouts.map((workout, index) => (
+              <Table.Row key={index}>
+                <Table.Cell>
+                  {/* {new Date(recordWorkout.date).toDateString()} */}
+                  <span className="hidden sm:block">
+                    {new Date(recordWorkout.date).toDateString()}
+                  </span>
+
+                  <span className="block sm:hidden">
+                    {format(recordWorkout.date, "MM/dd/yyyy")}
+                  </span>
+                </Table.Cell>
+                <Table.Cell>
+                  {workout.type}{" "}
+                  <div className="block md:hidden">{workout.exercise_name}</div>
+                  <div className="block md:hidden">
+                    {workout.sets.map((set, workoutIndex) => (
+                      <div key={workoutIndex}>
+                        {Object.entries(set).map(([key, value], setIndex) => (
+                          <div
+                            className="border-b border-black last:border-b-0 py-2"
+                            key={setIndex}
+                          >{`${key}: ${value}`}</div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
+                  {workout.exercise_name}
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
+                  {workout.sets.map((set, workoutIndex) => (
+                    <div key={workoutIndex}>
+                      {Object.entries(set).map(([key, value], setIndex) => (
+                        <div
+                          key={setIndex}
+                          className="border-b border-black last:border-b-0 py-2"
+                        >{`${key}: ${value}`}</div>
+                      ))}
+                    </div>
+                  ))}
+                </Table.Cell>
+                <Table.Cell>
+                  <Box className="md:hidden flex flex-col items-center space-y-2">
+                    <Button onClick={() => handleUpdateWorkout(index)}>
+                      Update
+                    </Button>
+                    <Button onClick={() => handleDeleteWorkout(index)}>
+                      Delete
+                    </Button>
+                  </Box>
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
+                  <Button onClick={() => handleUpdateWorkout(index)}>
+                    Update
+                  </Button>
+                </Table.Cell>
+                <Table.Cell className="hidden md:table-cell">
+                  <Button onClick={() => handleDeleteWorkout(index)}>
+                    Delete
+                  </Button>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
       </Box>
-      <Button onClick={printCurrentWorkout}> Print Current Workout</Button>
     </div>
   );
 };

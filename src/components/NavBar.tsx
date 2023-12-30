@@ -79,7 +79,7 @@ const NavBar = () => {
                 <Link
                   to={link.href}
                   className={classNames({
-                    "text-blue-500 hover:text-blue-700 hover:underline transition-colors":
+                    "text-blue-500 hover:text-blue-700 hover:underline transition-colors hidden sm:block":
                       true,
                   })}
                 >
