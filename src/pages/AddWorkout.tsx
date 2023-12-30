@@ -465,6 +465,7 @@ const AddWorkout = () => {
                     radius="large"
                     color="indigo"
                     highContrast
+                    onClick={() => handleUpdateWorkout(index)}
                   >
                     <Pencil1Icon width="17" height="17" />
                     Edit
@@ -475,6 +476,7 @@ const AddWorkout = () => {
                       radius="large"
                       color="crimson"
                       highContrast
+                      onClick={() => handleDeleteWorkout(index)}
                     >
                       <TrashIcon width="17" height="17" /> Delete
                     </Button>
@@ -486,6 +488,7 @@ const AddWorkout = () => {
                     radius="large"
                     color="crimson"
                     highContrast
+                    onClick={() => handleDeleteWorkout(index)}
                   >
                     <TrashIcon width="17" height="17" />
                     Delete
