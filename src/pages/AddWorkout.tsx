@@ -74,6 +74,12 @@ enum WorkoutType {
   Stretch = "Stretch",
 }
 
+type WorkoutSummary = {
+  id: string;
+  date: number;
+  summaryDetails: string;
+};
+
 type Workout = Strength | Cardio | Stretch;
 
 type AllWorkout = Workout[];
@@ -98,6 +104,17 @@ const AddWorkout = () => {
     useState<WorkoutType | null>(null);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [exerciseName, setExerciseName] = useState<string>("");
+
+  // State to hold the history of recorded workouts, summary of today's workout,
+  // and summary of all recorded workouts
+  const [historyRecordedWorkouts, setHistoryRecordedWorkouts] = useState<
+    workoutFinal[]
+  >([]);
+  const [summaryRecordedWorkouts, setSummaryRecordedWorkouts] =
+    useState<WorkoutSummary | null>(null);
+  const [allSummaryRecordedWorkouts, setAllSummaryRecordedWorkouts] = useState<
+    WorkoutSummary[]
+  >([]);
 
   const handleSelectWorkoutType = (type: WorkoutType) => {
     setSelectedWorkoutType(type);
