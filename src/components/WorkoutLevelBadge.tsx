@@ -5,22 +5,30 @@ type WorkoutLevel = "LIGHT" | "MODERATE" | "INTENSE";
 
 const workoutLevelMap: Record<
   WorkoutLevel,
-  { color: "mint" | "amber" | "crimson"; level: string; style: string }
+  {
+    color: "mint" | "amber" | "crimson";
+    level: string;
+    style: "solid" | "soft" | "outline" | "surface";
+    radius: "full" | "none" | "large";
+  }
 > = {
   LIGHT: {
     color: "mint",
     level: "Light",
-    style: "Solid",
+    style: "outline",
+    radius: "none",
   },
   MODERATE: {
     color: "amber",
     level: "Moderate",
-    style: "Soft",
+    style: "soft",
+    radius: "large",
   },
   INTENSE: {
     color: "crimson",
     level: "Intense",
-    style: "Outline",
+    style: "solid",
+    radius: "full",
   },
 };
 
@@ -30,7 +38,11 @@ interface Props {
 
 export const WorkoutLevelBadge = ({ workoutLevel }: Props) => {
   return (
-    <Badge color={workoutLevelMap[workoutLevel].color}>
+    <Badge
+      variant={workoutLevelMap[workoutLevel].style}
+      color={workoutLevelMap[workoutLevel].color}
+      radius={workoutLevelMap[workoutLevel].radius}
+    >
       {workoutLevelMap[workoutLevel].level}
     </Badge>
   );
