@@ -1,7 +1,7 @@
 import { Badge } from "@radix-ui/themes";
 import React from "react";
 
-type WorkoutLevel = "LIGHT" | "MODERATE" | "INTENSE";
+export type WorkoutLevel = "LIGHT" | "MODERATE" | "INTENSE";
 
 const workoutLevelMap: Record<
   WorkoutLevel,
