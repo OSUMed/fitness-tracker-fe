@@ -15,6 +15,7 @@ import AboutUs from "../pages/About Us";
 import AddWorkout from "../pages/AddWorkout";
 import WeekPlanner from "../pages/WeekGrid";
 import WeekGrid from "../pages/WeekGrid";
+import { Container } from "@radix-ui/themes";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -29,28 +30,36 @@ const AppRoutes: React.FC = () => {
   return (
     <Router>
       <NavBar />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            username ? <Navigate to="/dashboard" /> : <Navigate to="/signin" />
-          }
-        />
+      <Container>
+        <main className="p-5">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                username ? (
+                  <Navigate to="/dashboard" />
+                ) : (
+                  <Navigate to="/signin" />
+                )
+              }
+            />
 
-        {/* Authenticated Routes */}
-        {username && (
-          <>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/addworkout" element={<AddWorkout />} />
-            <Route path="/weekgrid" element={<WeekGrid />} />
-          </>
-        )}
+            {/* Authenticated Routes */}
+            {username && (
+              <>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/addworkout" element={<AddWorkout />} />
+                <Route path="/weekgrid" element={<WeekGrid />} />
+              </>
+            )}
 
-        <Route path="/signin" element={<RegisterLogin />} />
-        <Route path="/aboutus" element={<AboutUs />} />
-        <Route path="*" element={<div>404 Not Found</div>} />
-      </Routes>
+            <Route path="/signin" element={<RegisterLogin />} />
+            <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="*" element={<div>404 Not Found</div>} />
+          </Routes>
+        </main>
+      </Container>
     </Router>
   );
 };
