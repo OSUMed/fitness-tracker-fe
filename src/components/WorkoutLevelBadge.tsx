@@ -24,11 +24,11 @@ const workoutLevelMap: Record<
   },
 };
 
-export const WorkoutLevelBadge = ({
-  workoutLevel,
-}: {
+interface Props {
   workoutLevel: WorkoutLevel;
-}) => {
+}
+
+export const WorkoutLevelBadge = ({ workoutLevel }: Props) => {
   return (
     <Badge color={workoutLevelMap[workoutLevel].color}>
       {workoutLevelMap[workoutLevel].level}
