@@ -13,7 +13,8 @@ import Dashboard from "../pages/Dashboard";
 import NavBar from "../components/NavBar";
 import AboutUs from "../pages/About Us";
 import AddWorkout from "../pages/AddWorkout";
-import WeekPlanner from "../pages/WeekPlanner";
+import WeekPlanner from "../pages/WeekGrid";
+import WeekGrid from "../pages/WeekGrid";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -42,7 +43,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/addworkout" element={<AddWorkout />} />
-            <Route path="/weekplanner" element={<WeekPlanner />} />
+            <Route path="/weekgrid" element={<WeekGrid />} />
           </>
         )}
 
