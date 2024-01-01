@@ -357,7 +357,6 @@ const AddWorkout = () => {
             <Box className="space-y-4">
               {" "}
               <Flex direction="column" gap="2">
-
                 <Select.Root
                   size="3"
                   value={selectedWorkoutType ?? ""}
@@ -368,26 +367,26 @@ const AddWorkout = () => {
                   <Select.Trigger
                     placeholder="Pick A Workout Type"
                     variant="surface"
-
                   />
-                  <Select.Content      
+                  <Select.Content
                     variant="solid"
                     position="popper"
-                    sideOffset={2}>
+                    sideOffset={2}
+                  >
                     <Select.Group>
                       <Select.Label>Workout Types</Select.Label>
                       {Object.values(WorkoutType).map((type) => (
-                        <Select.Item key={type} value={type}      className="focus:bg-yellow-400">
-                    id="workoutType"
-                  />
-               
+                        <Select.Item
+                          key={type}
+                          value={type}
+                          className="focus:bg-yellow-400"
+                        >
                           {type}
                         </Select.Item>
                       ))}
                     </Select.Group>
                   </Select.Content>
                 </Select.Root>
-
 
                 <TextField.Input
                   placeholder="Exercise Name"
@@ -660,7 +659,6 @@ const DeleteWorkoutButton: React.FC<DeleteWorkoutButtonProps> = ({
         </Flex>
       </AlertDialog.Content>
     </AlertDialog.Root>
-
   );
 };
 
