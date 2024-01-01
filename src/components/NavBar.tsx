@@ -5,7 +5,7 @@ import { UserContext } from "../context/UserContext";
 import "../custom-styles.css";
 import { IoFitness } from "react-icons/io5";
 import classNames from "classnames";
-
+import { Text } from "@radix-ui/themes";
 const NavBar = () => {
   const context = useContext(UserContext);
 
@@ -62,7 +62,10 @@ const NavBar = () => {
     <nav className="flex justify-between border-b border-blue-500 mb-5 p-5 h-14 items-center">
       <Link to="/">
         <Link to="/">
-          <IoFitness className="text-3xl custom-icon-color " />
+          <div className="flex space-x-2">
+            <IoFitness className="text-3xl custom-icon-color " />
+            <Text className="custom-icon-text-color text-xl">FitSocial</Text>
+          </div>
         </Link>
       </Link>
       {contextUsername ? (

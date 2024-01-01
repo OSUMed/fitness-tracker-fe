@@ -95,6 +95,12 @@ interface UpdateWorkoutButtonProps {
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+type WorkoutSummary = {
+  id: string;
+  date: number;
+  summaryDetails: string;
+};
+
 type Workout = Strength | Cardio | Stretch;
 
 type AllWorkout = Workout[];
@@ -119,6 +125,17 @@ const AddWorkout = () => {
     useState<WorkoutType | null>(null);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [exerciseName, setExerciseName] = useState<string>("");
+
+  // State to hold the history of recorded workouts, summary of today's workout,
+  // and summary of all recorded workouts
+  const [historyRecordedWorkouts, setHistoryRecordedWorkouts] = useState<
+    workoutFinal[]
+  >([]);
+  const [summaryRecordedWorkouts, setSummaryRecordedWorkouts] =
+    useState<WorkoutSummary | null>(null);
+  const [allSummaryRecordedWorkouts, setAllSummaryRecordedWorkouts] = useState<
+    WorkoutSummary[]
+  >([]);
 
   const handleSelectWorkoutType = (type: WorkoutType) => {
     setSelectedWorkoutType(type);
@@ -340,6 +357,7 @@ const AddWorkout = () => {
             <Box className="space-y-4">
               {" "}
               <Flex direction="column" gap="2">
+
                 <Select.Root
                   size="3"
                   value={selectedWorkoutType ?? ""}
@@ -350,18 +368,26 @@ const AddWorkout = () => {
                   <Select.Trigger
                     placeholder="Pick A Workout Type"
                     variant="surface"
+
                   />
-                  <Select.Content>
+                  <Select.Content      
+                    variant="solid"
+                    position="popper"
+                    sideOffset={2}>
                     <Select.Group>
                       <Select.Label>Workout Types</Select.Label>
                       {Object.values(WorkoutType).map((type) => (
-                        <Select.Item key={type} value={type}>
+                        <Select.Item key={type} value={type}      className="focus:bg-yellow-400">
+                    id="workoutType"
+                  />
+               
                           {type}
                         </Select.Item>
                       ))}
                     </Select.Group>
                   </Select.Content>
                 </Select.Root>
+
 
                 <TextField.Input
                   placeholder="Exercise Name"
@@ -634,6 +660,7 @@ const DeleteWorkoutButton: React.FC<DeleteWorkoutButtonProps> = ({
         </Flex>
       </AlertDialog.Content>
     </AlertDialog.Root>
+
   );
 };
 
