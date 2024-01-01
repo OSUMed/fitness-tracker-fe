@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Table,
+  Text,
   AlertDialog,
 } from "@radix-ui/themes";
 import { v4 as uuidv4 } from "uuid";
@@ -332,192 +333,221 @@ const AddWorkout = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center px-4">
-      <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
-        <Box className="space-y-4">
-          <Select.Root
-            size="3"
-            value={selectedWorkoutType ?? ""}
-            onValueChange={(value) =>
-              handleSelectWorkoutType(value as WorkoutType)
-            }
-          >
-            <Select.Trigger
-              placeholder="Pick A Workout Type"
-              variant="classic"
-              radius="full"
-            />
-            <Select.Content>
-              <Select.Group>
-                <Select.Label>Workout Types</Select.Label>
-                {Object.values(WorkoutType).map((type) => (
-                  <Select.Item key={type} value={type}>
-                    {type}
-                  </Select.Item>
-                ))}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
-          <Box className="space-y-4">
-            {" "}
-            <Flex direction="column" gap="2">
-              <TextField.Input
-                placeholder="Exercise Name"
-                onChange={(e) => handleAddExerciseName(e)}
-              />
-              {currentWorkout?.sets.map((item, index) => (
-                <div key={index}>
-                  <h3>Set {index + 1}</h3>
-                  {Object.keys(item).map((key) => (
-                    <TextField.Input
-                      key={key}
-                      placeholder={`${key}`}
-                      onChange={(e) => handleAddWorkout(e, key, index)}
-                    />
-                  ))}
-                </div>
-              ))}
-
-              <Button
-                variant="solid"
-                color="green"
-                onClick={addSetToCurrentWorkout}
-              >
-                <PlusIcon aria-hidden="true" /> Add Set
-              </Button>
-              <Button
-                variant="soft"
-                color="orange"
-                onClick={deleteLastWorkoutSet}
-              >
-                <MinusIcon aria-hidden="true" /> Delete Last Set
-              </Button>
-            </Flex>
-            <Button
-              variant="solid"
-              color="teal"
-              onClick={addWorkoutToAllWorkouts}
-            >
+    <>
+      <div>
+        <div className="w-full flex justify-center items-center px-4">
+          <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
+            <Box className="space-y-4">
               {" "}
-              <CheckIcon aria-hidden="true" /> Finish Exercise
-            </Button>
-          </Box>
-          <Button
-            className="mt-6"
-            variant="solid"
-            color="blue"
-            onClick={printCurrentWorkout}
-          >
-            Finish Workout (ConsoleLog)
-          </Button>
-        </Box>
-        <Table.Root variant="surface">
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeaderCell className="text-center ">
-                Date
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center ">
-                Exercise Type
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                Exercise Name
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                Sets
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center">
-                Edit
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                Delete
-              </Table.ColumnHeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {allWorkouts.map((workout, index) => (
-              <Table.Row key={index}>
-                <Table.Cell>
-                  {/* {new Date(recordWorkout.date).toDateString()} */}
-                  <span className="hidden sm:block">
-                    {new Date(recordWorkout.date).toDateString()}
-                  </span>
+              <Flex direction="column" gap="2">
+                <Select.Root
+                  size="3"
+                  value={selectedWorkoutType ?? ""}
+                  onValueChange={(value) =>
+                    handleSelectWorkoutType(value as WorkoutType)
+                  }
+                >
+                  <Select.Trigger
+                    placeholder="Pick A Workout Type"
+                    variant="surface"
+                  />
+                  <Select.Content>
+                    <Select.Group>
+                      <Select.Label>Workout Types</Select.Label>
+                      {Object.values(WorkoutType).map((type) => (
+                        <Select.Item key={type} value={type}>
+                          {type}
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </Select.Content>
+                </Select.Root>
 
-                  <span className="block sm:hidden">
-                    {format(recordWorkout.date, "MM/dd/yyyy")}
-                  </span>
-                </Table.Cell>
-                <Table.Cell>
-                  {workout.type}{" "}
-                  <div className="block md:hidden">{workout.exercise_name}</div>
-                  <div className="block md:hidden">
-                    {workout.sets.map((set, workoutIndex) => (
-                      <div key={workoutIndex}>
-                        {Object.entries(set).map(([key, value], setIndex) => (
-                          <div
-                            className="border-b border-black last:border-b-0 py-2"
-                            key={setIndex}
-                          >{`${key}: ${value}`}</div>
-                        ))}
-                      </div>
+                <TextField.Input
+                  placeholder="Exercise Name"
+                  onChange={(e) => handleAddExerciseName(e)}
+                />
+                {currentWorkout?.sets.map((item, index) => (
+                  <div key={index}>
+                    <h3>Set {index + 1}</h3>
+                    {Object.keys(item).map((key) => (
+                      <TextField.Input
+                        key={key}
+                        placeholder={`${key}`}
+                        onChange={(e) => handleAddWorkout(e, key, index)}
+                      />
                     ))}
                   </div>
-                </Table.Cell>
-                <Table.Cell className="hidden md:table-cell">
-                  {workout.exercise_name}
-                </Table.Cell>
-                <Table.Cell className="hidden md:table-cell">
-                  {workout.sets.map((set, workoutIndex) => (
-                    <div key={workoutIndex}>
-                      {Object.entries(set).map(([key, value], setIndex) => (
-                        <div
-                          key={setIndex}
-                          className="border-b border-black last:border-b-0 py-2"
-                        >{`${key}: ${value}`}</div>
-                      ))}
-                    </div>
-                  ))}
-                </Table.Cell>
+                ))}
 
-                <Table.Cell className="space-y-4">
-                  {isEditing ? (
-                    <UpdateWorkoutButton
-                      index={index}
-                      onUpdate={handleUpdateWorkout}
-                      setIsEditing={setIsEditing}
-                    />
-                  ) : (
-                    <Button
-                      className="p-20"
-                      variant="soft"
-                      radius="large"
-                      color="indigo"
-                      highContrast
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Pencil1Icon width="17" height="17" />
+                <Button
+                  variant="solid"
+                  color="green"
+                  onClick={addSetToCurrentWorkout}
+                >
+                  <PlusIcon aria-hidden="true" /> Add Set
+                </Button>
+                <Button
+                  variant="soft"
+                  color="orange"
+                  onClick={deleteLastWorkoutSet}
+                >
+                  <MinusIcon aria-hidden="true" /> Delete Last Set
+                </Button>
+                <Box className="mt-3 ">
+                  <Button
+                    variant="solid"
+                    color="teal"
+                    onClick={addWorkoutToAllWorkouts}
+                    size="4"
+                    className="shadow-md items-center flex justify-center "
+                    mx-6
+                  >
+                    {" "}
+                    <CheckIcon width="19" height="19" aria-hidden="true" />
+                    <Text className="font-medium">Finish Exercise</Text>
+                  </Button>
+                </Box>
+              </Flex>
+            </Box>
+
+            <Box className="space-y-4 flex flex-col justify-end">
+              <Button
+                className="mt-6 text-lg py-4 px-8"
+                size="2"
+                variant="solid"
+                color="jade"
+                onClick={printCurrentWorkout}
+              >
+                Finish Workout
+              </Button>
+              <Table.Root variant="surface">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeaderCell className="text-center ">
+                      Date
+                    </Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell className="text-center ">
+                      Exercise Type
+                    </Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                      Exercise Name
+                    </Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                      Sets
+                    </Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell className="text-center">
                       Edit
-                    </Button>
-                  )}
-                  <span className="block md:hidden ">
-                    <DeleteWorkoutButton
-                      index={index}
-                      onDelete={handleDeleteWorkout}
-                    />
-                  </span>
-                </Table.Cell>
-                <Table.Cell className="hidden md:table-cell">
-                  <DeleteWorkoutButton
-                    index={index}
-                    onDelete={handleDeleteWorkout}
-                  />
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
-      </Box>
-    </div>
+                    </Table.ColumnHeaderCell>
+                    <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+                      Delete
+                    </Table.ColumnHeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {allWorkouts.map((workout, index) => (
+                    <Table.Row key={index}>
+                      <Table.Cell>
+                        {/* {new Date(recordWorkout.date).toDateString()} */}
+                        <span className="hidden sm:block">
+                          {new Date(recordWorkout.date).toDateString()}
+                        </span>
+
+                        <span className="block sm:hidden">
+                          {format(recordWorkout.date, "MM/dd/yyyy")}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        {workout.type}{" "}
+                        <div className="block md:hidden">
+                          {workout.exercise_name}
+                        </div>
+                        <div className="block md:hidden">
+                          {workout.sets.map((set, workoutIndex) => (
+                            <div key={workoutIndex}>
+                              {Object.entries(set).map(
+                                ([key, value], setIndex) => (
+                                  <div
+                                    className="border-b border-black last:border-b-0 py-2"
+                                    key={setIndex}
+                                  >{`${key}: ${value}`}</div>
+                                )
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </Table.Cell>
+                      <Table.Cell className="hidden md:table-cell">
+                        {workout.exercise_name}
+                      </Table.Cell>
+                      <Table.Cell className="hidden md:table-cell">
+                        {workout.sets.map((set, workoutIndex) => (
+                          <div key={workoutIndex}>
+                            {Object.entries(set).map(
+                              ([key, value], setIndex) => (
+                                <div
+                                  key={setIndex}
+                                  className="border-b border-black last:border-b-0 py-2"
+                                >{`${key}: ${value}`}</div>
+                              )
+                            )}
+                          </div>
+                        ))}
+                      </Table.Cell>
+
+                      <Table.Cell className="space-y-4">
+                        {isEditing ? (
+                          <UpdateWorkoutButton
+                            index={index}
+                            onUpdate={handleUpdateWorkout}
+                            setIsEditing={setIsEditing}
+                          />
+                        ) : (
+                          <Button
+                            className="p-20"
+                            variant="soft"
+                            radius="large"
+                            color="indigo"
+                            highContrast
+                            onClick={() => setIsEditing(true)}
+                          >
+                            <Pencil1Icon width="17" height="17" />
+                            Edit
+                          </Button>
+                        )}
+                        <span className="block md:hidden ">
+                          <DeleteWorkoutButton
+                            index={index}
+                            onDelete={handleDeleteWorkout}
+                          />
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell className="hidden md:table-cell">
+                        <DeleteWorkoutButton
+                          index={index}
+                          onDelete={handleDeleteWorkout}
+                        />
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
+          </Box>
+        </div>
+      </div>
+      <div className="sticky w-full bg-gray-100 bg-white p-4 shadow-md flex justify-end">
+        <Button
+          className="mt-6 text-lg py-4 px-8"
+          size="4"
+          variant="solid"
+          color="jade"
+          onClick={printCurrentWorkout}
+        >
+          Finish Workout
+        </Button>
+      </div>
+    </>
   );
 };
 
