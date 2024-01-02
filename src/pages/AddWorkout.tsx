@@ -139,6 +139,8 @@ const AddWorkout = () => {
     setAllSummaryRecordedWorkouts,
     summaryRecordedWorkouts,
     setSummaryRecordedWorkouts,
+    workoutTypeCounts,
+    setWorkoutTypeCounts,
   } = useContext<UserContextType>(UserContext as Context<UserContextType>);
 
   const handleSelectWorkoutType = (type: WorkoutType) => {
@@ -175,12 +177,20 @@ const AddWorkout = () => {
       (total, workout) => total + workout.sets.length,
       0
     );
-
+    updateWorkoutTypeCounts();
     return {
-      id: uuidv4(),
+      id: recordWorkout.id,
       date: recordWorkout.date,
       summaryDetails: `${workoutTypesSummary} | ${exerciseNamesSummary} | ${totalSets} Sets`,
     };
+  };
+  const updateWorkoutTypeCounts = () => {
+    const newCounts = { ...workoutTypeCounts };
+    const newRecordWorkout = [...recordWorkout.workouts];
+    newRecordWorkout.forEach((workout) => {
+      newCounts[workout.type] += 1;
+    });
+    setWorkoutTypeCounts(newCounts);
   };
 
   const addSetToCurrentWorkout = () => {

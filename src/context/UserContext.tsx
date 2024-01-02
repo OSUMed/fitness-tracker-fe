@@ -28,6 +28,18 @@ export interface UserContextType {
   setSummaryRecordedWorkouts: React.Dispatch<
     React.SetStateAction<WorkoutSummary | null>
   >;
+  workoutTypeCounts: {
+    Cardio: number;
+    Strength: number;
+    Stretch: number;
+  };
+  setWorkoutTypeCounts: React.Dispatch<
+    React.SetStateAction<{
+      Cardio: number;
+      Strength: number;
+      Stretch: number;
+    }>
+  >;
 }
 
 // Create the context with an initial empty state
@@ -52,7 +64,11 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
   const [allSummaryRecordedWorkouts, setAllSummaryRecordedWorkouts] = useState<
     WorkoutSummary[]
   >([]);
-
+  const [workoutTypeCounts, setWorkoutTypeCounts] = useState({
+    Cardio: 1,
+    Strength: 1,
+    Stretch: 1,
+  });
   useEffect(() => {
     // Retrieve the JWT token from local storage
     const jwtToken = localStorage.getItem("accessToken");
@@ -87,6 +103,8 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
         setAllSummaryRecordedWorkouts,
         summaryRecordedWorkouts,
         setSummaryRecordedWorkouts,
+        workoutTypeCounts,
+        setWorkoutTypeCounts,
       }}
     >
       {children}
