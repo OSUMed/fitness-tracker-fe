@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Context, useContext, useEffect, useState } from "react";
 import {
   Flex,
   Select,
@@ -20,6 +20,10 @@ import {
   MinusIcon,
   Update,
 } from "@radix-ui/react-icons";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
+import { UserContext } from "../context/UserContext";
+import { UserContextType } from "../context/UserContext";
 
 const defaultWorkouts: Workout[] = [
   {
@@ -128,14 +132,16 @@ const AddWorkout = () => {
 
   // State to hold the history of recorded workouts, summary of today's workout,
   // and summary of all recorded workouts
-  const [historyRecordedWorkouts, setHistoryRecordedWorkouts] = useState<
-    workoutFinal[]
-  >([]);
-  const [summaryRecordedWorkouts, setSummaryRecordedWorkouts] =
-    useState<WorkoutSummary | null>(null);
-  const [allSummaryRecordedWorkouts, setAllSummaryRecordedWorkouts] = useState<
-    WorkoutSummary[]
-  >([]);
+  const {
+    historyRecordedWorkouts,
+    setHistoryRecordedWorkouts,
+    allSummaryRecordedWorkouts,
+    setAllSummaryRecordedWorkouts,
+    summaryRecordedWorkouts,
+    setSummaryRecordedWorkouts,
+    workoutTypeCounts,
+    setWorkoutTypeCounts,
+  } = useContext<UserContextType>(UserContext as Context<UserContextType>);
 
   const handleSelectWorkoutType = (type: WorkoutType) => {
     setSelectedWorkoutType(type);
@@ -152,6 +158,39 @@ const AddWorkout = () => {
     } else if (type === WorkoutType.Stretch) {
       setCurrentWorkout({ type, exercise_name: "", sets: [{ seconds: "" }] });
     }
+  };
+
+  const summarizeDayWorkout = (): WorkoutSummary => {
+    // Types of workouts performed
+    const workoutTypes = new Set(
+      recordWorkout.workouts.map((workout) => workout.type)
+    );
+    const workoutTypesSummary = Array.from(workoutTypes).join(", ");
+
+    // Exercise names
+    const exerciseNamesSummary = recordWorkout.workouts
+      .map((workout) => workout.exercise_name)
+      .join(", ");
+
+    // Total number of sets
+    const totalSets = recordWorkout.workouts.reduce(
+      (total, workout) => total + workout.sets.length,
+      0
+    );
+    updateWorkoutTypeCounts();
+    return {
+      id: recordWorkout.id,
+      date: recordWorkout.date,
+      summaryDetails: `${workoutTypesSummary} | ${exerciseNamesSummary} | ${totalSets} Sets`,
+    };
+  };
+  const updateWorkoutTypeCounts = () => {
+    const newCounts = { ...workoutTypeCounts };
+    const newRecordWorkout = [...recordWorkout.workouts];
+    newRecordWorkout.forEach((workout) => {
+      newCounts[workout.type] += 1;
+    });
+    setWorkoutTypeCounts(newCounts);
   };
 
   const addSetToCurrentWorkout = () => {
@@ -285,9 +324,25 @@ const AddWorkout = () => {
     setCurrentWorkout(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
+    toast.success("Workout added!", { duration: 3000 });
   };
-  const printCurrentWorkout = () => {
-    console.log("All workouts are: ", allWorkouts);
+  const finishCurrentWorkout = () => {
+    const daySummary = summarizeDayWorkout();
+    setHistoryRecordedWorkouts([...historyRecordedWorkouts, recordWorkout]);
+    setSummaryRecordedWorkouts(daySummary);
+    setAllSummaryRecordedWorkouts([...allSummaryRecordedWorkouts, daySummary]);
+    console.log("daySummary is: ", daySummary);
+    console.log("allSummaryRecordedWorkouts is: ", allSummaryRecordedWorkouts);
+    setRecordWorkout({
+      id: uuidv4(),
+      date: Date.now(),
+      workouts: [],
+    });
+    setAllWorkouts([]);
+    setCurrentWorkout(null);
+    setSelectedWorkoutType(null);
+    setExerciseName("");
+    toast.success("Workout saved!", { duration: 3000 });
   };
 
   function deleteLastWorkoutSet(): void {
@@ -360,9 +415,14 @@ const AddWorkout = () => {
                 <Select.Root
                   size="3"
                   value={selectedWorkoutType ?? ""}
-                  onValueChange={(value) =>
-                    handleSelectWorkoutType(value as WorkoutType)
-                  }
+                  onValueChange={(value) => {
+                    handleSelectWorkoutType(value as WorkoutType);
+                    axios.patch("Fake Error").catch(() => {
+                      toast.error("Changes could not be saved", {
+                        duration: 3000,
+                      });
+                    });
+                  }}
                 >
                   <Select.Trigger
                     placeholder="Pick A Workout Type"
@@ -442,7 +502,7 @@ const AddWorkout = () => {
                 size="2"
                 variant="solid"
                 color="jade"
-                onClick={printCurrentWorkout}
+                onClick={finishCurrentWorkout}
               >
                 Finish Workout
               </Button>
@@ -567,11 +627,12 @@ const AddWorkout = () => {
           size="4"
           variant="solid"
           color="jade"
-          onClick={printCurrentWorkout}
+          onClick={finishCurrentWorkout}
         >
           Finish Workout
         </Button>
       </div>
+      <Toaster />
     </>
   );
 };
