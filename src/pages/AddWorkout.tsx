@@ -20,6 +20,8 @@ import {
   MinusIcon,
   Update,
 } from "@radix-ui/react-icons";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 
 const defaultWorkouts: Workout[] = [
   {
@@ -285,6 +287,7 @@ const AddWorkout = () => {
     setCurrentWorkout(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
+    toast.success("Workout added!", { duration: 3000 });
   };
   const printCurrentWorkout = () => {
     console.log("All workouts are: ", allWorkouts);
@@ -360,9 +363,14 @@ const AddWorkout = () => {
                 <Select.Root
                   size="3"
                   value={selectedWorkoutType ?? ""}
-                  onValueChange={(value) =>
-                    handleSelectWorkoutType(value as WorkoutType)
-                  }
+                  onValueChange={(value) => {
+                    handleSelectWorkoutType(value as WorkoutType);
+                    axios.patch("Fake Error").catch(() => {
+                      toast.error("Changes could not be saved", {
+                        duration: 3000,
+                      });
+                    });
+                  }}
                 >
                   <Select.Trigger
                     placeholder="Pick A Workout Type"
@@ -572,6 +580,7 @@ const AddWorkout = () => {
           Finish Workout
         </Button>
       </div>
+      <Toaster />
     </>
   );
 };
