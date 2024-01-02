@@ -3,6 +3,7 @@ import { UserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import NavBar from "../components/NavBar";
+import SummaryWorkouts from "../components/SummaryWorkouts";
 
 const Dashboard: React.FC = () => {
   const context = useContext(UserContext);
@@ -13,6 +14,7 @@ const Dashboard: React.FC = () => {
   return (
     <div>
       <p>Welcome to the Dashboard, {username}</p>
+      <SummaryWorkouts />
     </div>
   );
 };
