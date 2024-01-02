@@ -16,6 +16,7 @@ import AddWorkout from "../pages/AddWorkout";
 import WeekPlanner from "../pages/WeekGrid";
 import WeekGrid from "../pages/WeekGrid";
 import { Container } from "@radix-ui/themes";
+import WorkoutDatabase from "../pages/WorkoutDatabase";
 
 const AppRoutes: React.FC = () => {
   const userContext = useContext(UserContext);
@@ -51,6 +52,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/addworkout" element={<AddWorkout />} />
                 <Route path="/weekgrid" element={<WeekGrid />} />
+                <Route path="/workoutdatabase" element={<WorkoutDatabase />} />
               </>
             )}
 
