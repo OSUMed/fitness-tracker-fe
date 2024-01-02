@@ -1,5 +1,5 @@
 import { Box, Select, TextField } from "@radix-ui/themes";
-import React from "react";
+import React, { useState } from "react";
 import { GymService } from "js-gym";
 import ReactPaginate from "react-paginate";
 const gymService = new GymService();
@@ -14,6 +14,7 @@ type AlgoExercise = {
 
 const WorkoutDatabase = () => {
   const [exerciseList, setExerciseList] = React.useState<AlgoExercise[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -33,6 +34,11 @@ const WorkoutDatabase = () => {
   function handleExerciseClick(exercise: AlgoExercise): void {
     console.log("exercise is: ", exercise);
   }
+  const handleSearch = () => {
+    const results = gymService.findByExercise(searchTerm);
+    setExerciseList(results);
+    setCurrentPage(1);
+  };
 
   return (
     <div>
@@ -71,6 +77,15 @@ const WorkoutDatabase = () => {
                   </Select.Group>
                 </Select.Content>
               </Select.Root>
+              <div>
+                <TextField.Input
+                  placeholder="Search for an exercise..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+                <button onClick={handleSearch}>Search</button>
+              </div>
               {currentExercises && (
                 <div>
                   {currentExercises.map((exercise, index) => (
