@@ -1,42 +1,14 @@
 import { Box, Select, TextField, Text } from "@radix-ui/themes";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { GymService } from "js-gym";
 import ReactPaginate from "react-paginate";
 import { set } from "date-fns";
-const gymService = new GymService();
-const muscleGroups = gymService.getMuscleGroups();
-console.log("muscleGroups are: ", muscleGroups);
+import { useKeenSlider } from "keen-slider/react";
+import "keen-slider/keen-slider.min.css";
+import { allDummyWorkouts } from "../mockdata/defaultworkouts";
+import { WheelControls } from "../components/ReusableSlider";
 
-type AlgoExercise = {
-  name: string;
-  muscle: string;
-  infoLink: string;
-};
-
-type StrengthWorkout = {
-  name: string;
-  muscle: string;
-  infoLink: string;
-  notes: string;
-};
-
-type CardioWorkout = {
-  name: string;
-  duration: number;
-  distance?: number;
-  intensity: string;
-  infoLink: string;
-  notes: string;
-};
-
-type StretchWorkout = {
-  name: string;
-  duration: number;
-  difficulty: string;
-  infoLink: string;
-  notes: string;
-};
-type UserWorkout = StrengthWorkout | CardioWorkout | StretchWorkout;
+// Initial Values:
 const initialCardioValues: CardioWorkout = {
   name: "",
   duration: 0,
@@ -60,6 +32,12 @@ const initialStretchValues: StretchWorkout = {
   infoLink: "",
   notes: "",
 };
+
+// Initial Strength workouts:
+const gymService = new GymService();
+const muscleGroups = gymService.getMuscleGroups();
+console.log("muscleGroups are: ", muscleGroups);
+
 const WorkoutDatabase = () => {
   const [exerciseList, setExerciseList] = useState<AlgoExercise[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,7 +45,8 @@ const WorkoutDatabase = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [chosenExercise, setChosenExercise] = useState<AlgoExercise>();
   const [savedExercise, setSavedExercise] = useState<UserWorkout>();
-  const [allSavedExercise, setAllSavedExercise] = useState<UserWorkout[]>([]);
+  const [allSavedExercise, setAllSavedExercise] =
+    useState<UserWorkout[]>(allDummyWorkouts);
 
   const [cardioForm, setCardioForm] =
     useState<CardioWorkout>(initialCardioValues);
@@ -78,6 +57,29 @@ const WorkoutDatabase = () => {
     useState<StretchWorkout>(initialStretchValues);
 
   const [workoutType, setWorkoutType] = useState("");
+
+  const [filter, setFilter] = useState(""); // Filter by workout type
+  const [searchQuery, setSearchQuery] = useState(""); // Search for workout name
+
+  const [sliderRef] = useKeenSlider<HTMLDivElement>(
+    {
+      loop: false,
+      mode: "free-snap",
+      slides: {
+        perView: 3,
+        spacing: 10,
+      },
+      breakpoints: {
+        "(max-width: 768px)": {
+          slides: { perView: 1 },
+        },
+        "(max-width: 1024px)": {
+          slides: { perView: 2 },
+        },
+      },
+    },
+    [WheelControls]
+  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -478,9 +480,39 @@ const WorkoutDatabase = () => {
           </Box>
         </Box>
       </div>
-      <div className="mt-6 text-center">
-        allSavedExercise: {JSON.stringify(allSavedExercise)}
+      <div>
+        <div ref={sliderRef} className="keen-slider">
+          {allSavedExercise.map((workout, index) => (
+            <div key={index} className="keen-slider__slide p-4">
+              <WorkoutCard workout={workout} />
+            </div>
+          ))}
+        </div>
       </div>
+    </div>
+  );
+};
+
+const WorkoutCard: React.FC<WorkoutProps> = ({ workout }) => {
+  return (
+    <div className="border rounded-md p-4 m-2 min-w-[200px] shadow">
+      <h3 className="font-bold text-lg mb-2">{workout.name}</h3>
+      {"muscle" in workout && <p>Muscle Group: {workout.muscle}</p>}
+      {"duration" in workout && <p>Duration: {workout.duration} mins</p>}
+      {"distance" in workout && <p>Distance: {workout.distance} km</p>}
+      {"intensity" in workout && <p>Intensity: {workout.intensity}</p>}
+      {"difficulty" in workout && <p>Difficulty: {workout.difficulty}</p>}
+      <a
+        href={workout.infoLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:underline"
+      >
+        More Info
+      </a>
+      {workout.notes && (
+        <p className="mt-2 text-sm text-gray-600">Notes: {workout.notes}</p>
+      )}
     </div>
   );
 };
