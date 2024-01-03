@@ -1,4 +1,11 @@
-import React, { Context, useContext, useEffect, useState } from "react";
+import React, {
+  Context,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   Flex,
   Select,
@@ -90,13 +97,14 @@ enum WorkoutType {
 
 interface DeleteWorkoutButtonProps {
   index: number;
-  onDelete: (index: number) => void; // This is the type signature for the deletion handler function
+  onDelete: (index: number) => void;
 }
 
 interface UpdateWorkoutButtonProps {
   index: number;
-  onUpdate: (index: number) => void; // This is the type signature for the deletion handler function
+  onUpdate: (index: number) => void;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
 }
 
 type WorkoutSummary = {
@@ -120,6 +128,8 @@ interface workoutFinal {
 const AddWorkout = () => {
   const [allWorkouts, setAllWorkouts] = useState<Workout[]>(defaultWorkouts);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+
   const [recordWorkout, setRecordWorkout] = useState<workoutFinal>({
     id: uuidv4(),
     date: Date.now(),
@@ -326,6 +336,7 @@ const AddWorkout = () => {
     setExerciseName("");
     toast.success("Workout added!", { duration: 3000 });
   };
+
   const finishCurrentWorkout = () => {
     const daySummary = summarizeDayWorkout();
     setHistoryRecordedWorkouts([...historyRecordedWorkouts, recordWorkout]);
@@ -388,21 +399,74 @@ const AddWorkout = () => {
     const deletedWorkout = allWorkouts.find((workout, i) => i === index);
     const updatedWorkouts = allWorkouts.filter((workout, i) => i !== index);
     setAllWorkouts(updatedWorkouts);
+    setIsEditing(false);
+    setEditingRowIndex(null);
     console.log("delete workout!: ", index, deletedWorkout);
   };
 
-  const handleUpdateWorkout = (index: number) => {
-    const updateWorkout = allWorkouts.find((workout, i) => i === index);
-    let workouts = [...allWorkouts];
-    workouts.map((workout, i) => {
-      if (i === index) {
-        workout.exercise_name = "Updated Exercise Name";
-      }
-    });
-    setAllWorkouts(workouts);
+  const handleUpdateWorkout = (
+    _event: React.MouseEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    // console.log("updateWorkout workout! _e: ", _event);
+    // const updateWorkout = allWorkouts.find((workout, i) => i === index);
+    // let workouts = [...allWorkouts];
+    // workouts.map((workout, i) => {
+    //   if (i === index) {
+    //     workout.exercise_name = "Updated Exercise Name";
+    //   }
+    // });
+    // setAllWorkouts(workouts);
     setIsEditing(false);
-    console.log("updateWorkout workout!: ", index, updateWorkout);
+    setEditingRowIndex(null);
+    console.log("updateWorkout workout!: ", index);
   };
+
+  function handleWorkoutSetChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+    workoutIndex: number,
+    setAttribute: string,
+    setIndex: number
+  ): void {
+    const updateSets = <T extends StrengthSet | CardioSet | StretchSet>(
+      sets: T[],
+      sIndex: number,
+      value: string
+    ): T[] =>
+      sets.map((set, idx) =>
+        idx === sIndex ? ({ ...set, [setAttribute]: value } as T) : set
+      );
+    const updatedWorkouts = allWorkouts.map((workout, wIndex) => {
+      if (wIndex === workoutIndex) {
+        if (workout.type === "Strength" && "reps" in workout.sets[0]) {
+          const updatedSets = updateSets(
+            workout.sets as StrengthSet[],
+            setIndex,
+            e.target.value
+          );
+          return { ...workout, sets: updatedSets };
+        } else if (workout.type === "Cardio" && "distance" in workout.sets[0]) {
+          const updatedSets = updateSets(
+            workout.sets as CardioSet[],
+            setIndex,
+            e.target.value
+          );
+          return { ...workout, sets: updatedSets };
+        } else if (workout.type === "Stretch" && "seconds" in workout.sets[0]) {
+          const updatedSets = updateSets(
+            workout.sets as StretchSet[],
+            setIndex,
+            e.target.value
+          );
+          return { ...workout, sets: updatedSets };
+        }
+        return workout;
+      }
+      return workout;
+    });
+
+    setAllWorkouts(updatedWorkouts as Workout[]);
+  }
 
   return (
     <>
@@ -513,7 +577,8 @@ const AddWorkout = () => {
                       Date
                     </Table.ColumnHeaderCell>
                     <Table.ColumnHeaderCell className="text-center ">
-                      Exercise Type
+                      <div className="block md:hidden"> Workout Summary</div>
+                      <div className="hidden md:block"> Exercise Type</div>
                     </Table.ColumnHeaderCell>
                     <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
                       Exercise Name
@@ -544,18 +609,54 @@ const AddWorkout = () => {
                       </Table.Cell>
                       <Table.Cell>
                         {workout.type}{" "}
-                        <div className="block md:hidden">
-                          {workout.exercise_name}
+                        <div className="block md:hidden mt-2">
+                          <TextField.Input
+                            disabled={editingRowIndex !== index}
+                            value={workout.exercise_name}
+                            onChange={(e) => {
+                              const updatedWorkoutList = allWorkouts.map(
+                                (currentWorkout, workoutIdx) => {
+                                  if (workoutIdx === index) {
+                                    return {
+                                      ...currentWorkout,
+                                      exercise_name: e.target.value,
+                                    };
+                                  }
+                                  return currentWorkout;
+                                }
+                              );
+                              setAllWorkouts(updatedWorkoutList);
+                            }}
+                          />
                         </div>
                         <div className="block md:hidden">
-                          {workout.sets.map((set, workoutIndex) => (
-                            <div key={workoutIndex}>
-                              {Object.entries(set).map(
-                                ([key, value], setIndex) => (
+                          {workout.sets.map((individualSet, setIndex) => (
+                            <div key={setIndex}>
+                              {Object.entries(individualSet).map(
+                                ([setAttribute, setValue], attributeIndex) => (
                                   <div
-                                    className="border-b border-black last:border-b-0 py-2"
-                                    key={setIndex}
-                                  >{`${key}: ${value}`}</div>
+                                    key={attributeIndex}
+                                    className="flex flex mb-2 items-center"
+                                  >
+                                    <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                                      {setAttribute}:
+                                    </label>
+
+                                    <TextField.Input
+                                      disabled={editingRowIndex !== index}
+                                      className="border-b border-black last:border-b-0 py-2"
+                                      key={attributeIndex}
+                                      value={setValue}
+                                      onChange={(e) =>
+                                        handleWorkoutSetChange(
+                                          e,
+                                          index, // Index of the workout in allWorkouts
+                                          setAttribute, // The attribute name of the set (e.g., 'reps', 'weight')
+                                          setIndex // Index of the set in the workout's sets array
+                                        )
+                                      }
+                                    />
+                                  </div>
                                 )
                               )}
                             </div>
@@ -563,17 +664,53 @@ const AddWorkout = () => {
                         </div>
                       </Table.Cell>
                       <Table.Cell className="hidden md:table-cell">
-                        {workout.exercise_name}
+                        <TextField.Input
+                          disabled={editingRowIndex !== index}
+                          value={workout.exercise_name}
+                          onChange={(e) => {
+                            const updatedWorkoutList = allWorkouts.map(
+                              (currentWorkout, workoutIdx) => {
+                                if (workoutIdx === index) {
+                                  return {
+                                    ...currentWorkout,
+                                    exercise_name: e.target.value,
+                                  };
+                                }
+                                return currentWorkout;
+                              }
+                            );
+                            setAllWorkouts(updatedWorkoutList);
+                          }}
+                        />
                       </Table.Cell>
                       <Table.Cell className="hidden md:table-cell">
-                        {workout.sets.map((set, workoutIndex) => (
-                          <div key={workoutIndex}>
-                            {Object.entries(set).map(
-                              ([key, value], setIndex) => (
+                        {workout.sets.map((individualSet, setIndex) => (
+                          <div key={setIndex}>
+                            {Object.entries(individualSet).map(
+                              ([setAttribute, setValue], attributeIndex) => (
                                 <div
-                                  key={setIndex}
-                                  className="border-b border-black last:border-b-0 py-2"
-                                >{`${key}: ${value}`}</div>
+                                  key={attributeIndex}
+                                  className="flex flex-col lg:flex-row mb-2"
+                                >
+                                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                                    {setAttribute}:
+                                  </label>
+
+                                  <TextField.Input
+                                    disabled={editingRowIndex !== index}
+                                    className="border-b border-black last:border-b-0 py-2"
+                                    key={attributeIndex}
+                                    value={setValue}
+                                    onChange={(e) =>
+                                      handleWorkoutSetChange(
+                                        e,
+                                        index, // Index of the workout in allWorkouts
+                                        setAttribute, // The attribute name of the set (e.g., 'reps', 'weight')
+                                        setIndex // Index of the set in the workout's sets array
+                                      )
+                                    }
+                                  />
+                                </div>
                               )
                             )}
                           </div>
@@ -581,11 +718,12 @@ const AddWorkout = () => {
                       </Table.Cell>
 
                       <Table.Cell className="space-y-4">
-                        {isEditing ? (
+                        {editingRowIndex === index ? (
                           <UpdateWorkoutButton
                             index={index}
-                            onUpdate={handleUpdateWorkout}
+                            onUpdate={(e) => handleUpdateWorkout(e, index)}
                             setIsEditing={setIsEditing}
+                            setEditingRowIndex={setEditingRowIndex}
                           />
                         ) : (
                           <Button
@@ -594,7 +732,7 @@ const AddWorkout = () => {
                             radius="large"
                             color="indigo"
                             highContrast
-                            onClick={() => setIsEditing(true)}
+                            onClick={() => setEditingRowIndex(index)}
                           >
                             <Pencil1Icon width="17" height="17" />
                             Edit
@@ -641,6 +779,7 @@ const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
   index,
   onUpdate,
   setIsEditing,
+  setEditingRowIndex,
 }) => {
   return (
     <AlertDialog.Root>
@@ -664,7 +803,7 @@ const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
         </Button>
       </AlertDialog.Trigger>
       <AlertDialog.Content style={{ maxWidth: 450 }}>
-        <AlertDialog.Title>Confirm Deletion</AlertDialog.Title>
+        <AlertDialog.Title>Confirm Update</AlertDialog.Title>
         <AlertDialog.Description size="2">
           Are you sure you want to update this workout?
         </AlertDialog.Description>
@@ -673,7 +812,7 @@ const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
             <Button
               variant="soft"
               color="gray"
-              onClick={() => setIsEditing(false)}
+              onClick={() => setEditingRowIndex(null)}
             >
               Cancel
             </Button>
