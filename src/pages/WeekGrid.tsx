@@ -223,6 +223,31 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
     });
   };
 
+  const handleSaveDay = (day) => {
+    setDayOutline((prevDayOutline) => {
+      if (prevDayOutline.day === day) {
+        // Filter out exercises with empty names & with no exercises
+        const filteredWorkouts = prevDayOutline.workouts
+          .map((workout) => {
+            return {
+              ...workout,
+              exercises: workout.exercises.filter(
+                (exercise) => exercise.name !== ""
+              ),
+            };
+          })
+          .filter((workout) => workout.exercises.length > 0);
+
+        return {
+          ...prevDayOutline,
+          workouts: filteredWorkouts,
+        };
+      }
+      return prevDayOutline;
+    });
+    setIsEditing(false);
+  };
+
   useEffect(() => {
     setDayOutline(dayPlan);
   }, [dayPlan]);
@@ -353,9 +378,10 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
                 className="border rounded px-2 py-1 w-full"
               />
             ) : (
-              <div key={index}>{exercise.name}</div>
+              <div key={index}>- {exercise.name}</div>
             )
           )}
+
           {isEditing && (
             <Box className="mt-2 space-x-3 mb-3 flex items-center">
               <Button
@@ -374,6 +400,7 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
               </form>
             </Box>
           )}
+          <hr />
         </div>
       ))}
       <Box>
@@ -420,7 +447,7 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
 
             <Button
               className="text-white py-1 px-3 rounded mt-2"
-              onClick={() => setIsEditing(false)}
+              onClick={() => handleSaveDay(dayOutline.day)}
             >
               Save
             </Button>
