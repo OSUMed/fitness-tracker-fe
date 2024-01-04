@@ -113,6 +113,8 @@ const initialPlanData: DayPlan[] = [
 
 const WeekGrid = () => {
   const [planData, setPlanData] = useState<DayPlan[]>(initialPlanData);
+  const [userTemplateWeek, setUserTemplateWeek] =
+    useState<DayPlan[]>(initialPlanData);
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
@@ -134,18 +136,60 @@ const WeekGrid = () => {
     const dayPlan = planData.find((plan) => plan.day === day);
     return dayPlan;
   };
+  const handleResetWeek = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to reset the entire week's workouts?"
+      )
+    ) {
+      const clearedPlanData = planData.map((dayPlan) => ({
+        ...dayPlan,
+        workouts: [],
+        intensity: "LIGHT",
+        duration: "",
+      }));
+
+      setPlanData(clearedPlanData);
+    }
+  };
+  const loadTemplateWeek = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to load the template week's workouts?"
+      )
+    ) {
+      setPlanData(userTemplateWeek);
+    }
+  };
+
+  const saveTemplateWeek = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to save the current week as the template?"
+      )
+    ) {
+      setUserTemplateWeek(planData);
+    }
+  };
 
   return (
-    <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
-      <div className="flex overflow-x-auto snap-x snap-mandatory">
-        {planData.map((dayPlan) => (
-          <DayCard
-            key={dayPlan.day}
-            dayPlan={dayPlan}
-            onEditClick={() => handleEditClick(dayPlan.day)}
-            handleSaveClick={handleSaveClick}
-          />
-        ))}
+    <div className="space-y-4">
+      <Box className="space-x-4">
+        <Button onClick={handleResetWeek}>Reset Week</Button>
+        <Button onClick={loadTemplateWeek}>Load Template Week</Button>
+        <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
+      </Box>
+      <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
+        <div className="flex overflow-x-auto snap-x snap-mandatory">
+          {planData.map((dayPlan) => (
+            <DayCard
+              key={dayPlan.day}
+              dayPlan={dayPlan}
+              onEditClick={() => handleEditClick(dayPlan.day)}
+              handleSaveClick={handleSaveClick}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
