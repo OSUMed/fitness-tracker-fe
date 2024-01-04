@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WorkoutLevelBadge } from "../components/WorkoutLevelBadge";
-import { Box, Button } from "@radix-ui/themes";
+import { Box, Button, Select } from "@radix-ui/themes";
 import { WorkoutLevel } from "../components/WorkoutLevelBadge";
 interface Exercise {
   name: string;
@@ -136,59 +136,16 @@ const WeekGrid = () => {
   };
 
   return (
-    <div className="y-space-18">
-      <div className="mx-4 my-2">
-        <div className="flex flex-col divide-y divide-gray-300 md:flex-row divide-x divide-gray-300 bg-gray-100 rounded-lg shadow-md">
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105 rounded-t-lg md:rounded-l-lg">
-            <DayCard
-              dayPlan={findPlanForDay("Sunday")}
-              onEditClick={() => handleEditClick("Sunday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105">
-            <DayCard
-              dayPlan={findPlanForDay("Monday")}
-              onEditClick={() => handleEditClick("Monday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105">
-            <DayCard
-              dayPlan={findPlanForDay("Tuesday")}
-              onEditClick={() => handleEditClick("Tuesday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105">
-            <DayCard
-              dayPlan={findPlanForDay("Wednesday")}
-              onEditClick={() => handleEditClick("Wednesday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105">
-            <DayCard
-              dayPlan={findPlanForDay("Thursday")}
-              onEditClick={() => handleEditClick("Thursday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105">
-            <DayCard
-              dayPlan={findPlanForDay("Friday")}
-              onEditClick={() => handleEditClick("Friday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-          <Box className="flex-1 flex items-center justify-center text-gray-800 bg-blue-600 hover:bg-orange-500 transition-transform transform hover:scale-105 rounded-b-lg md:rounded-r-lg">
-            <DayCard
-              dayPlan={findPlanForDay("Saturday")}
-              onEditClick={() => handleEditClick("Saturday")}
-              handleSaveClick={handleSaveClick}
-            />
-          </Box>
-        </div>
+    <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
+      <div className="flex overflow-x-auto snap-x snap-mandatory">
+        {planData.map((dayPlan) => (
+          <DayCard
+            key={dayPlan.day}
+            dayPlan={dayPlan}
+            onEditClick={() => handleEditClick(dayPlan.day)}
+            handleSaveClick={handleSaveClick}
+          />
+        ))}
       </div>
     </div>
   );
@@ -258,7 +215,7 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
   }
 
   return (
-    <div className="border rounded-lg p-4 m-2 bg-gray-100 shadow">
+    <Box className="border rounded-lg p-4 m-2 bg-gray-100 shadow space-y-4">
       <h2 className="font-bold text-lg mb-2">
         {dayPlan.day} <br />
         <WorkoutLevelBadge
@@ -324,46 +281,56 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
         }
         className="border rounded px-2 py-1 w-full"
       />
-      <label hidden={!isEditing} htmlFor="intensity">
-        Intensity
-      </label>
-      <select
-        id="intensity"
-        value={dayOutline.intensity}
-        disabled={!isEditing}
-        hidden={!isEditing}
-        onChange={(e) =>
-          setDayOutline({ ...dayPlan, intensity: e.target.value })
-        }
-        className="border rounded px-2 py-1 w-full mt-2"
-      >
-        <option value="LIGHT">Light</option>
-        <option value="MODERATE">Moderate</option>
-        <option value="INTENSE">Intense</option>
-      </select>
-      <div className="flex justify-evenly">
-        {isEditing ? (
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded mt-2"
-            onClick={() => setIsEditing(false)}
-          >
-            Save
-          </button>
-        ) : (
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded mt-2"
+
+      <Box hidden={!isEditing} className="mt-3 mb-3">
+        <Select.Root
+          size="2"
+          disabled={!isEditing}
+          onValueChange={(value) => {
+            setDayOutline({ ...dayPlan, intensity: value });
+          }}
+        >
+          <Select.Trigger
+            placeholder="Pick A Workout Intensity"
+            variant="surface"
+          />
+          <Select.Content variant="solid" position="popper">
+            <Select.Group>
+              <Select.Label>Intensity</Select.Label>
+              <Select.Item value="LIGHT">Light</Select.Item>
+              <Select.Item value="MODERATE">Moderate</Select.Item>
+              <Select.Item value="INTENSE">Intense</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+      </Box>
+      <Box>
+        {!isEditing && (
+          <Button
+            className="w-full bg-blue-500 text-white hover:bg-blue-700"
             onClick={() => setIsEditing(true)}
           >
             Edit
-          </button>
+          </Button>
         )}
         {isEditing && (
-          <button className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2">
-            Add Exercise
-          </button>
+          <Box className="flex flex-col space-y-3">
+            <Box className="flex justify-evenly space-x-2">
+              <Button
+                className="text-white py-1 px-3 rounded mt-2"
+                onClick={() => setIsEditing(false)}
+              >
+                Save
+              </Button>
+              <Button className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2">
+                Add Exercise
+              </Button>
+            </Box>
+            <Button onClick={() => setIsEditing(false)}>Cancel</Button>
+          </Box>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

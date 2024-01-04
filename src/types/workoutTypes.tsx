@@ -12,19 +12,19 @@ export type StretchSet = {
 };
 
 export type Strength = {
-  type: "Strength";
+  type: "strength";
   exercise_name: string;
   sets: StrengthSet[];
 };
 
 export type Cardio = {
-  type: "Cardio";
+  type: "cardio";
   exercise_name: string;
   sets: CardioSet[];
 };
 
 export type Stretch = {
-  type: "Stretch";
+  type: "stretch";
   exercise_name: string;
   sets: StretchSet[];
 };

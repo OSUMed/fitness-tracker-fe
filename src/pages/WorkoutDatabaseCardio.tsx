@@ -1,14 +1,56 @@
-import { Box, Select, TextField, Text, Button } from "@radix-ui/themes";
-import React, { useState, useRef, useEffect } from "react";
+import { Box, Select, TextField, Text } from "@radix-ui/themes";
+import React, { useState } from "react";
 import { GymService } from "js-gym";
 import ReactPaginate from "react-paginate";
 import { set } from "date-fns";
-import { useKeenSlider } from "keen-slider/react";
-import "keen-slider/keen-slider.min.css";
-import { allDummyWorkouts } from "../mockdata/defaultworkouts";
-import { WheelControls } from "../components/ReusableSlider";
-import { Workout } from "../types/workoutTypes";
-// Initial Values:
+import axios from "axios";
+const gymService = new GymService();
+const muscleGroups = gymService.getMuscleGroups();
+console.log("muscleGroups are: ", muscleGroups);
+
+type AlgoExercise = {
+  name: string;
+  muscle: string;
+  infoLink: string;
+};
+
+type StrengthWorkout = {
+  name: string;
+  muscle: string;
+  infoLink: string;
+  notes: string;
+};
+
+type CardioWorkout = {
+  name: string;
+  duration: number;
+  distance?: number;
+  intensity: string;
+  infoLink: string;
+  notes: string;
+  instructions: string;
+  muscle: string;
+  difficulty: string;
+  type: string;
+};
+
+type APINinjaCardioWorkout = {
+  name: string;
+  type: string;
+  muscle: string;
+  equipment: string;
+  difficulty: string;
+  instructions: string;
+};
+
+type StretchWorkout = {
+  name: string;
+  duration: number;
+  difficulty: string;
+  infoLink: string;
+  notes: string;
+};
+type UserWorkout = StrengthWorkout | CardioWorkout | StretchWorkout;
 const initialCardioValues: CardioWorkout = {
   name: "",
   duration: 0,
@@ -16,6 +58,10 @@ const initialCardioValues: CardioWorkout = {
   intensity: "",
   infoLink: "",
   notes: "",
+  instructions: "",
+  muscle: "",
+  difficulty: "",
+  type: "",
 };
 
 const initialStrengthValues: StrengthWorkout = {
@@ -32,21 +78,16 @@ const initialStretchValues: StretchWorkout = {
   infoLink: "",
   notes: "",
 };
-
-// Initial Strength workouts:
-const gymService = new GymService();
-const muscleGroups = gymService.getMuscleGroups();
-console.log("muscleGroups are: ", muscleGroups);
-
-const WorkoutDatabase = () => {
+const WorkoutDatabaseCardio = () => {
   const [exerciseList, setExerciseList] = useState<AlgoExercise[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [cardioOffset, setCardioOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [chosenExercise, setChosenExercise] = useState<AlgoExercise>();
+  const [chosenAlgoExercise, setChosenAlgoExercise] = useState<AlgoExercise>();
+  const [chosenCardioExercise, setchosenCardioExercise] =
+    useState<AlgoExercise>();
   const [savedExercise, setSavedExercise] = useState<UserWorkout>();
-  const [allSavedExercise, setAllSavedExercise] =
-    useState<UserWorkout[]>(allDummyWorkouts);
+  const [allSavedExercise, setAllSavedExercise] = useState<UserWorkout[]>([]);
 
   const [cardioForm, setCardioForm] =
     useState<CardioWorkout>(initialCardioValues);
@@ -56,51 +97,7 @@ const WorkoutDatabase = () => {
   const [stretchForm, setStretchForm] =
     useState<StretchWorkout>(initialStretchValues);
 
-  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
-
-  const [workoutToEdit, setWorkoutToEdit] = useState<UserWorkout>();
-
   const [workoutType, setWorkoutType] = useState("");
-
-  const [filter, setFilter] = useState(""); // Filter by workout type
-  const [searchQuery, setSearchQuery] = useState(""); // Search for workout name
-  const [filteredWorkouts, setFilteredWorkouts] = useState<UserWorkout[]>([]);
-
-  const [sliderRef] = useKeenSlider<HTMLDivElement>(
-    {
-      loop: false,
-      mode: "free-snap",
-      slides: {
-        perView: 3,
-        spacing: 10,
-      },
-      breakpoints: {
-        "(max-width: 768px)": {
-          slides: { perView: 1 },
-        },
-        "(max-width: 1024px)": {
-          slides: { perView: 2 },
-        },
-      },
-    },
-    [WheelControls]
-  );
-  useEffect(() => {
-    setFilteredWorkouts([]);
-
-    const lowercasedQuery = searchQuery.toLowerCase();
-
-    const filtered = allSavedExercise.filter((workout) => {
-      const matchesSearch = workout.name
-        .toLowerCase()
-        .includes(lowercasedQuery);
-      const matchesFilter = filter ? workout.type === filter : true;
-
-      return matchesSearch && matchesFilter;
-    });
-
-    setFilteredWorkouts(filtered);
-  }, [searchQuery, filter, allSavedExercise]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -119,10 +116,30 @@ const WorkoutDatabase = () => {
     setStrengthForm(initialStrengthValues);
     setStretchForm(initialStretchValues);
     setWorkoutType("");
-    setChosenExercise(undefined);
+    setChosenAlgoExercise(undefined);
     setExerciseList([]);
   };
 
+  const getCardioExercises = async () => {
+    const options = {
+      method: "GET",
+      url: "https://exercises-by-api-ninjas.p.rapidapi.com/v1/exercises",
+      params: {
+        type: "cardio",
+        offset: cardioOffset,
+      },
+      headers: {
+        "X-RapidAPI-Key": "5ec5743921msh5aaf6b0fac82a8ap156f51jsnf2dfa4726962",
+        "X-RapidAPI-Host": "exercises-by-api-ninjas.p.rapidapi.com",
+      },
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const exercisesPerPage = 5;
 
   const indexOfLastExercise = currentPage * exercisesPerPage;
@@ -135,38 +152,21 @@ const WorkoutDatabase = () => {
   const handlePageClick = (data) => {
     setCurrentPage(data.selected + 1);
   };
-  const updateDatabaseWorkout = (id) => {
-    const workout = allSavedExercise.find((workout) => workout.id === id);
-
-    setWorkoutToEdit(workout!);
-
-    setIsUpdateModalVisible(true);
-  };
-  const onSaveUpdatedWorkout = (updatedWorkout) => {
-    console.log("onSaveUpdatedWorkout updatedWorkout is: ", updatedWorkout);
-    setAllSavedExercise((prevWorkouts) =>
-      prevWorkouts.map((workout) =>
-        workout.id === updatedWorkout.id ? updatedWorkout : workout
-      )
-    );
-    setIsUpdateModalVisible(false);
-  };
-  const deleteDatabaseWorkout = (id) => {
-    const newWorkouts = allSavedExercise.filter((workout) => workout.id !== id);
-    setAllSavedExercise(newWorkouts);
-  };
 
   function handleExerciseClick(exercise: AlgoExercise): void {
     console.log("exercise is: ", exercise);
-    setChosenExercise(exercise);
+    setChosenAlgoExercise(exercise);
     setStrengthForm({
-      type: "strength",
-      id: exercise.id,
       name: exercise.name,
       muscle: exercise.muscle,
       infoLink: exercise.infoLink,
       notes: "",
     });
+  }
+  function handleCardioClick(exercise: APINinjaCardioWorkout): void {
+    console.log("exercise is: ", exercise);
+    setChosenAlgoExercise(exercise);
+    setCardioForm({});
   }
   const handleSearch = () => {
     const results = gymService.findByExercise(searchTerm);
@@ -183,13 +183,6 @@ const WorkoutDatabase = () => {
     }
     setSearchTerm(term);
   };
-
-  function clearFilters(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>
-  ): void {
-    setFilter("");
-    setSearchQuery("");
-  }
 
   return (
     <div>
@@ -307,35 +300,37 @@ const WorkoutDatabase = () => {
               {workoutType === "strength" && (
                 <>
                   <Box className="text-xl font-medium">
-                    <Text as="label">Search by muscle type</Text>
-                    <Select.Root
-                      size="3"
-                      // value={selectedWorkoutType ?? ""}
-                      onValueChange={(value) => {
-                        const values = gymService.getByMuscleGroup(value);
-                        console.log(typeof values, values.exercises);
-                        setExerciseList(values.exercises);
-                      }}
-                    >
-                      <Select.Trigger
-                        placeholder="Pick A Workout Type"
-                        variant="surface"
-                      />
-                      <Select.Content
-                        variant="solid"
-                        position="popper"
-                        sideOffset={2}
+                    <div>
+                      <Text as="label">Search by muscle type</Text>
+                      <Select.Root
+                        size="3"
+                        // value={selectedWorkoutType ?? ""}
+                        onValueChange={(value) => {
+                          const values = gymService.getByMuscleGroup(value);
+                          console.log(typeof values, values.exercises);
+                          setExerciseList(values.exercises);
+                        }}
                       >
-                        <Select.Group>
-                          <Select.Label>Workout Options</Select.Label>
-                          {muscleGroups.map((group, index) => (
-                            <Select.Item key={index} value={group}>
-                              {group}
-                            </Select.Item>
-                          ))}
-                        </Select.Group>
-                      </Select.Content>
-                    </Select.Root>
+                        <Select.Trigger
+                          placeholder="Pick A Workout Type"
+                          variant="surface"
+                        />
+                        <Select.Content
+                          variant="solid"
+                          position="popper"
+                          sideOffset={2}
+                        >
+                          <Select.Group>
+                            <Select.Label>Workout Options</Select.Label>
+                            {muscleGroups.map((group, index) => (
+                              <Select.Item key={index} value={group}>
+                                {group}
+                              </Select.Item>
+                            ))}
+                          </Select.Group>
+                        </Select.Content>
+                      </Select.Root>
+                    </div>
                     <div>
                       <Text as="label">Search by exercise name</Text>
                       <TextField.Input
@@ -353,7 +348,7 @@ const WorkoutDatabase = () => {
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter exercise name"
-                      value={chosenExercise?.name ?? ""}
+                      value={chosenAlgoExercise?.name ?? ""}
                     />
                   </label>
 
@@ -363,7 +358,7 @@ const WorkoutDatabase = () => {
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter muscle group"
-                      value={chosenExercise?.muscle ?? ""}
+                      value={chosenAlgoExercise?.muscle ?? ""}
                       onChange={(e) =>
                         setStrengthForm({
                           ...strengthForm,
@@ -379,7 +374,7 @@ const WorkoutDatabase = () => {
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter URL to info"
-                      value={chosenExercise?.infoLink ?? ""}
+                      value={chosenAlgoExercise?.infoLink ?? ""}
                       onChange={(e) =>
                         setStrengthForm({
                           ...strengthForm,
@@ -530,232 +525,11 @@ const WorkoutDatabase = () => {
           </Box>
         </Box>
       </div>
-      <div>
-        <div className="flex space-x-3 mt-10">
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="p-2"
-          >
-            <option value="">All Workouts</option>
-            <option value="strength">Strength</option>
-            <option value="cardio">Cardio</option>
-            <option value="stretch">Stretch</option>
-          </select>
-          <Button onClick={clearFilters}>Clear Filters</Button>
-        </div>
-        <div
-          ref={sliderRef}
-          className="keen-slider"
-          key={filteredWorkouts.length}
-        >
-          {filteredWorkouts.map((workout, index) => (
-            <div key={index} className="keen-slider__slide p-4">
-              <WorkoutCard
-                key={workout.id}
-                workout={workout}
-                onUpdate={updateDatabaseWorkout}
-                onDelete={deleteDatabaseWorkout}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-      {isUpdateModalVisible && (
-        <WorkoutUpdateModal
-          workout={workoutToEdit}
-          onSave={(updatedWorkout) => {
-            onSaveUpdatedWorkout(updatedWorkout);
-          }}
-          onCancel={() => setIsUpdateModalVisible(false)}
-        />
-      )}
-    </div>
-  );
-};
-type WorkoutProps = {
-  workout: UserWorkout;
-  onUpdate: (id: string) => void;
-  onDelete: (id: string) => void;
-};
-const WorkoutCard: React.FC<WorkoutProps> = ({
-  workout,
-  onUpdate,
-  onDelete,
-}) => {
-  return (
-    <div className="border rounded-md p-4 m-2 min-w-[200px] shadow">
-      <h3 className="font-bold text-lg mb-2">{workout.name}</h3>
-      {"type" in workout && (
-        <p>
-          Type: {workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
-        </p>
-      )}
-
-      {"muscle" in workout && <p>Muscle Group: {workout.muscle}</p>}
-      {"duration" in workout && <p>Duration: {workout.duration} mins</p>}
-      {"distance" in workout && <p>Distance: {workout.distance} km</p>}
-      {"intensity" in workout && <p>Intensity: {workout.intensity}</p>}
-      {"difficulty" in workout && <p>Difficulty: {workout.difficulty}</p>}
-      <a
-        href={workout.infoLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-500 hover:underline"
-      >
-        More Info
-      </a>
-      {workout.notes && (
-        <p className="mt-2 text-sm text-gray-600">Notes: {workout.notes}</p>
-      )}
-      <div className="space-x-3 mt-3">
-        <Button onClick={() => onUpdate(workout.id)}>Update</Button>
-        <Button onClick={() => onDelete(workout.id)}>Delete</Button>
+      <div className="mt-6 text-center">
+        allSavedExercise: {JSON.stringify(allSavedExercise)}
       </div>
     </div>
   );
 };
 
-const WorkoutUpdateModal = ({ workout, onSave, onCancel }) => {
-  const [formState, setFormState] = useState(workout);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormState((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("formState is: ", formState);
-    onSave(formState);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Update Workout
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-gray-600">Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={formState.name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-
-          {"muscle" in workout && (
-            <div>
-              <label className="text-gray-600">Muscle Group:</label>
-              <input
-                type="text"
-                name="muscle"
-                value={formState.muscle}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-          )}
-
-          {"duration" in workout && (
-            <div>
-              <label className="text-gray-600">Duration (minutes):</label>
-              <input
-                type="number"
-                name="duration"
-                value={formState.duration}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-          )}
-
-          {"intensity" in workout && (
-            <div>
-              <label className="text-gray-600">Intensity:</label>
-              <select
-                name="intensity"
-                value={formState.intensity}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-          )}
-
-          {"difficulty" in workout && (
-            <div>
-              <label className="text-gray-600">Difficulty:</label>
-              <select
-                name="difficulty"
-                value={formState.difficulty}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
-          )}
-
-          <div>
-            <label className="text-gray-600">Info Link:</label>
-            <input
-              type="text"
-              name="infoLink"
-              value={formState.infoLink}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-
-          <div>
-            <label className="text-gray-600">Notes:</label>
-            <textarea
-              name="notes"
-              value={formState.notes}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 bg-transparent p-3 rounded-lg text-indigo-500 hover:bg-gray-100 hover:text-indigo-400 mr-2"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
-            >
-              Update
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-export default WorkoutDatabase;
+export default WorkoutDatabaseCardio;
