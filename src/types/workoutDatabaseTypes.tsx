@@ -1,7 +1,4 @@
 // Workout Types:
-type WorkoutProps = {
-  workout: UserWorkout;
-};
 
 type AlgoExercise = {
   name: string;

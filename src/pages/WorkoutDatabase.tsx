@@ -7,7 +7,7 @@ import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import { allDummyWorkouts } from "../mockdata/defaultworkouts";
 import { WheelControls } from "../components/ReusableSlider";
-
+import { Workout } from "../types/workoutTypes";
 // Initial Values:
 const initialCardioValues: CardioWorkout = {
   name: "",
@@ -139,6 +139,11 @@ const WorkoutDatabase = () => {
       return workout;
     });
 
+    setAllSavedExercise(newWorkouts);
+  };
+
+  const deleteWorkout = (id) => {
+    const newWorkouts = allSavedExercise.filter((workout) => workout.id !== id);
     setAllSavedExercise(newWorkouts);
   };
 
@@ -542,7 +547,12 @@ const WorkoutDatabase = () => {
         >
           {filteredWorkouts.map((workout, index) => (
             <div key={index} className="keen-slider__slide p-4">
-              <WorkoutCard workout={workout} />
+              <WorkoutCard
+                key={workout.id}
+                workout={workout}
+                onUpdate={updateWorkout}
+                onDelete={deleteWorkout}
+              />
             </div>
           ))}
         </div>
@@ -550,8 +560,16 @@ const WorkoutDatabase = () => {
     </div>
   );
 };
-
-const WorkoutCard: React.FC<WorkoutProps> = ({ workout }) => {
+type WorkoutProps = {
+  workout: UserWorkout;
+  onUpdate: (id: string) => void;
+  onDelete: (id: string) => void;
+};
+const WorkoutCard: React.FC<WorkoutProps> = ({
+  workout,
+  onUpdate,
+  onDelete,
+}) => {
   return (
     <div className="border rounded-md p-4 m-2 min-w-[200px] shadow">
       <h3 className="font-bold text-lg mb-2">{workout.name}</h3>
@@ -577,6 +595,8 @@ const WorkoutCard: React.FC<WorkoutProps> = ({ workout }) => {
       {workout.notes && (
         <p className="mt-2 text-sm text-gray-600">Notes: {workout.notes}</p>
       )}
+      <Button onClick={() => onUpdate(workout.id)}>Update</Button>
+      <Button onClick={() => onDelete(workout.id)}>Delete</Button>
     </div>
   );
 };
