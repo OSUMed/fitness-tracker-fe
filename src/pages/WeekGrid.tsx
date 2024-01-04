@@ -162,6 +162,40 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [dayOutline, setDayOutline] = useState<DayPlan>(dayPlan!);
 
+  const handleAddNewExercise = (workoutId: string) => {
+    setDayOutline((prevDayOutline) => {
+      return {
+        ...prevDayOutline,
+        workouts: prevDayOutline.workouts.map((workout) => {
+          // Append an empty exercise to the workout with the matching id
+          if (workout.id === workoutId) {
+            return {
+              ...workout,
+              exercises: [...workout.exercises, { name: "" }],
+            };
+          }
+          return workout;
+        }),
+      };
+    });
+  };
+  const handleRemoveLastExercise = (workoutId: string) => {
+    setDayOutline((prevDayOutline) => {
+      return {
+        ...prevDayOutline,
+        workouts: prevDayOutline.workouts.map((workout) => {
+          if (workout.id === workoutId) {
+            return {
+              ...workout,
+              exercises: workout.exercises.slice(0, -1), // Create a new array without the last element
+            };
+          }
+          return workout;
+        }),
+      };
+    });
+  };
+
   useEffect(() => {
     setDayOutline(dayPlan);
   }, [dayPlan]);
@@ -266,21 +300,39 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
               <div key={index}>{exercise.name}</div>
             )
           )}
+          {isEditing && (
+            <Box className="space-x-3 mb-3">
+              <Button
+                onClick={() => handleRemoveLastExercise(workout.id)}
+                className="text-white py-1 px-3 rounded mt-2"
+              >
+                -
+              </Button>
+              <Button
+                onClick={() => handleAddNewExercise(workout.id)}
+                className="text-white py-1 px-3 rounded mt-2"
+              >
+                +
+              </Button>
+            </Box>
+          )}
         </div>
       ))}
-      <label hidden={!isEditing} htmlFor="duration">
-        Duration
-      </label>
-      <input
-        id="duration"
-        type="text"
-        value={dayOutline.duration}
-        disabled={!isEditing}
-        onChange={(e) =>
-          setDayOutline({ ...dayPlan, duration: e.target.value })
-        }
-        className="border rounded px-2 py-1 w-full"
-      />
+      <Box>
+        <label hidden={!isEditing} htmlFor="duration">
+          Duration
+        </label>
+        <input
+          id="duration"
+          type="text"
+          value={dayOutline.duration}
+          disabled={!isEditing}
+          onChange={(e) =>
+            setDayOutline({ ...dayPlan, duration: e.target.value })
+          }
+          className="border rounded px-2 py-1 w-full"
+        />
+      </Box>
 
       <Box hidden={!isEditing} className="mt-3 mb-3">
         <Select.Root
