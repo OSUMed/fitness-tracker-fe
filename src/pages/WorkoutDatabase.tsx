@@ -1,5 +1,5 @@
-import { Box, Select, TextField, Text } from "@radix-ui/themes";
-import React, { useState, useRef } from "react";
+import { Box, Select, TextField, Text, Button } from "@radix-ui/themes";
+import React, { useState, useRef, useEffect } from "react";
 import { GymService } from "js-gym";
 import ReactPaginate from "react-paginate";
 import { set } from "date-fns";
@@ -60,6 +60,7 @@ const WorkoutDatabase = () => {
 
   const [filter, setFilter] = useState(""); // Filter by workout type
   const [searchQuery, setSearchQuery] = useState(""); // Search for workout name
+  const [filteredWorkouts, setFilteredWorkouts] = useState<UserWorkout[]>([]);
 
   const [sliderRef] = useKeenSlider<HTMLDivElement>(
     {
@@ -80,6 +81,22 @@ const WorkoutDatabase = () => {
     },
     [WheelControls]
   );
+  useEffect(() => {
+    setFilteredWorkouts([]);
+
+    const lowercasedQuery = searchQuery.toLowerCase();
+
+    const filtered = allSavedExercise.filter((workout) => {
+      const matchesSearch = workout.name
+        .toLowerCase()
+        .includes(lowercasedQuery);
+      const matchesFilter = filter ? workout.type === filter : true;
+
+      return matchesSearch && matchesFilter;
+    });
+
+    setFilteredWorkouts(filtered);
+  }, [searchQuery, filter, allSavedExercise]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -114,11 +131,22 @@ const WorkoutDatabase = () => {
   const handlePageClick = (data) => {
     setCurrentPage(data.selected + 1);
   };
+  const updateWorkout = (updatedWorkout) => {
+    const newWorkouts = allSavedExercise.map((workout) => {
+      if (workout.id === updatedWorkout.id) {
+        return updatedWorkout;
+      }
+      return workout;
+    });
+
+    setAllSavedExercise(newWorkouts);
+  };
 
   function handleExerciseClick(exercise: AlgoExercise): void {
     console.log("exercise is: ", exercise);
     setChosenExercise(exercise);
     setStrengthForm({
+      id: exercise.id,
       name: exercise.name,
       muscle: exercise.muscle,
       infoLink: exercise.infoLink,
@@ -140,6 +168,13 @@ const WorkoutDatabase = () => {
     }
     setSearchTerm(term);
   };
+
+  function clearFilters(
+    event: MouseEvent<HTMLButtonElement, MouseEvent>
+  ): void {
+    setFilter("");
+    setSearchQuery("");
+  }
 
   return (
     <div>
@@ -481,8 +516,31 @@ const WorkoutDatabase = () => {
         </Box>
       </div>
       <div>
-        <div ref={sliderRef} className="keen-slider">
-          {allSavedExercise.map((workout, index) => (
+        <div className="flex space-x-3 mt-10">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="p-2"
+          >
+            <option value="">All Workouts</option>
+            <option value="strength">Strength</option>
+            <option value="cardio">Cardio</option>
+            <option value="stretch">Stretch</option>
+          </select>
+          <Button onClick={clearFilters}>Clear Filters</Button>
+        </div>
+        <div
+          ref={sliderRef}
+          className="keen-slider"
+          key={filteredWorkouts.length}
+        >
+          {filteredWorkouts.map((workout, index) => (
             <div key={index} className="keen-slider__slide p-4">
               <WorkoutCard workout={workout} />
             </div>
@@ -497,6 +555,12 @@ const WorkoutCard: React.FC<WorkoutProps> = ({ workout }) => {
   return (
     <div className="border rounded-md p-4 m-2 min-w-[200px] shadow">
       <h3 className="font-bold text-lg mb-2">{workout.name}</h3>
+      {"type" in workout && (
+        <p>
+          Type: {workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
+        </p>
+      )}
+
       {"muscle" in workout && <p>Muscle Group: {workout.muscle}</p>}
       {"duration" in workout && <p>Duration: {workout.duration} mins</p>}
       {"distance" in workout && <p>Distance: {workout.distance} km</p>}
