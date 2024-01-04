@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WorkoutLevelBadge } from "../components/WorkoutLevelBadge";
-import { Box, Button, Select } from "@radix-ui/themes";
+import { Box, Button, Select, Text } from "@radix-ui/themes";
 import { WorkoutLevel } from "../components/WorkoutLevelBadge";
 interface Exercise {
   name: string;
@@ -167,7 +167,6 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
       return {
         ...prevDayOutline,
         workouts: prevDayOutline.workouts.map((workout) => {
-          // Append an empty exercise to the workout with the matching id
           if (workout.id === workoutId) {
             return {
               ...workout,
@@ -187,12 +186,40 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
           if (workout.id === workoutId) {
             return {
               ...workout,
-              exercises: workout.exercises.slice(0, -1), // Create a new array without the last element
+              exercises: workout.exercises.slice(0, -1),
             };
           }
           return workout;
         }),
       };
+    });
+  };
+  const handleAddNewWorkout = (day) => {
+    setDayOutline((prevDayOutline) => {
+      if (prevDayOutline.day === day) {
+        const newWorkout = {
+          id: Date.now().toString(),
+          type: "",
+          exercises: [],
+        };
+
+        return {
+          ...prevDayOutline,
+          workouts: [...prevDayOutline.workouts, newWorkout],
+        };
+      }
+      return prevDayOutline;
+    });
+  };
+  const handleRemoveLastWorkout = (day) => {
+    setDayOutline((prevDayOutline) => {
+      if (prevDayOutline.day === day && prevDayOutline.workouts.length > 0) {
+        return {
+          ...prevDayOutline,
+          workouts: prevDayOutline.workouts.slice(0, -1),
+        };
+      }
+      return prevDayOutline;
     });
   };
 
@@ -258,6 +285,30 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
           }
         />{" "}
       </h2>
+
+      <Box hidden={!isEditing} className="mt-3 mb-3">
+        <Text>Pick Workout Intensity</Text>
+        <Select.Root
+          size="2"
+          disabled={!isEditing}
+          onValueChange={(value) => {
+            setDayOutline({ ...dayPlan, intensity: value });
+          }}
+        >
+          <Select.Trigger
+            placeholder="Pick A Workout Intensity"
+            variant="surface"
+          />
+          <Select.Content variant="solid" position="popper">
+            <Select.Group>
+              <Select.Label>Intensity</Select.Label>
+              <Select.Item value="LIGHT">Light</Select.Item>
+              <Select.Item value="MODERATE">Moderate</Select.Item>
+              <Select.Item value="INTENSE">Intense</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+      </Box>
       {dayOutline.workouts.map((workout) => (
         <div key={workout.id} className="mb-4">
           {isEditing ? (
@@ -294,6 +345,11 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
                 onChange={(e) =>
                   handleExerciseNameChange(workout.id, index, e.target.value)
                 }
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddNewExercise(workout.id);
+                  }
+                }}
                 className="border rounded px-2 py-1 w-full"
               />
             ) : (
@@ -301,19 +357,21 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
             )
           )}
           {isEditing && (
-            <Box className="space-x-3 mb-3">
+            <Box className="mt-2 space-x-3 mb-3 flex items-center">
               <Button
                 onClick={() => handleRemoveLastExercise(workout.id)}
                 className="text-white py-1 px-3 rounded mt-2"
               >
                 -
               </Button>
-              <Button
-                onClick={() => handleAddNewExercise(workout.id)}
-                className="text-white py-1 px-3 rounded mt-2"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault(); // Prevents the default form submission behavior
+                  handleAddNewExercise(workout.id);
+                }}
               >
-                +
-              </Button>
+                <Button>+</Button>
+              </form>
             </Box>
           )}
         </div>
@@ -334,28 +392,6 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
         />
       </Box>
 
-      <Box hidden={!isEditing} className="mt-3 mb-3">
-        <Select.Root
-          size="2"
-          disabled={!isEditing}
-          onValueChange={(value) => {
-            setDayOutline({ ...dayPlan, intensity: value });
-          }}
-        >
-          <Select.Trigger
-            placeholder="Pick A Workout Intensity"
-            variant="surface"
-          />
-          <Select.Content variant="solid" position="popper">
-            <Select.Group>
-              <Select.Label>Intensity</Select.Label>
-              <Select.Item value="LIGHT">Light</Select.Item>
-              <Select.Item value="MODERATE">Moderate</Select.Item>
-              <Select.Item value="INTENSE">Intense</Select.Item>
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
-      </Box>
       <Box>
         {!isEditing && (
           <Button
@@ -369,15 +405,25 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
           <Box className="flex flex-col space-y-3">
             <Box className="flex justify-evenly space-x-2">
               <Button
-                className="text-white py-1 px-3 rounded mt-2"
-                onClick={() => setIsEditing(false)}
+                onClick={() => handleRemoveLastWorkout(dayOutline.day)}
+                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
               >
-                Save
+                - Exercise
               </Button>
-              <Button className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2">
-                Add Exercise
+              <Button
+                onClick={() => handleAddNewWorkout(dayOutline.day)}
+                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
+              >
+                + Exercise
               </Button>
             </Box>
+
+            <Button
+              className="text-white py-1 px-3 rounded mt-2"
+              onClick={() => setIsEditing(false)}
+            >
+              Save
+            </Button>
             <Button onClick={() => setIsEditing(false)}>Cancel</Button>
           </Box>
         )}
