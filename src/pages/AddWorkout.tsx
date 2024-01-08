@@ -31,6 +31,20 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
 import { UserContextType } from "../context/UserContext";
+import { AddWorkoutForm } from "../components/AddWorkoutForm";
+import {
+  Cardio,
+  CardioSet,
+  DeleteWorkoutButtonProps,
+  Exercise,
+  ExerciseType,
+  Strength,
+  StrengthSet,
+  Stretch,
+  StretchSet,
+  TodaysWorkout,
+  WorkoutSummary,
+} from "../types/workoutTypes";
 
 const defaultWorkouts: Exercise[] = [
   {
@@ -57,65 +71,6 @@ const defaultWorkouts: Exercise[] = [
     sets: [{ distance: "20 km" }],
   },
 ];
-type AllExercise = Exercise[];
-type Exercise = Strength | Cardio | Stretch;
-type ExerciseSet = StrengthSet | CardioSet | StretchSet;
-enum ExerciseType {
-  Strength = "Strength",
-  Cardio = "Cardio",
-  Stretch = "Stretch",
-}
-interface EditableRowData {
-  exercise_name: string;
-  type: ExerciseType;
-  sets: ExerciseSet[];
-}
-
-type Strength = {
-  type: "Strength";
-  exercise_name: string;
-  sets: StrengthSet[];
-};
-
-type Cardio = {
-  type: "Cardio";
-  exercise_name: string;
-  sets: CardioSet[];
-};
-
-type Stretch = {
-  type: "Stretch";
-  exercise_name: string;
-  sets: StretchSet[];
-};
-type StrengthSet = {
-  reps: string;
-  weight: string;
-};
-
-type CardioSet = {
-  distance: string;
-};
-
-type StretchSet = {
-  seconds: string;
-};
-
-type WorkoutSummary = {
-  id: string;
-  date: number;
-  summaryDetails: string;
-};
-interface TodaysWorkout {
-  id: string;
-  date: number;
-  workouts: AllExercise;
-}
-
-interface DeleteWorkoutButtonProps {
-  index: number;
-  onDelete: (index: number) => void;
-}
 
 interface UpdateWorkoutButtonProps {
   index: number;
@@ -929,107 +884,6 @@ const AddWorkout = () => {
       </div>
       <Toaster />
     </>
-  );
-};
-type AddWorkoutFormProps = {
-  handleSetAddForm: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: string,
-    index: number
-  ) => void;
-  addSetToCurrentWorkout: () => void;
-  removeLastSetFromCurrentWorkout: () => void;
-  currentExercise: Exercise | null;
-  addExerciseToDaysWorkout: (event: React.FormEvent<HTMLFormElement>) => void;
-  selectedWorkoutType: ExerciseType | null;
-  handleSelectWorkoutType: (value: ExerciseType) => void;
-  handleExerciseNameAddForm: (e: React.ChangeEvent<HTMLInputElement>) => void;
-};
-
-const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
-  handleSetAddForm,
-  addSetToCurrentWorkout,
-  removeLastSetFromCurrentWorkout,
-  currentExercise,
-  addExerciseToDaysWorkout,
-  selectedWorkoutType,
-  handleSelectWorkoutType,
-  handleExerciseNameAddForm,
-}) => {
-  return (
-    <form onSubmit={addExerciseToDaysWorkout}>
-      <Select.Root
-        size="3"
-        value={selectedWorkoutType ?? ""}
-        onValueChange={(value) => {
-          handleSelectWorkoutType(value as ExerciseType);
-          axios.patch("Fake Error").catch(() => {
-            toast.error("Changes could not be saved", {
-              duration: 3000,
-            });
-          });
-        }}
-      >
-        <Select.Trigger placeholder="Pick A Workout Type" variant="surface" />
-        <Select.Content variant="solid" position="popper" sideOffset={2}>
-          <Select.Group>
-            <Select.Label>Workout Types</Select.Label>
-            {Object.values(ExerciseType).map((type) => (
-              <Select.Item
-                key={type}
-                value={type}
-                className="focus:bg-yellow-400"
-              >
-                {type}
-              </Select.Item>
-            ))}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
-
-      <TextField.Input
-        placeholder="Exercise Name"
-        onChange={(e) => handleExerciseNameAddForm(e)}
-      />
-      {currentExercise?.sets.map((item, index) => (
-        <div key={index}>
-          <h3>Set {index + 1}</h3>
-          {Object.keys(item).map((key) => (
-            <TextField.Input
-              key={key}
-              placeholder={`${key}`}
-              onChange={(e) => handleSetAddForm(e, key, index)}
-            />
-          ))}
-        </div>
-      ))}
-
-      <Button variant="solid" color="green" onClick={addSetToCurrentWorkout}>
-        <PlusIcon aria-hidden="true" /> Add Set
-      </Button>
-      <Button
-        variant="soft"
-        color="orange"
-        onClick={removeLastSetFromCurrentWorkout}
-      >
-        <MinusIcon aria-hidden="true" /> Delete Last Set
-      </Button>
-      <Box className="mt-3 ">
-        <Button
-          variant="solid"
-          color="teal"
-          type="submit"
-          // onClick={addExerciseToDaysWorkout}
-          size="4"
-          className="shadow-md items-center flex justify-center "
-          mx-6
-        >
-          {" "}
-          <CheckIcon width="19" height="19" aria-hidden="true" />
-          <Text className="font-medium">Finish Exercise</Text>
-        </Button>
-      </Box>
-    </form>
   );
 };
 
