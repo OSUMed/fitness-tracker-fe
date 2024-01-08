@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from "react";
+
 export type AllExercise = Exercise[];
 export type Exercise = Strength | Cardio | Stretch;
 export type ExerciseSet = StrengthSet | CardioSet | StretchSet;
@@ -67,3 +69,54 @@ export interface UpdateWorkoutButtonProps {
 export interface WorkoutSetDataStructure {
   [key: string]: string;
 }
+export interface StaticWorkoutRowProps {
+  key: React.Key;
+  workout: Exercise;
+  index: number;
+  recordTodaysWorkout: TodaysWorkout;
+  editingRowIndex: number | null;
+  startRowEditProcess: (index: number) => void;
+  handleDeleteExercise: (index: number) => void;
+}
+export interface EditableWorkoutRowProps {
+  workout: Exercise;
+  index: number;
+  editableRowData: Exercise | null;
+  editingRowIndex: number | null;
+  handleUpdateExerciseName: (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  handleUpdateExerciseSet: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setAttribute: string,
+    setIndex: number
+  ) => void;
+  isEditing: boolean;
+  UpdateWorkoutButton: React.ComponentType<UpdateWorkoutButtonProps>;
+  DeleteWorkoutButton: React.ComponentType<DeleteWorkoutButtonProps>;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
+  handleUpdateExercise: (
+    event: React.MouseEvent<HTMLButtonElement>,
+    index: number
+  ) => void;
+  handleDeleteExercise: (index: number) => void;
+}
+export interface EditWorkoutButtonProps {
+  startRowEditProcess: (index: number) => void;
+  index: number;
+}
+export type WorkoutSummaryMobileViewProps = {
+  index: number;
+  workout: Exercise;
+  editingRowIndex: number | null;
+  editableRowData: Exercise | undefined;
+  handleUpdateExerciseName: (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  handleUpdateExerciseSet: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setAttribute: string,
+    setIndex: number
+  ) => void;
+};

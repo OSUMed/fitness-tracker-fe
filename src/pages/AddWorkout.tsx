@@ -36,6 +36,10 @@ import {
   WorkoutSummary,
   UpdateWorkoutButtonProps,
   WorkoutSetDataStructure,
+  StaticWorkoutRowProps,
+  EditableWorkoutRowProps,
+  EditWorkoutButtonProps,
+  WorkoutSummaryMobileViewProps,
 } from "../types/workoutTypes";
 import { defaultWorkouts } from "../util/defaultWorkouts";
 
@@ -245,7 +249,7 @@ const AddWorkout = () => {
       return;
     }
     const setValue = e.target.value;
-    console.log("new exercise name is: ", setValue);
+    setExerciseName(setValue);
     setCurrentExercise({ ...currentExercise, exercise_name: setValue });
   };
   const handleSetAddForm = (
@@ -526,11 +530,10 @@ const AddWorkout = () => {
 
   return (
     <>
-      <div>
-        <div className="w-full flex justify-center items-center px-4">
+      <Box>
+        <Box className="w-full flex justify-center items-center px-4">
           <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
             <Box className="space-y-4">
-              {" "}
               <AddWorkoutForm
                 handleSetAddForm={handleSetAddForm}
                 addSetToCurrentWorkout={addSetToCurrentWorkout}
@@ -542,12 +545,12 @@ const AddWorkout = () => {
                 selectedWorkoutType={selectedWorkoutType}
                 handleSelectWorkoutType={handleSelectWorkoutType}
                 handleExerciseNameAddForm={handleExerciseNameAddForm}
+                exerciseName={exerciseName}
+                setExerciseName={setExerciseName}
               />
             </Box>
 
             <Box className="space-y-4 flex flex-col justify-end">
-              <Button onClick={testEndpoint}>Test Endpoint</Button>
-              <Button onClick={testPOSTEndpoint}>Test POST Endpoint</Button>
               <Button
                 className="mt-6 text-lg py-4 px-8"
                 size="2"
@@ -560,253 +563,42 @@ const AddWorkout = () => {
 
               <Table.Root variant="surface">
                 <Table.Header>
-                  <TableHeader />
+                  <TableHeaderContent />
                 </Table.Header>
                 <Table.Body>
                   {allExercises.map((workout, index) =>
                     editingRowIndex === index ? (
-                      <Table.Row key={index}>
-                        <Table.Cell>
-                          {/* {new Date(recordWorkout.date).toDateString()} */}
-                          <span className="hidden sm:block">
-                            {new Date(recordTodaysWorkout.date).toDateString()}
-                          </span>
-
-                          <span className="block sm:hidden">
-                            {format(recordTodaysWorkout.date, "MM/dd/yyyy")}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          {workout.type}{" "}
-                          <Box className="block md:hidden mt-2">
-                            <TextField.Input
-                              disabled={editingRowIndex !== index}
-                              value={editableRowData?.exercise_name}
-                              onChange={(e) => handleUpdateExerciseName(e)}
-                            />
-                          </Box>
-                          <Box className="block md:hidden">
-                            {editableRowData?.sets.map(
-                              (individualSet, setIndex) => (
-                                <div key={setIndex}>
-                                  {Object.entries(individualSet).map(
-                                    (
-                                      [setAttribute, setValue],
-                                      attributeIndex
-                                    ) => (
-                                      <div
-                                        key={attributeIndex}
-                                        className="flex flex mb-2 items-center"
-                                      >
-                                        <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                                          {setAttribute}:
-                                        </label>
-
-                                        <TextField.Input
-                                          disabled={editingRowIndex !== index}
-                                          className="border-b border-black last:border-b-0 py-2"
-                                          key={attributeIndex}
-                                          value={setValue}
-                                          onChange={(e) =>
-                                            handleUpdateExerciseSet(
-                                              e,
-                                              setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
-                                              setIndex // The 'set' index in the workout's sets array
-                                            )
-                                          }
-                                        />
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              )
-                            )}
-                          </Box>
-                        </Table.Cell>
-                        <Table.Cell className="hidden md:table-cell">
-                          <TextField.Input
-                            disabled={editingRowIndex !== index}
-                            value={editableRowData?.exercise_name}
-                            onChange={(e) => handleUpdateExerciseName(e)}
-                          />
-                        </Table.Cell>
-                        <Table.Cell className="hidden md:table-cell">
-                          {editableRowData?.sets.map(
-                            (individualSet, setIndex) => (
-                              <div key={setIndex}>
-                                {Object.entries(individualSet).map(
-                                  (
-                                    [setAttribute, setValue],
-                                    attributeIndex
-                                  ) => (
-                                    <div
-                                      key={attributeIndex}
-                                      className="flex flex-col lg:flex-row mb-2"
-                                    >
-                                      <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                                        {setAttribute}:
-                                      </label>
-
-                                      <TextField.Input
-                                        disabled={editingRowIndex !== index}
-                                        className="border-b border-black last:border-b-0 py-2"
-                                        key={attributeIndex}
-                                        value={setValue}
-                                        onChange={(e) =>
-                                          handleUpdateExerciseSet(
-                                            e,
-                                            setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
-                                            setIndex // The 'set' index in the workout's sets array
-                                          )
-                                        }
-                                      />
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            )
-                          )}
-                        </Table.Cell>
-
-                        <Table.Cell className="space-y-4">
-                          <UpdateWorkoutButton
-                            index={index}
-                            onUpdate={(e) => handleUpdateExercise(e, index)}
-                            setIsEditing={setIsEditing}
-                            setEditingRowIndex={setEditingRowIndex}
-                          />
-
-                          <span className="block md:hidden ">
-                            <DeleteWorkoutButton
-                              index={index}
-                              onDelete={handleDeleteExercise}
-                            />
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell className="hidden md:table-cell">
-                          <DeleteWorkoutButton
-                            index={index}
-                            onDelete={handleDeleteExercise}
-                          />
-                        </Table.Cell>
-                      </Table.Row>
+                      <EditableWorkoutRow
+                        workout={workout}
+                        index={index}
+                        editableRowData={editableRowData}
+                        editingRowIndex={editingRowIndex}
+                        handleUpdateExerciseName={handleUpdateExerciseName}
+                        handleUpdateExerciseSet={handleUpdateExerciseSet}
+                        isEditing={index === editingRowIndex}
+                        UpdateWorkoutButton={UpdateWorkoutButton}
+                        DeleteWorkoutButton={DeleteWorkoutButton}
+                        setIsEditing={setIsEditing}
+                      />
                     ) : (
-                      <Table.Row key={index}>
-                        <Table.Cell>
-                          {/* {new Date(recordWorkout.date).toDateString()} */}
-                          <span className="hidden sm:block">
-                            {new Date(recordTodaysWorkout.date).toDateString()}
-                          </span>
-
-                          <span className="block sm:hidden">
-                            {format(recordTodaysWorkout.date, "MM/dd/yyyy")}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          {workout.type}{" "}
-                          <div className="block md:hidden mt-2">
-                            <TextField.Input
-                              disabled={editingRowIndex !== index}
-                              value={workout.exercise_name}
-                            />
-                          </div>
-                          <div className="block md:hidden">
-                            {workout.sets.map((individualSet, setIndex) => (
-                              <div key={setIndex}>
-                                {Object.entries(individualSet).map(
-                                  (
-                                    [setAttribute, setValue],
-                                    attributeIndex
-                                  ) => (
-                                    <div
-                                      key={attributeIndex}
-                                      className="flex flex mb-2 items-center"
-                                    >
-                                      <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                                        {setAttribute}:
-                                      </label>
-
-                                      <TextField.Input
-                                        disabled={editingRowIndex !== index}
-                                        className="border-b border-black last:border-b-0 py-2"
-                                        key={attributeIndex}
-                                        value={setValue}
-                                      />
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </Table.Cell>
-                        <Table.Cell className="hidden md:table-cell">
-                          <TextField.Input
-                            disabled={editingRowIndex !== index}
-                            value={workout.exercise_name}
-                          />
-                        </Table.Cell>
-                        <Table.Cell className="hidden md:table-cell">
-                          {workout.sets.map((individualSet, setIndex) => (
-                            <div key={setIndex}>
-                              {Object.entries(individualSet).map(
-                                ([setAttribute, setValue], attributeIndex) => (
-                                  <div
-                                    key={attributeIndex}
-                                    className="flex flex-col lg:flex-row mb-2"
-                                  >
-                                    <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                                      {setAttribute}:
-                                    </label>
-
-                                    <TextField.Input
-                                      disabled={editingRowIndex !== index}
-                                      className="border-b border-black last:border-b-0 py-2"
-                                      key={attributeIndex}
-                                      value={setValue}
-                                    />
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          ))}
-                        </Table.Cell>
-
-                        <Table.Cell className="space-y-4">
-                          <Button
-                            className="p-20"
-                            variant="soft"
-                            radius="large"
-                            color="indigo"
-                            highContrast
-                            onClick={() => startRowEditProcess(index)}
-                          >
-                            <Pencil1Icon width="17" height="17" />
-                            Edit
-                          </Button>
-
-                          <span className="block md:hidden ">
-                            <DeleteWorkoutButton
-                              index={index}
-                              onDelete={handleDeleteExercise}
-                            />
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell className="hidden md:table-cell">
-                          <DeleteWorkoutButton
-                            index={index}
-                            onDelete={handleDeleteExercise}
-                          />
-                        </Table.Cell>
-                      </Table.Row>
+                      <StaticWorkoutRow
+                        key={index}
+                        workout={workout}
+                        index={index}
+                        recordTodaysWorkout={recordTodaysWorkout}
+                        editingRowIndex={editingRowIndex}
+                        startRowEditProcess={startRowEditProcess}
+                        handleDeleteExercise={handleDeleteExercise}
+                      />
                     )
                   )}
                 </Table.Body>
               </Table.Root>
             </Box>
           </Box>
-        </div>
-      </div>
-      <div className="sticky w-full bg-gray-100 bg-white p-4 shadow-md flex justify-end">
+        </Box>
+      </Box>
+      <Box className="sticky w-full bg-gray-100 bg-white p-4 shadow-md flex justify-end">
         <Button
           className="mt-6 text-lg py-4 px-8"
           size="4"
@@ -816,13 +608,14 @@ const AddWorkout = () => {
         >
           Finish Workout
         </Button>
-      </div>
+      </Box>
       <Toaster />
     </>
   );
 };
 
-const TableHeader: React.FC = () => {
+// Main Sections:
+const TableHeaderContent: React.FC = () => {
   return (
     <Table.Row>
       <Table.ColumnHeaderCell className="text-center ">
@@ -847,7 +640,275 @@ const TableHeader: React.FC = () => {
     </Table.Row>
   );
 };
+const StaticWorkoutRow: React.FC<StaticWorkoutRowProps> = ({
+  workout,
+  index,
+  recordTodaysWorkout,
+  editingRowIndex,
+  startRowEditProcess,
+  handleDeleteExercise,
+}) => {
+  return (
+    <Table.Row key={index}>
+      <Table.Cell>
+        <span className="hidden sm:block">
+          {new Date(recordTodaysWorkout.date).toDateString()}
+        </span>
 
+        <span className="block sm:hidden">
+          {format(recordTodaysWorkout.date, "MM/dd/yyyy")}
+        </span>
+      </Table.Cell>
+      <Table.Cell>
+        {workout.type}{" "}
+        <Box className="block md:hidden mt-2">
+          <TextField.Input
+            disabled={editingRowIndex !== index}
+            value={workout.exercise_name}
+          />
+        </Box>
+        <Box className="block md:hidden">
+          {workout.sets.map((individualSet, setIndex) => (
+            <Box key={setIndex}>
+              {Object.entries(individualSet).map(
+                ([setAttribute, setValue], attributeIndex) => (
+                  <Box
+                    key={attributeIndex}
+                    className="flex flex mb-2 items-center"
+                  >
+                    <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                      {setAttribute}:
+                    </label>
+
+                    <TextField.Input
+                      disabled={editingRowIndex !== index}
+                      className="border-b border-black last:border-b-0 py-2"
+                      key={attributeIndex}
+                      value={setValue}
+                    />
+                  </Box>
+                )
+              )}
+            </Box>
+          ))}
+        </Box>
+      </Table.Cell>
+      <Table.Cell className="hidden md:table-cell">
+        <TextField.Input
+          disabled={editingRowIndex !== index}
+          value={workout.exercise_name}
+        />
+      </Table.Cell>
+      <Table.Cell className="hidden md:table-cell">
+        {workout.sets.map((individualSet, setIndex) => (
+          <Box key={setIndex}>
+            {Object.entries(individualSet).map(
+              ([setAttribute, setValue], attributeIndex) => (
+                <Box
+                  key={attributeIndex}
+                  className="flex flex-col lg:flex-row mb-2"
+                >
+                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                    {setAttribute}:
+                  </label>
+
+                  <TextField.Input
+                    disabled={editingRowIndex !== index}
+                    className="border-b border-black last:border-b-0 py-2"
+                    key={attributeIndex}
+                    value={setValue}
+                  />
+                </Box>
+              )
+            )}
+          </Box>
+        ))}
+      </Table.Cell>
+
+      <Table.Cell className="space-y-4">
+        <EditWorkoutButton
+          startRowEditProcess={startRowEditProcess}
+          index={index}
+        />
+        <span className="block md:hidden ">
+          <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+        </span>
+      </Table.Cell>
+      <Table.Cell className="hidden md:table-cell">
+        <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+      </Table.Cell>
+    </Table.Row>
+  );
+};
+const EditableWorkoutRow: React.FC<EditableWorkoutRowProps> = ({
+  workout,
+  index,
+  editableRowData,
+  editingRowIndex,
+  handleUpdateExerciseName,
+  handleUpdateExerciseSet,
+  isEditing,
+  UpdateWorkoutButton,
+  DeleteWorkoutButton,
+  setEditingRowIndex,
+  setIsEditing,
+  handleUpdateExercise,
+  handleDeleteExercise,
+}) => {
+  return (
+    <Table.Row key={index}>
+      <Table.Cell>
+        <span className="hidden sm:block">
+          {new Date(recordTodaysWorkout.date).toDateString()}
+        </span>
+
+        <span className="block sm:hidden">
+          {format(recordTodaysWorkout.date, "MM/dd/yyyy")}
+        </span>
+      </Table.Cell>
+      <Table.Cell>
+        <WorkoutSummaryMobileView
+          index={index}
+          workout={workout}
+          editingRowIndex={editingRowIndex}
+          editableRowData={editableRowData}
+          handleUpdateExerciseSet={handleUpdateExerciseSet}
+          handleUpdateExerciseName={handleUpdateExerciseName}
+        />
+      </Table.Cell>
+      <Table.Cell className="hidden md:table-cell">
+        <TextField.Input
+          disabled={editingRowIndex !== index}
+          value={editableRowData?.exercise_name}
+          onChange={(e) => handleUpdateExerciseName(e)}
+        />
+      </Table.Cell>
+      <Table.Cell className="hidden md:table-cell">
+        {editableRowData?.sets.map((individualSet, setIndex) => (
+          <Box key={setIndex}>
+            {Object.entries(individualSet).map(
+              ([setAttribute, setValue], attributeIndex) => (
+                <Box
+                  key={attributeIndex}
+                  className="flex flex-col lg:flex-row mb-2"
+                >
+                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                    {setAttribute}:
+                  </label>
+
+                  <TextField.Input
+                    disabled={editingRowIndex !== index}
+                    className="border-b border-black last:border-b-0 py-2"
+                    key={attributeIndex}
+                    value={setValue}
+                    onChange={(e) =>
+                      handleUpdateExerciseSet(
+                        e,
+                        setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
+                        setIndex // The 'set' index in the workout's sets array
+                      )
+                    }
+                  />
+                </Box>
+              )
+            )}
+          </Box>
+        ))}
+      </Table.Cell>
+
+      <Table.Cell className="space-y-4">
+        <UpdateWorkoutButton
+          index={index}
+          onUpdate={(e) => handleUpdateExercise(e, index)}
+          setIsEditing={setIsEditing}
+          setEditingRowIndex={setEditingRowIndex}
+        />
+
+        <span className="block md:hidden ">
+          <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+        </span>
+      </Table.Cell>
+      <Table.Cell className="hidden md:table-cell">
+        <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+      </Table.Cell>
+    </Table.Row>
+  );
+};
+
+const WorkoutSummaryMobileView: React.FC<WorkoutSummaryMobileViewProps> = ({
+  workout,
+  index,
+  editingRowIndex,
+  editableRowData,
+  handleUpdateExerciseSet,
+  handleUpdateExerciseName,
+}) => {
+  return (
+    <>
+      {workout.type}{" "}
+      <Box className="block md:hidden mt-2">
+        <TextField.Input
+          disabled={editingRowIndex !== index}
+          value={editableRowData?.exercise_name}
+          onChange={(e) => handleUpdateExerciseName(e)}
+        />
+      </Box>
+      <Box className="block md:hidden">
+        {editableRowData?.sets.map((individualSet, setIndex) => (
+          <div key={setIndex}>
+            {Object.entries(individualSet).map(
+              ([setAttribute, setValue], attributeIndex) => (
+                <div
+                  key={attributeIndex}
+                  className="flex flex mb-2 items-center"
+                >
+                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                    {setAttribute}:
+                  </label>
+
+                  <TextField.Input
+                    disabled={editingRowIndex !== index}
+                    className="border-b border-black last:border-b-0 py-2"
+                    key={attributeIndex}
+                    value={setValue}
+                    onChange={(e) =>
+                      handleUpdateExerciseSet(
+                        e,
+                        setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
+                        setIndex // The 'set' index in the workout's sets array
+                      )
+                    }
+                  />
+                </div>
+              )
+            )}
+          </div>
+        ))}
+      </Box>
+    </>
+  );
+};
+
+// Table Buttons:
+
+const EditWorkoutButton: React.FC<EditWorkoutButtonProps> = ({
+  startRowEditProcess,
+  index,
+}) => {
+  return (
+    <Button
+      className="p-20"
+      variant="soft"
+      radius="large"
+      color="indigo"
+      highContrast
+      onClick={() => startRowEditProcess(index)}
+    >
+      <Pencil1Icon width="17" height="17" />
+      Edit
+    </Button>
+  );
+};
 const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
   index,
   onUpdate,

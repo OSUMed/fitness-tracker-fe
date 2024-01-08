@@ -3,8 +3,11 @@ import { Select, TextField, Box, Flex, Button, Text } from "@radix-ui/themes";
 import { Exercise, ExerciseType } from "../types/workoutTypes";
 import axios from "axios";
 import { CheckIcon, MinusIcon, PlusIcon } from "@radix-ui/react-icons";
+import toast from "react-hot-toast";
 
 type AddWorkoutFormProps = {
+  exerciseName: string;
+  setExerciseName: React.Dispatch<React.SetStateAction<string>>;
   handleSetAddForm: (
     e: React.ChangeEvent<HTMLInputElement>,
     key: string,
@@ -28,6 +31,8 @@ export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
   selectedWorkoutType,
   handleSelectWorkoutType,
   handleExerciseNameAddForm,
+  exerciseName,
+  setExerciseName,
 }) => {
   return (
     <Flex direction="column" gap="2">
@@ -63,6 +68,7 @@ export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
 
         <TextField.Input
           placeholder="Exercise Name"
+          value={exerciseName}
           onChange={(e) => handleExerciseNameAddForm(e)}
         />
         {currentExercise?.sets.map((item, index) => (
