@@ -98,8 +98,8 @@ export interface EditableWorkoutRowProps {
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
   handleUpdateExercise: (
-    event: React.MouseEvent<HTMLButtonElement>,
-    index: number
+    index: number,
+    event?: React.MouseEvent<HTMLButtonElement>
   ) => void;
   handleDeleteExercise: (index: number) => void;
 }
@@ -112,6 +112,10 @@ export type WorkoutSummaryMobileViewProps = {
   workout: Exercise;
   editingRowIndex: number | null;
   editableRowData: Exercise | undefined;
+  handleUpdateExercise: (
+    index: number,
+    event?: React.MouseEvent<HTMLButtonElement>
+  ) => void;
   handleUpdateExerciseName: (
     event: React.ChangeEvent<HTMLInputElement>
   ) => void;

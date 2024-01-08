@@ -1,10 +1,4 @@
-import React, {
-  Context,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useState,
-} from "react";
+import React, { Context, useContext, useState } from "react";
 import {
   Flex,
   TextField,
@@ -52,17 +46,16 @@ const AddWorkout = () => {
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
 
   // Helper Variables:
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [, setIsEditing] = useState<boolean>(false);
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
   // Table State Variables:
-  const [exerciseNameUpdateTable, setExerciseNameUpdateTable] =
-    useState<string>("");
+  const [exerciseNameUpdateTable] = useState<string>("");
 
   // Summary and All History Variables:
   const [allExercises, setAllExercises] = useState<Exercise[]>(defaultWorkouts);
-  const [allExercisesTemp, setAllExercisesTemp] =
-    useState<Exercise[]>(defaultWorkouts);
+  // const [allExercisesTemp, setAllExercisesTemp] =
+  //   useState<Exercise[]>(defaultWorkouts);
   const [editableRowData, setEditableRowData] = useState<Exercise>();
   const [recordTodaysWorkout, setRecordTodaysWorkout] = useState<TodaysWorkout>(
     {
@@ -78,7 +71,6 @@ const AddWorkout = () => {
     setHistoryRecordedWorkouts,
     allSummaryRecordedWorkouts,
     setAllSummaryRecordedWorkouts,
-    summaryRecordedWorkouts,
     setSummaryRecordedWorkouts,
     workoutTypeCounts,
     setWorkoutTypeCounts,
@@ -368,10 +360,7 @@ const AddWorkout = () => {
     setEditableRowData({ ...allExercises[index] });
   };
 
-  const handleUpdateExercise = (
-    _event: React.MouseEvent<HTMLButtonElement>,
-    index: number
-  ) => {
+  const handleUpdateExercise = (index: number) => {
     // console.log("updateWorkout workout! _e: ", _event);
     // const updateWorkout = allExercises.find((workout, i) => i === index);
     // let workouts = [...allExercises];
@@ -444,53 +433,53 @@ const AddWorkout = () => {
     }
   };
 
-  const handleUpdateExerciseSet1 = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    workoutIndex: number,
-    setAttribute: string,
-    setIndex: number
-  ) => {
-    const updateSets = <T extends StrengthSet | CardioSet | StretchSet>(
-      sets: T[],
-      sIndex: number,
-      value: string
-    ): T[] =>
-      sets.map((set, idx) =>
-        idx === sIndex ? ({ ...set, [setAttribute]: value } as T) : set
-      );
-    const updatedWorkouts = allExercises.map((workout, wIndex) => {
-      if (wIndex === workoutIndex) {
-        if (workout.type === "Strength" && "reps" in workout.sets[0]) {
-          const updatedSets = updateSets(
-            workout.sets as StrengthSet[],
-            setIndex,
-            e.target.value
-          );
-          return { ...workout, sets: updatedSets };
-        } else if (workout.type === "Cardio" && "distance" in workout.sets[0]) {
-          const updatedSets = updateSets(
-            workout.sets as CardioSet[],
-            setIndex,
-            e.target.value
-          );
-          return { ...workout, sets: updatedSets };
-        } else if (workout.type === "Stretch" && "seconds" in workout.sets[0]) {
-          const updatedSets = updateSets(
-            workout.sets as StretchSet[],
-            setIndex,
-            e.target.value
-          );
-          return { ...workout, sets: updatedSets };
-        }
-        return workout;
-      }
-      return workout;
-    });
-    setAllExercisesTemp(updatedWorkouts as Exercise[]);
-  };
+  // const handleUpdateExerciseSet1 = (
+  //   e: React.ChangeEvent<HTMLInputElement>,
+  //   workoutIndex: number,
+  //   setAttribute: string,
+  //   setIndex: number
+  // ) => {
+  //   const updateSets = <T extends StrengthSet | CardioSet | StretchSet>(
+  //     sets: T[],
+  //     sIndex: number,
+  //     value: string
+  //   ): T[] =>
+  //     sets.map((set, idx) =>
+  //       idx === sIndex ? ({ ...set, [setAttribute]: value } as T) : set
+  //     );
+  //   const updatedWorkouts = allExercises.map((workout, wIndex) => {
+  //     if (wIndex === workoutIndex) {
+  //       if (workout.type === "Strength" && "reps" in workout.sets[0]) {
+  //         const updatedSets = updateSets(
+  //           workout.sets as StrengthSet[],
+  //           setIndex,
+  //           e.target.value
+  //         );
+  //         return { ...workout, sets: updatedSets };
+  //       } else if (workout.type === "Cardio" && "distance" in workout.sets[0]) {
+  //         const updatedSets = updateSets(
+  //           workout.sets as CardioSet[],
+  //           setIndex,
+  //           e.target.value
+  //         );
+  //         return { ...workout, sets: updatedSets };
+  //       } else if (workout.type === "Stretch" && "seconds" in workout.sets[0]) {
+  //         const updatedSets = updateSets(
+  //           workout.sets as StretchSet[],
+  //           setIndex,
+  //           e.target.value
+  //         );
+  //         return { ...workout, sets: updatedSets };
+  //       }
+  //       return workout;
+  //     }
+  //     return workout;
+  //   });
+  //   setAllExercisesTemp(updatedWorkouts as Exercise[]);
+  // };
   const handleDeleteExercise = (index: number) => {
-    const deletedWorkout = allExercises.find((workout, i) => i === index);
-    const updatedWorkouts = allExercises.filter((workout, i) => i !== index);
+    const deletedWorkout = allExercises.find((_workout, i) => i === index);
+    const updatedWorkouts = allExercises.filter((_workout, i) => i !== index);
     setAllExercises(updatedWorkouts);
     setIsEditing(false);
     setEditingRowIndex(null);
@@ -499,30 +488,30 @@ const AddWorkout = () => {
 
   ///////////////////////// Testing Purposes  /////////////////////////
 
-  const testEndpoint = () => {
-    console.log("testEndpoint");
-    axios
-      .get(`${serverAPI}/workoutlogins`)
-      .then((response) => {
-        console.log("response is workoutlogin: ", response.data);
-      })
-      .catch((error) => {
-        console.log("error is: ", error);
-      });
-  };
-  const testPOSTEndpoint = () => {
-    console.log("testEndpoint");
-    axios
-      .post(`${serverAPI}/workoutlogins`, {
-        email: "sri@gmail.com",
-      })
-      .then((response) => {
-        console.log("response is workoutlogin: ", response.data);
-      })
-      .catch((error) => {
-        console.log("error is: ", error);
-      });
-  };
+  // const testEndpoint = () => {
+  //   console.log("testEndpoint");
+  //   axios
+  //     .get(`${serverAPI}/workoutlogins`)
+  //     .then((response) => {
+  //       console.log("response is workoutlogin: ", response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.log("error is: ", error);
+  //     });
+  // };
+  // const testPOSTEndpoint = () => {
+  //   console.log("testEndpoint");
+  //   axios
+  //     .post(`${serverAPI}/workoutlogins`, {
+  //       email: "sri@gmail.com",
+  //     })
+  //     .then((response) => {
+  //       console.log("response is workoutlogin: ", response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.log("error is: ", error);
+  //     });
+  // };
 
   console.log("exerciseNameUpdateTable: ", exerciseNameUpdateTable);
 
@@ -571,7 +560,7 @@ const AddWorkout = () => {
                       <EditableWorkoutRow
                         workout={workout}
                         index={index}
-                        editableRowData={editableRowData}
+                        editableRowData={editableRowData || null}
                         editingRowIndex={editingRowIndex}
                         handleUpdateExerciseName={handleUpdateExerciseName}
                         handleUpdateExerciseSet={handleUpdateExerciseSet}
@@ -580,6 +569,9 @@ const AddWorkout = () => {
                         DeleteWorkoutButton={DeleteWorkoutButton}
                         setIsEditing={setIsEditing}
                         recordTodaysWorkout={recordTodaysWorkout}
+                        setEditingRowIndex={setEditingRowIndex}
+                        handleUpdateExercise={handleUpdateExercise}
+                        handleDeleteExercise={handleDeleteExercise}
                       />
                     ) : (
                       <StaticWorkoutRow
@@ -748,7 +740,6 @@ const EditableWorkoutRow: React.FC<EditableWorkoutRowProps> = ({
   editingRowIndex,
   handleUpdateExerciseName,
   handleUpdateExerciseSet,
-  isEditing,
   UpdateWorkoutButton,
   DeleteWorkoutButton,
   setEditingRowIndex,
@@ -773,9 +764,10 @@ const EditableWorkoutRow: React.FC<EditableWorkoutRowProps> = ({
           index={index}
           workout={workout}
           editingRowIndex={editingRowIndex}
-          editableRowData={editableRowData}
+          editableRowData={editableRowData as Exercise | undefined}
           handleUpdateExerciseSet={handleUpdateExerciseSet}
           handleUpdateExerciseName={handleUpdateExerciseName}
+          handleUpdateExercise={handleUpdateExercise}
         />
       </Table.Cell>
       <Table.Cell className="hidden md:table-cell">
@@ -821,7 +813,7 @@ const EditableWorkoutRow: React.FC<EditableWorkoutRowProps> = ({
       <Table.Cell className="space-y-4">
         <UpdateWorkoutButton
           index={index}
-          onUpdate={(e) => handleUpdateExercise(e, index)}
+          onUpdate={handleUpdateExercise}
           setIsEditing={setIsEditing}
           setEditingRowIndex={setEditingRowIndex}
         />
@@ -914,7 +906,6 @@ const EditWorkoutButton: React.FC<EditWorkoutButtonProps> = ({
 const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
   index,
   onUpdate,
-  setIsEditing,
   setEditingRowIndex,
 }) => {
   return (
