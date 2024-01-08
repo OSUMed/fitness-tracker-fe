@@ -57,3 +57,13 @@ export interface DeleteWorkoutButtonProps {
   index: number;
   onDelete: (index: number) => void;
 }
+export interface UpdateWorkoutButtonProps {
+  index: number;
+  onUpdate: (index: number) => void;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
+}
+
+export interface WorkoutSetDataStructure {
+  [key: string]: string;
+}

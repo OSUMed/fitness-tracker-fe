@@ -3,30 +3,20 @@ import React, {
   Dispatch,
   SetStateAction,
   useContext,
-  useEffect,
   useState,
 } from "react";
 import {
   Flex,
-  Select,
   TextField,
   Box,
   Button,
   Table,
-  Text,
   AlertDialog,
 } from "@radix-ui/themes";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "react-hook-form";
 import { format } from "date-fns";
-import {
-  Pencil1Icon,
-  TrashIcon,
-  PlusIcon,
-  CheckIcon,
-  MinusIcon,
-  Update,
-} from "@radix-ui/react-icons";
+import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
@@ -44,44 +34,10 @@ import {
   StretchSet,
   TodaysWorkout,
   WorkoutSummary,
+  UpdateWorkoutButtonProps,
+  WorkoutSetDataStructure,
 } from "../types/workoutTypes";
-
-const defaultWorkouts: Exercise[] = [
-  {
-    type: "Cardio",
-    exercise_name: "Running",
-    sets: [{ distance: "5 km" }],
-  },
-  {
-    type: "Stretch",
-    exercise_name: "Yoga",
-    sets: [{ seconds: "1800" }],
-  },
-  {
-    type: "Strength",
-    exercise_name: "Deadlift",
-    sets: [
-      { reps: "8", weight: "185 lbs" },
-      { reps: "6", weight: "205 lbs" },
-    ],
-  },
-  {
-    type: "Cardio",
-    exercise_name: "Cycling",
-    sets: [{ distance: "20 km" }],
-  },
-];
-
-interface UpdateWorkoutButtonProps {
-  index: number;
-  onUpdate: (index: number) => void;
-  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-  setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
-}
-
-interface WorkoutSetDataStructure {
-  [key: string]: string;
-}
+import { defaultWorkouts } from "../util/defaultWorkouts";
 
 const serverAPI = "http://localhost:8080/workouts";
 const AddWorkout = () => {
@@ -335,8 +291,9 @@ const AddWorkout = () => {
 
     setCurrentExercise(updatedWorkout);
   };
+
   const addExerciseToDaysWorkout = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
@@ -574,20 +531,18 @@ const AddWorkout = () => {
           <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
             <Box className="space-y-4">
               {" "}
-              <Flex direction="column" gap="2">
-                <AddWorkoutForm
-                  handleSetAddForm={handleSetAddForm}
-                  addSetToCurrentWorkout={addSetToCurrentWorkout}
-                  removeLastSetFromCurrentWorkout={
-                    removeLastSetFromCurrentWorkout
-                  }
-                  currentExercise={currentExercise}
-                  addExerciseToDaysWorkout={addExerciseToDaysWorkout}
-                  selectedWorkoutType={selectedWorkoutType}
-                  handleSelectWorkoutType={handleSelectWorkoutType}
-                  handleExerciseNameAddForm={handleExerciseNameAddForm}
-                />
-              </Flex>
+              <AddWorkoutForm
+                handleSetAddForm={handleSetAddForm}
+                addSetToCurrentWorkout={addSetToCurrentWorkout}
+                removeLastSetFromCurrentWorkout={
+                  removeLastSetFromCurrentWorkout
+                }
+                currentExercise={currentExercise}
+                addExerciseToDaysWorkout={addExerciseToDaysWorkout}
+                selectedWorkoutType={selectedWorkoutType}
+                handleSelectWorkoutType={handleSelectWorkoutType}
+                handleExerciseNameAddForm={handleExerciseNameAddForm}
+              />
             </Box>
 
             <Box className="space-y-4 flex flex-col justify-end">
@@ -605,27 +560,7 @@ const AddWorkout = () => {
 
               <Table.Root variant="surface">
                 <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeaderCell className="text-center ">
-                      Date
-                    </Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="text-center ">
-                      <div className="block md:hidden"> Workout Summary</div>
-                      <div className="hidden md:block"> Exercise Type</div>
-                    </Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                      Exercise Name
-                    </Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                      Sets
-                    </Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="text-center">
-                      Edit
-                    </Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
-                      Delete
-                    </Table.ColumnHeaderCell>
-                  </Table.Row>
+                  <TableHeader />
                 </Table.Header>
                 <Table.Body>
                   {allExercises.map((workout, index) =>
@@ -884,6 +819,32 @@ const AddWorkout = () => {
       </div>
       <Toaster />
     </>
+  );
+};
+
+const TableHeader: React.FC = () => {
+  return (
+    <Table.Row>
+      <Table.ColumnHeaderCell className="text-center ">
+        Date
+      </Table.ColumnHeaderCell>
+      <Table.ColumnHeaderCell className="text-center ">
+        <div className="block md:hidden"> Workout Summary</div>
+        <div className="hidden md:block"> Exercise Type</div>
+      </Table.ColumnHeaderCell>
+      <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+        Exercise Name
+      </Table.ColumnHeaderCell>
+      <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+        Sets
+      </Table.ColumnHeaderCell>
+      <Table.ColumnHeaderCell className="text-center">
+        Edit
+      </Table.ColumnHeaderCell>
+      <Table.ColumnHeaderCell className="text-center hidden md:table-cell">
+        Delete
+      </Table.ColumnHeaderCell>
+    </Table.Row>
   );
 };
 
