@@ -123,24 +123,33 @@ interface WorkoutSetDataStructure {
 
 const serverAPI = "http://localhost:8080/workouts";
 const AddWorkout = () => {
-  const [allWorkouts, setAllWorkouts] = useState<Exercise[]>(defaultWorkouts);
+  // Form Variables:
+  const [exerciseName, setExerciseName] = useState<string>("");
+  const [selectedWorkoutType, setSelectedWorkoutType] =
+    useState<ExerciseType | null>(null);
+  const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
+
+  // Helper Variables:
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
+  // Table State Variables:
+  const [exerciseNameUpdateTable, setExerciseNameUpdateTable] =
+    useState<string>("");
+
+  // Summary and All History Variables:
+  const [allExercise, setAllExercises] = useState<Exercise[]>(defaultWorkouts);
+  const [allExerciseRough, setAllExerciseRough] =
+    useState<Exercise[]>(allExercise);
   const [recordTodaysWorkout, setRecordTodaysWorkout] = useState<TodaysWorkout>(
     {
       id: uuidv4(),
       date: Date.now(),
-      workouts: allWorkouts,
+      workouts: allExercise,
     }
   );
-  const [selectedWorkoutType, setSelectedWorkoutType] =
-    useState<ExerciseType | null>(null);
-  const [currentWorkout, setCurrentWorkout] = useState<Exercise | null>(null);
-  const [exerciseName, setExerciseName] = useState<string>("");
 
-  // State to hold the history of recorded workouts, summary of today's workout,
-  // and summary of all recorded workouts
+  // useContext Variables:
   const {
     historyRecordedWorkouts,
     setHistoryRecordedWorkouts,
@@ -151,9 +160,6 @@ const AddWorkout = () => {
     workoutTypeCounts,
     setWorkoutTypeCounts,
   } = useContext<UserContextType>(UserContext as Context<UserContextType>);
-  useEffect(() => {
-    console.log("allWorkouts is: ", allWorkouts);
-  }, [allWorkouts]);
 
   // Finish Today Workout & Save to History
   const finishTodaysWorkout = () => {
@@ -172,8 +178,8 @@ const AddWorkout = () => {
       date: Date.now(),
       workouts: [],
     });
-    setAllWorkouts([]);
-    setCurrentWorkout(null);
+    setAllExercises([]);
+    setCurrentExercise(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
     toast.success("Workout saved!", { duration: 3000 });
@@ -219,50 +225,53 @@ const AddWorkout = () => {
 
     // Initialize a new workout when a type is selected
     if (type === ExerciseType.Strength) {
-      setCurrentWorkout({
+      setCurrentExercise({
         type,
         exercise_name: "",
         sets: [{ reps: "", weight: "" }],
       });
     } else if (type === ExerciseType.Cardio) {
-      setCurrentWorkout({ type, exercise_name: "", sets: [{ distance: "" }] });
+      setCurrentExercise({ type, exercise_name: "", sets: [{ distance: "" }] });
     } else if (type === ExerciseType.Stretch) {
-      setCurrentWorkout({ type, exercise_name: "", sets: [{ seconds: "" }] });
+      setCurrentExercise({ type, exercise_name: "", sets: [{ seconds: "" }] });
     }
   };
   const addSetToCurrentWorkout = () => {
-    if (!currentWorkout) return;
+    if (!currentExercise) return;
 
     let newSet: StrengthSet | CardioSet | StretchSet;
     let updatedStrengthSets: StrengthSet[];
     let updatedCardioSets: CardioSet[];
     let updatedStretchSets: StretchSet[];
 
-    switch (currentWorkout.type) {
+    switch (currentExercise.type) {
       case ExerciseType.Strength:
         newSet = { reps: "", weight: "" } as StrengthSet;
         updatedStrengthSets = [
-          ...(currentWorkout.sets as StrengthSet[]),
+          ...(currentExercise.sets as StrengthSet[]),
           newSet,
         ];
-        setCurrentWorkout({
-          ...currentWorkout,
+        setCurrentExercise({
+          ...currentExercise,
           sets: updatedStrengthSets,
         });
         break;
       case ExerciseType.Cardio:
         newSet = { distance: "" } as CardioSet;
-        updatedCardioSets = [...(currentWorkout.sets as CardioSet[]), newSet];
-        setCurrentWorkout({
-          ...currentWorkout,
+        updatedCardioSets = [...(currentExercise.sets as CardioSet[]), newSet];
+        setCurrentExercise({
+          ...currentExercise,
           sets: updatedCardioSets,
         });
         break;
       case ExerciseType.Stretch:
         newSet = { seconds: "" } as StretchSet;
-        updatedStretchSets = [...(currentWorkout.sets as StretchSet[]), newSet];
-        setCurrentWorkout({
-          ...currentWorkout,
+        updatedStretchSets = [
+          ...(currentExercise.sets as StretchSet[]),
+          newSet,
+        ];
+        setCurrentExercise({
+          ...currentExercise,
           sets: updatedStretchSets,
         });
         break;
@@ -271,34 +280,34 @@ const AddWorkout = () => {
     }
   };
   function removeLastSetFromCurrentWorkout(): void {
-    if (!currentWorkout) {
+    if (!currentExercise) {
       return;
     }
 
-    const updatedSets = currentWorkout.sets
-      ? [...currentWorkout.sets]
+    const updatedSets = currentExercise.sets
+      ? [...currentExercise.sets]
       : ([] as WorkoutSetDataStructure[]);
 
     updatedSets.pop();
 
     let updatedWorkout: Exercise;
 
-    switch (currentWorkout.type) {
+    switch (currentExercise.type) {
       case ExerciseType.Strength:
         updatedWorkout = {
-          ...currentWorkout,
+          ...currentExercise,
           sets: updatedSets as StrengthSet[],
         } as Strength;
         break;
       case ExerciseType.Cardio:
         updatedWorkout = {
-          ...currentWorkout,
+          ...currentExercise,
           sets: updatedSets as CardioSet[],
         } as Cardio;
         break;
       case ExerciseType.Stretch:
         updatedWorkout = {
-          ...currentWorkout,
+          ...currentExercise,
           sets: updatedSets as StretchSet[],
         } as Stretch;
         break;
@@ -306,30 +315,30 @@ const AddWorkout = () => {
         throw new Error("Invalid workout type");
     }
 
-    setCurrentWorkout(updatedWorkout);
+    setCurrentExercise(updatedWorkout);
   }
 
   // Add Form Logic: Input OnChange Handlers & Form Submission
   const handleExerciseNameAddForm = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (!currentWorkout) {
+    if (!currentExercise) {
       return;
     }
     const setValue = e.target.value;
     console.log("new exercise name is: ", setValue);
-    setCurrentWorkout({ ...currentWorkout, exercise_name: setValue });
+    setCurrentExercise({ ...currentExercise, exercise_name: setValue });
   };
   const handleSetAddForm = (
     e: React.ChangeEvent<HTMLInputElement>,
     key: string,
     index: number
   ) => {
-    if (!currentWorkout) {
+    if (!currentExercise) {
       return;
     }
 
-    const updatedSets = currentWorkout.sets ? [...currentWorkout.sets] : [];
+    const updatedSets = currentExercise.sets ? [...currentExercise.sets] : [];
     const setValue = e.target.value;
 
     if (updatedSets[index]) {
@@ -338,22 +347,22 @@ const AddWorkout = () => {
 
     let updatedWorkout: Exercise;
 
-    switch (currentWorkout.type) {
+    switch (currentExercise.type) {
       case ExerciseType.Strength:
         updatedWorkout = {
-          ...currentWorkout,
+          ...currentExercise,
           sets: updatedSets as StrengthSet[],
         } as Strength;
         break;
       case ExerciseType.Cardio:
         updatedWorkout = {
-          ...currentWorkout,
+          ...currentExercise,
           sets: updatedSets as CardioSet[],
         } as Cardio;
         break;
       case ExerciseType.Stretch:
         updatedWorkout = {
-          ...currentWorkout,
+          ...currentExercise,
           sets: updatedSets as StretchSet[],
         } as Stretch;
         break;
@@ -361,7 +370,7 @@ const AddWorkout = () => {
         throw new Error("Invalid workout type");
     }
 
-    setCurrentWorkout(updatedWorkout);
+    setCurrentExercise(updatedWorkout);
   };
   const addExerciseToDaysWorkout = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -369,14 +378,14 @@ const AddWorkout = () => {
     event?.preventDefault();
 
     // Error Handling
-    if (!currentWorkout) {
+    if (!currentExercise) {
       console.log(
-        "addExerciseToDaysWorkout: currentWorkout is empty, returning"
+        "addExerciseToDaysWorkout: currentExercise is empty, returning"
       );
       return;
     }
 
-    if (!currentWorkout.exercise_name) {
+    if (!currentExercise.exercise_name) {
       console.log("addExerciseToDaysWorkout: exerciseName is empty, returning");
       return;
     }
@@ -388,7 +397,7 @@ const AddWorkout = () => {
       return;
     }
 
-    const isAnySetFieldEmpty = currentWorkout.sets.some((set) =>
+    const isAnySetFieldEmpty = currentExercise.sets.some((set) =>
       Object.values(set).some((value) => value === "")
     );
 
@@ -398,14 +407,17 @@ const AddWorkout = () => {
     }
 
     console.log("exerciseName is: ", exerciseName);
-    console.log("currentWorkout.sets.length is: ", currentWorkout.sets.length);
+    console.log(
+      "currentExercise.sets.length is: ",
+      currentExercise.sets.length
+    );
 
     // Add current workout to workouts in server
     axios
       .post(`${serverAPI}/workoutlogins`, {
         id: recordTodaysWorkout.id,
         date: recordTodaysWorkout.date,
-        workout: currentWorkout,
+        workout: currentExercise,
       })
       .then((response) => {
         console.log("response is: ", response.data);
@@ -415,8 +427,8 @@ const AddWorkout = () => {
       });
 
     // Update the recordWorkout state
-    setAllWorkouts([...allWorkouts, currentWorkout]);
-    setCurrentWorkout(null);
+    setAllExercises([...allExercise, currentExercise]);
+    setCurrentExercise(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
     toast.success("Workout added!", { duration: 3000 });
@@ -429,32 +441,30 @@ const AddWorkout = () => {
     index: number
   ) => {
     // console.log("updateWorkout workout! _e: ", _event);
-    // const updateWorkout = allWorkouts.find((workout, i) => i === index);
-    // let workouts = [...allWorkouts];
+    // const updateWorkout = allExercise.find((workout, i) => i === index);
+    // let workouts = [...allExercise];
     // workouts.map((workout, i) => {
     //   if (i === index) {
     //     workout.exercise_name = "Updated Exercise Name";
     //   }
     // });
-    // setAllWorkouts(workouts);
+    // setAllExercises(workouts);
+
+    const updatedWorkoutList = allExercise.map(
+      (currentExercise, workoutIdx) => {
+        if (workoutIdx === index) {
+          return {
+            ...currentExercise,
+            exercise_name: exerciseNameUpdateTable,
+          };
+        }
+        return currentExercise;
+      }
+    );
+    setAllExercises(updatedWorkoutList);
     setIsEditing(false);
     setEditingRowIndex(null);
     console.log("updateWorkout workout!: ", index);
-  };
-  const handleUpdateExerciseName = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const updatedWorkoutList = allWorkouts.map((currentWorkout, workoutIdx) => {
-      if (workoutIdx === index) {
-        return {
-          ...currentWorkout,
-          exercise_name: e.target.value,
-        };
-      }
-      return currentWorkout;
-    });
-    setAllWorkouts(updatedWorkoutList);
   };
   const handleUpdateExerciseSet = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -470,7 +480,7 @@ const AddWorkout = () => {
       sets.map((set, idx) =>
         idx === sIndex ? ({ ...set, [setAttribute]: value } as T) : set
       );
-    const updatedWorkouts = allWorkouts.map((workout, wIndex) => {
+    const updatedWorkouts = allExercise.map((workout, wIndex) => {
       if (wIndex === workoutIndex) {
         if (workout.type === "Strength" && "reps" in workout.sets[0]) {
           const updatedSets = updateSets(
@@ -499,12 +509,12 @@ const AddWorkout = () => {
       return workout;
     });
 
-    setAllWorkouts(updatedWorkouts as Exercise[]);
+    setAllExercises(updatedWorkouts as Exercise[]);
   };
   const handleDeleteExercise = (index: number) => {
-    const deletedWorkout = allWorkouts.find((workout, i) => i === index);
-    const updatedWorkouts = allWorkouts.filter((workout, i) => i !== index);
-    setAllWorkouts(updatedWorkouts);
+    const deletedWorkout = allExercise.find((workout, i) => i === index);
+    const updatedWorkouts = allExercise.filter((workout, i) => i !== index);
+    setAllExercises(updatedWorkouts);
     setIsEditing(false);
     setEditingRowIndex(null);
     console.log("delete workout!: ", index, deletedWorkout);
@@ -537,7 +547,7 @@ const AddWorkout = () => {
       });
   };
 
-  console.log("allWorkouts is: ", allWorkouts[0]);
+  console.log("allExercise is: ", allExercise[0]);
   return (
     <>
       <div>
@@ -587,7 +597,7 @@ const AddWorkout = () => {
                     placeholder="Exercise Name"
                     onChange={(e) => handleExerciseNameAddForm(e)}
                   />
-                  {currentWorkout?.sets.map((item, index) => (
+                  {currentExercise?.sets.map((item, index) => (
                     <div key={index}>
                       <h3>Set {index + 1}</h3>
                       {Object.keys(item).map((key) => (
@@ -671,7 +681,7 @@ const AddWorkout = () => {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {allWorkouts.map((workout, index) => (
+                  {allExercise.map((workout, index) => (
                     <Table.Row key={index}>
                       <Table.Cell>
                         {/* {new Date(recordWorkout.date).toDateString()} */}
@@ -689,7 +699,9 @@ const AddWorkout = () => {
                           <TextField.Input
                             disabled={editingRowIndex !== index}
                             value={workout.exercise_name}
-                            onChange={(e) => handleUpdateExerciseName(e, index)}
+                            onChange={(e) =>
+                              setExerciseNameUpdateTable(e.target.value)
+                            }
                           />
                         </div>
                         <div className="block md:hidden">
@@ -713,7 +725,7 @@ const AddWorkout = () => {
                                       onChange={(e) =>
                                         handleUpdateExerciseSet(
                                           e,
-                                          index, // Index of the workout in allWorkouts
+                                          index, // Index of the workout in allExercise
                                           setAttribute, // The attribute name of the set (e.g., 'reps', 'weight')
                                           setIndex // Index of the set in the workout's sets array
                                         )
@@ -731,18 +743,18 @@ const AddWorkout = () => {
                           disabled={editingRowIndex !== index}
                           value={workout.exercise_name}
                           onChange={(e) => {
-                            const updatedWorkoutList = allWorkouts.map(
-                              (currentWorkout, workoutIdx) => {
+                            const updatedWorkoutList = allExercise.map(
+                              (currentExercise, workoutIdx) => {
                                 if (workoutIdx === index) {
                                   return {
-                                    ...currentWorkout,
+                                    ...currentExercise,
                                     exercise_name: e.target.value,
                                   };
                                 }
-                                return currentWorkout;
+                                return currentExercise;
                               }
                             );
-                            setAllWorkouts(updatedWorkoutList);
+                            setAllExercises(updatedWorkoutList);
                           }}
                         />
                       </Table.Cell>
@@ -767,7 +779,7 @@ const AddWorkout = () => {
                                     onChange={(e) =>
                                       handleUpdateExerciseSet(
                                         e,
-                                        index, // Index of the workout in allWorkouts
+                                        index, // Index of the workout in allExercise
                                         setAttribute, // The attribute name of the set (e.g., 'reps', 'weight')
                                         setIndex // Index of the set in the workout's sets array
                                       )
