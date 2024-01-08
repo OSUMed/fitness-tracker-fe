@@ -579,6 +579,7 @@ const AddWorkout = () => {
                         UpdateWorkoutButton={UpdateWorkoutButton}
                         DeleteWorkoutButton={DeleteWorkoutButton}
                         setIsEditing={setIsEditing}
+                        recordTodaysWorkout={recordTodaysWorkout}
                       />
                     ) : (
                       <StaticWorkoutRow
@@ -754,6 +755,7 @@ const EditableWorkoutRow: React.FC<EditableWorkoutRowProps> = ({
   setIsEditing,
   handleUpdateExercise,
   handleDeleteExercise,
+  recordTodaysWorkout,
 }) => {
   return (
     <Table.Row key={index}>

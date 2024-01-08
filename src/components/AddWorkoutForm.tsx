@@ -37,40 +37,45 @@ export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
   return (
     <Flex direction="column" gap="2">
       <form onSubmit={addExerciseToDaysWorkout}>
-        <Select.Root
-          size="3"
-          value={selectedWorkoutType ?? ""}
-          onValueChange={(value) => {
-            handleSelectWorkoutType(value as ExerciseType);
-            axios.patch("Fake Error").catch(() => {
-              toast.error("Changes could not be saved", {
-                duration: 3000,
+        <Box className="space-y-3 mb-4">
+          <Select.Root
+            size="3"
+            value={selectedWorkoutType ?? ""}
+            onValueChange={(value) => {
+              handleSelectWorkoutType(value as ExerciseType);
+              axios.patch("Fake Error").catch(() => {
+                toast.error("Changes could not be saved", {
+                  duration: 3000,
+                });
               });
-            });
-          }}
-        >
-          <Select.Trigger placeholder="Pick A Workout Type" variant="surface" />
-          <Select.Content variant="solid" position="popper" sideOffset={2}>
-            <Select.Group>
-              <Select.Label>Workout Types</Select.Label>
-              {Object.values(ExerciseType).map((type) => (
-                <Select.Item
-                  key={type}
-                  value={type}
-                  className="focus:bg-yellow-400"
-                >
-                  {type}
-                </Select.Item>
-              ))}
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
+            }}
+          >
+            <Select.Trigger
+              placeholder="Pick A Workout Type"
+              variant="surface"
+            />
+            <Select.Content variant="solid" position="popper" sideOffset={2}>
+              <Select.Group>
+                <Select.Label>Workout Types</Select.Label>
+                {Object.values(ExerciseType).map((type) => (
+                  <Select.Item
+                    key={type}
+                    value={type}
+                    className="focus:bg-yellow-400"
+                  >
+                    {type}
+                  </Select.Item>
+                ))}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
 
-        <TextField.Input
-          placeholder="Exercise Name"
-          value={exerciseName}
-          onChange={(e) => handleExerciseNameAddForm(e)}
-        />
+          <TextField.Input
+            placeholder="Exercise Name"
+            value={exerciseName}
+            onChange={(e) => handleExerciseNameAddForm(e)}
+          />
+        </Box>
         {currentExercise?.sets.map((item, index) => (
           <div key={index}>
             <h3>Set {index + 1}</h3>
@@ -83,7 +88,6 @@ export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
             ))}
           </div>
         ))}
-
         <Button variant="solid" color="green" onClick={addSetToCurrentWorkout}>
           <PlusIcon aria-hidden="true" /> Add Set
         </Button>
@@ -101,8 +105,7 @@ export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
             type="submit"
             // onClick={addExerciseToDaysWorkout}
             size="4"
-            className="shadow-md items-center flex justify-center "
-            mx-6
+            className="shadow-md items-center flex justify-center"
           >
             {" "}
             <CheckIcon width="19" height="19" aria-hidden="true" />

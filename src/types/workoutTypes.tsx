@@ -81,6 +81,7 @@ export interface StaticWorkoutRowProps {
 export interface EditableWorkoutRowProps {
   workout: Exercise;
   index: number;
+  recordTodaysWorkout: TodaysWorkout;
   editableRowData: Exercise | null;
   editingRowIndex: number | null;
   handleUpdateExerciseName: (
