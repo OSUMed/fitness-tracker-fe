@@ -58,19 +58,8 @@ const defaultWorkouts: Workout[] = [
   },
 ];
 
-type StrengthSet = {
-  reps: string;
-  weight: string;
-};
-
-type CardioSet = {
-  distance: string;
-};
-
-type StretchSet = {
-  seconds: string;
-};
-
+type Exercise = Strength | Cardio | Stretch;
+type AllExercise = Exercise[];
 type Strength = {
   type: "Strength";
   exercise_name: string;
@@ -88,11 +77,32 @@ type Stretch = {
   exercise_name: string;
   sets: StretchSet[];
 };
+type StrengthSet = {
+  reps: string;
+  weight: string;
+};
 
-enum WorkoutType {
+type CardioSet = {
+  distance: string;
+};
+
+type StretchSet = {
+  seconds: string;
+};
+enum ExerciseType {
   Strength = "Strength",
   Cardio = "Cardio",
   Stretch = "Stretch",
+}
+type WorkoutSummary = {
+  id: string;
+  date: number;
+  summaryDetails: string;
+};
+interface TodaysWorkout {
+  id: string;
+  date: number;
+  workouts: AllExercise;
 }
 
 interface DeleteWorkoutButtonProps {
@@ -107,37 +117,26 @@ interface UpdateWorkoutButtonProps {
   setEditingRowIndex: Dispatch<SetStateAction<number | null>>;
 }
 
-type WorkoutSummary = {
-  id: string;
-  date: number;
-  summaryDetails: string;
-};
-
-type Workout = Strength | Cardio | Stretch;
-
-type AllWorkout = Workout[];
-
 interface WorkoutSetDataStructure {
   [key: string]: string;
 }
-interface workoutFinal {
-  id: string;
-  date: number;
-  workouts: Workout[];
-}
+
+const serverAPI = "http://localhost:8080/workouts";
 const AddWorkout = () => {
-  const [allWorkouts, setAllWorkouts] = useState<Workout[]>(defaultWorkouts);
+  const [allWorkouts, setAllWorkouts] = useState<Exercise[]>(defaultWorkouts);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
-  const [recordWorkout, setRecordWorkout] = useState<workoutFinal>({
-    id: uuidv4(),
-    date: Date.now(),
-    workouts: allWorkouts,
-  });
+  const [recordTodaysWorkout, setRecordTodaysWorkout] = useState<TodaysWorkout>(
+    {
+      id: uuidv4(),
+      date: Date.now(),
+      workouts: allWorkouts,
+    }
+  );
   const [selectedWorkoutType, setSelectedWorkoutType] =
-    useState<WorkoutType | null>(null);
-  const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
+    useState<ExerciseType | null>(null);
+  const [currentWorkout, setCurrentWorkout] = useState<Exercise | null>(null);
   const [exerciseName, setExerciseName] = useState<string>("");
 
   // State to hold the history of recorded workouts, summary of today's workout,
@@ -153,19 +152,19 @@ const AddWorkout = () => {
     setWorkoutTypeCounts,
   } = useContext<UserContextType>(UserContext as Context<UserContextType>);
 
-  const handleSelectWorkoutType = (type: WorkoutType) => {
+  const handleSelectWorkoutType = (type: ExerciseType) => {
     setSelectedWorkoutType(type);
 
     // Initialize a new workout when a type is selected
-    if (type === WorkoutType.Strength) {
+    if (type === ExerciseType.Strength) {
       setCurrentWorkout({
         type,
         exercise_name: "",
         sets: [{ reps: "", weight: "" }],
       });
-    } else if (type === WorkoutType.Cardio) {
+    } else if (type === ExerciseType.Cardio) {
       setCurrentWorkout({ type, exercise_name: "", sets: [{ distance: "" }] });
-    } else if (type === WorkoutType.Stretch) {
+    } else if (type === ExerciseType.Stretch) {
       setCurrentWorkout({ type, exercise_name: "", sets: [{ seconds: "" }] });
     }
   };
@@ -173,30 +172,30 @@ const AddWorkout = () => {
   const summarizeDayWorkout = (): WorkoutSummary => {
     // Types of workouts performed
     const workoutTypes = new Set(
-      recordWorkout.workouts.map((workout) => workout.type)
+      recordTodaysWorkout.workouts.map((workout) => workout.type)
     );
     const workoutTypesSummary = Array.from(workoutTypes).join(", ");
 
     // Exercise names
-    const exerciseNamesSummary = recordWorkout.workouts
+    const exerciseNamesSummary = recordTodaysWorkout.workouts
       .map((workout) => workout.exercise_name)
       .join(", ");
 
     // Total number of sets
-    const totalSets = recordWorkout.workouts.reduce(
+    const totalSets = recordTodaysWorkout.workouts.reduce(
       (total, workout) => total + workout.sets.length,
       0
     );
     updateWorkoutTypeCounts();
     return {
-      id: recordWorkout.id,
-      date: recordWorkout.date,
+      id: recordTodaysWorkout.id,
+      date: recordTodaysWorkout.date,
       summaryDetails: `${workoutTypesSummary} | ${exerciseNamesSummary} | ${totalSets} Sets`,
     };
   };
   const updateWorkoutTypeCounts = () => {
     const newCounts = { ...workoutTypeCounts };
-    const newRecordWorkout = [...recordWorkout.workouts];
+    const newRecordWorkout = [...recordTodaysWorkout.workouts];
     newRecordWorkout.forEach((workout) => {
       newCounts[workout.type] += 1;
     });
@@ -212,7 +211,7 @@ const AddWorkout = () => {
     let updatedStretchSets: StretchSet[];
 
     switch (currentWorkout.type) {
-      case WorkoutType.Strength:
+      case ExerciseType.Strength:
         newSet = { reps: "", weight: "" } as StrengthSet;
         updatedStrengthSets = [
           ...(currentWorkout.sets as StrengthSet[]),
@@ -223,7 +222,7 @@ const AddWorkout = () => {
           sets: updatedStrengthSets,
         });
         break;
-      case WorkoutType.Cardio:
+      case ExerciseType.Cardio:
         newSet = { distance: "" } as CardioSet;
         updatedCardioSets = [...(currentWorkout.sets as CardioSet[]), newSet];
         setCurrentWorkout({
@@ -231,7 +230,7 @@ const AddWorkout = () => {
           sets: updatedCardioSets,
         });
         break;
-      case WorkoutType.Stretch:
+      case ExerciseType.Stretch:
         newSet = { seconds: "" } as StretchSet;
         updatedStretchSets = [...(currentWorkout.sets as StretchSet[]), newSet];
         setCurrentWorkout({
@@ -262,22 +261,22 @@ const AddWorkout = () => {
       (updatedSets[index] as WorkoutSetDataStructure)[key] = setValue;
     }
 
-    let updatedWorkout: Workout;
+    let updatedWorkout: Exercise;
 
     switch (currentWorkout.type) {
-      case WorkoutType.Strength:
+      case ExerciseType.Strength:
         updatedWorkout = {
           ...currentWorkout,
           sets: updatedSets as StrengthSet[],
         } as Strength;
         break;
-      case WorkoutType.Cardio:
+      case ExerciseType.Cardio:
         updatedWorkout = {
           ...currentWorkout,
           sets: updatedSets as CardioSet[],
         } as Cardio;
         break;
-      case WorkoutType.Stretch:
+      case ExerciseType.Stretch:
         updatedWorkout = {
           ...currentWorkout,
           sets: updatedSets as StretchSet[],
@@ -298,7 +297,10 @@ const AddWorkout = () => {
     setCurrentWorkout({ ...currentWorkout, exercise_name: setValue });
   };
 
-  const addWorkoutToAllWorkouts = () => {
+  const addWorkoutToAllWorkouts = (event) => {
+    event?.preventDefault();
+
+    // Error Handling
     if (!currentWorkout) {
       console.log(
         "addWorkoutToAllWorkouts: currentWorkout is empty, returning"
@@ -330,6 +332,21 @@ const AddWorkout = () => {
     console.log("exerciseName is: ", exerciseName);
     console.log("currentWorkout.sets.length is: ", currentWorkout.sets.length);
 
+    // Add current workout to workouts in server
+    axios
+      .post(`${serverAPI}/workoutlogins`, {
+        id: recordTodaysWorkout.id,
+        date: recordTodaysWorkout.date,
+        workout: currentWorkout,
+      })
+      .then((response) => {
+        console.log("response is: ", response.data);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+
+    // Update the recordWorkout state
     setAllWorkouts([...allWorkouts, currentWorkout]);
     setCurrentWorkout(null);
     setSelectedWorkoutType(null);
@@ -339,12 +356,15 @@ const AddWorkout = () => {
 
   const finishCurrentWorkout = () => {
     const daySummary = summarizeDayWorkout();
-    setHistoryRecordedWorkouts([...historyRecordedWorkouts, recordWorkout]);
+    setHistoryRecordedWorkouts([
+      ...historyRecordedWorkouts,
+      recordTodaysWorkout,
+    ]);
     setSummaryRecordedWorkouts(daySummary);
     setAllSummaryRecordedWorkouts([...allSummaryRecordedWorkouts, daySummary]);
     console.log("daySummary is: ", daySummary);
     console.log("allSummaryRecordedWorkouts is: ", allSummaryRecordedWorkouts);
-    setRecordWorkout({
+    setRecordTodaysWorkout({
       id: uuidv4(),
       date: Date.now(),
       workouts: [],
@@ -367,22 +387,22 @@ const AddWorkout = () => {
 
     updatedSets.pop();
 
-    let updatedWorkout: Workout;
+    let updatedWorkout: Exercise;
 
     switch (currentWorkout.type) {
-      case WorkoutType.Strength:
+      case ExerciseType.Strength:
         updatedWorkout = {
           ...currentWorkout,
           sets: updatedSets as StrengthSet[],
         } as Strength;
         break;
-      case WorkoutType.Cardio:
+      case ExerciseType.Cardio:
         updatedWorkout = {
           ...currentWorkout,
           sets: updatedSets as CardioSet[],
         } as Cardio;
         break;
-      case WorkoutType.Stretch:
+      case ExerciseType.Stretch:
         updatedWorkout = {
           ...currentWorkout,
           sets: updatedSets as StretchSet[],
@@ -465,8 +485,35 @@ const AddWorkout = () => {
       return workout;
     });
 
-    setAllWorkouts(updatedWorkouts as Workout[]);
+    setAllWorkouts(updatedWorkouts as Exercise[]);
   }
+
+  /////////////////////////
+
+  const testEndpoint = () => {
+    console.log("testEndpoint");
+    axios
+      .get(`${serverAPI}/workoutlogins`)
+      .then((response) => {
+        console.log("response is workoutlogin: ", response.data);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+  };
+  const testPOSTEndpoint = () => {
+    console.log("testEndpoint");
+    axios
+      .post(`${serverAPI}/workoutlogins`, {
+        email: "sri@gmail.com",
+      })
+      .then((response) => {
+        console.log("response is workoutlogin: ", response.data);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+  };
 
   return (
     <>
@@ -476,91 +523,96 @@ const AddWorkout = () => {
             <Box className="space-y-4">
               {" "}
               <Flex direction="column" gap="2">
-                <Select.Root
-                  size="3"
-                  value={selectedWorkoutType ?? ""}
-                  onValueChange={(value) => {
-                    handleSelectWorkoutType(value as WorkoutType);
-                    axios.patch("Fake Error").catch(() => {
-                      toast.error("Changes could not be saved", {
-                        duration: 3000,
+                <form onSubmit={addWorkoutToAllWorkouts}>
+                  <Select.Root
+                    size="3"
+                    value={selectedWorkoutType ?? ""}
+                    onValueChange={(value) => {
+                      handleSelectWorkoutType(value as ExerciseType);
+                      axios.patch("Fake Error").catch(() => {
+                        toast.error("Changes could not be saved", {
+                          duration: 3000,
+                        });
                       });
-                    });
-                  }}
-                >
-                  <Select.Trigger
-                    placeholder="Pick A Workout Type"
-                    variant="surface"
-                  />
-                  <Select.Content
-                    variant="solid"
-                    position="popper"
-                    sideOffset={2}
+                    }}
                   >
-                    <Select.Group>
-                      <Select.Label>Workout Types</Select.Label>
-                      {Object.values(WorkoutType).map((type) => (
-                        <Select.Item
-                          key={type}
-                          value={type}
-                          className="focus:bg-yellow-400"
-                        >
-                          {type}
-                        </Select.Item>
+                    <Select.Trigger
+                      placeholder="Pick A Workout Type"
+                      variant="surface"
+                    />
+                    <Select.Content
+                      variant="solid"
+                      position="popper"
+                      sideOffset={2}
+                    >
+                      <Select.Group>
+                        <Select.Label>Workout Types</Select.Label>
+                        {Object.values(ExerciseType).map((type) => (
+                          <Select.Item
+                            key={type}
+                            value={type}
+                            className="focus:bg-yellow-400"
+                          >
+                            {type}
+                          </Select.Item>
+                        ))}
+                      </Select.Group>
+                    </Select.Content>
+                  </Select.Root>
+
+                  <TextField.Input
+                    placeholder="Exercise Name"
+                    onChange={(e) => handleAddExerciseName(e)}
+                  />
+                  {currentWorkout?.sets.map((item, index) => (
+                    <div key={index}>
+                      <h3>Set {index + 1}</h3>
+                      {Object.keys(item).map((key) => (
+                        <TextField.Input
+                          key={key}
+                          placeholder={`${key}`}
+                          onChange={(e) => handleAddWorkout(e, key, index)}
+                        />
                       ))}
-                    </Select.Group>
-                  </Select.Content>
-                </Select.Root>
+                    </div>
+                  ))}
 
-                <TextField.Input
-                  placeholder="Exercise Name"
-                  onChange={(e) => handleAddExerciseName(e)}
-                />
-                {currentWorkout?.sets.map((item, index) => (
-                  <div key={index}>
-                    <h3>Set {index + 1}</h3>
-                    {Object.keys(item).map((key) => (
-                      <TextField.Input
-                        key={key}
-                        placeholder={`${key}`}
-                        onChange={(e) => handleAddWorkout(e, key, index)}
-                      />
-                    ))}
-                  </div>
-                ))}
-
-                <Button
-                  variant="solid"
-                  color="green"
-                  onClick={addSetToCurrentWorkout}
-                >
-                  <PlusIcon aria-hidden="true" /> Add Set
-                </Button>
-                <Button
-                  variant="soft"
-                  color="orange"
-                  onClick={deleteLastWorkoutSet}
-                >
-                  <MinusIcon aria-hidden="true" /> Delete Last Set
-                </Button>
-                <Box className="mt-3 ">
                   <Button
                     variant="solid"
-                    color="teal"
-                    onClick={addWorkoutToAllWorkouts}
-                    size="4"
-                    className="shadow-md items-center flex justify-center "
-                    mx-6
+                    color="green"
+                    onClick={addSetToCurrentWorkout}
                   >
-                    {" "}
-                    <CheckIcon width="19" height="19" aria-hidden="true" />
-                    <Text className="font-medium">Finish Exercise</Text>
+                    <PlusIcon aria-hidden="true" /> Add Set
                   </Button>
-                </Box>
+                  <Button
+                    variant="soft"
+                    color="orange"
+                    onClick={deleteLastWorkoutSet}
+                  >
+                    <MinusIcon aria-hidden="true" /> Delete Last Set
+                  </Button>
+                  <Box className="mt-3 ">
+                    <Button
+                      variant="solid"
+                      color="teal"
+                      type="submit"
+                      // onClick={addWorkoutToAllWorkouts}
+                      size="4"
+                      className="shadow-md items-center flex justify-center "
+                      mx-6
+                    >
+                      {" "}
+                      <CheckIcon width="19" height="19" aria-hidden="true" />
+                      <Text className="font-medium">Finish Exercise</Text>
+                    </Button>
+                  </Box>
+                </form>
               </Flex>
             </Box>
 
             <Box className="space-y-4 flex flex-col justify-end">
+              <Button onClick={testEndpoint}>Test Endpoint</Button>
+              <Button onClick={testPOSTEndpoint}>Test POST Endpoint</Button>
               <Button
                 className="mt-6 text-lg py-4 px-8"
                 size="2"
@@ -570,6 +622,7 @@ const AddWorkout = () => {
               >
                 Finish Workout
               </Button>
+
               <Table.Root variant="surface">
                 <Table.Header>
                   <Table.Row>
@@ -600,11 +653,11 @@ const AddWorkout = () => {
                       <Table.Cell>
                         {/* {new Date(recordWorkout.date).toDateString()} */}
                         <span className="hidden sm:block">
-                          {new Date(recordWorkout.date).toDateString()}
+                          {new Date(recordTodaysWorkout.date).toDateString()}
                         </span>
 
                         <span className="block sm:hidden">
-                          {format(recordWorkout.date, "MM/dd/yyyy")}
+                          {format(recordTodaysWorkout.date, "MM/dd/yyyy")}
                         </span>
                       </Table.Cell>
                       <Table.Cell>
