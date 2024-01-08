@@ -69,7 +69,7 @@ export interface UpdateWorkoutButtonProps {
 export interface WorkoutSetDataStructure {
   [key: string]: string;
 }
-export interface StaticWorkoutRowProps {
+export interface StaticExerciseRowProps {
   key: React.Key;
   workout: Exercise;
   index: number;
@@ -78,7 +78,7 @@ export interface StaticWorkoutRowProps {
   startRowEditProcess: (index: number) => void;
   handleDeleteExercise: (index: number) => void;
 }
-export interface EditableWorkoutRowProps {
+export interface EditableExerciseRowProps {
   workout: Exercise;
   index: number;
   recordTodaysWorkout: TodaysWorkout;

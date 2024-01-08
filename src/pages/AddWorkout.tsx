@@ -15,7 +15,7 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
 import { UserContextType } from "../context/UserContext";
-import { AddWorkoutForm } from "../components/AddWorkoutForm";
+import { AddExerciseForm, AddWorkoutForm } from "../components/AddExerciseForm";
 import {
   Cardio,
   CardioSet,
@@ -30,8 +30,8 @@ import {
   WorkoutSummary,
   UpdateWorkoutButtonProps,
   WorkoutSetDataStructure,
-  StaticWorkoutRowProps,
-  EditableWorkoutRowProps,
+  StaticExerciseRowProps,
+  EditableExerciseRowProps,
   EditWorkoutButtonProps,
   WorkoutSummaryMobileViewProps,
 } from "../types/workoutTypes";
@@ -523,7 +523,7 @@ const AddWorkout = () => {
         <Box className="w-full flex justify-center items-center px-4">
           <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
             <Box className="space-y-4">
-              <AddWorkoutForm
+              <AddExerciseForm
                 handleSetAddForm={handleSetAddForm}
                 addSetToCurrentWorkout={addSetToCurrentWorkout}
                 removeLastSetFromCurrentWorkout={
@@ -557,7 +557,7 @@ const AddWorkout = () => {
                 <Table.Body>
                   {allExercises.map((workout, index) =>
                     editingRowIndex === index ? (
-                      <EditableWorkoutRow
+                      <EditableExerciseRow
                         workout={workout}
                         index={index}
                         editableRowData={editableRowData || null}
@@ -574,7 +574,7 @@ const AddWorkout = () => {
                         handleDeleteExercise={handleDeleteExercise}
                       />
                     ) : (
-                      <StaticWorkoutRow
+                      <StaticExerciseRow
                         key={index}
                         workout={workout}
                         index={index}
@@ -633,7 +633,7 @@ const TableHeaderContent: React.FC = () => {
     </Table.Row>
   );
 };
-const StaticWorkoutRow: React.FC<StaticWorkoutRowProps> = ({
+const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
   workout,
   index,
   recordTodaysWorkout,
@@ -733,7 +733,7 @@ const StaticWorkoutRow: React.FC<StaticWorkoutRowProps> = ({
     </Table.Row>
   );
 };
-const EditableWorkoutRow: React.FC<EditableWorkoutRowProps> = ({
+const EditableExerciseRow: React.FC<EditableExerciseRowProps> = ({
   workout,
   index,
   editableRowData,

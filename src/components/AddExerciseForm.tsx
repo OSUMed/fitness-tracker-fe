@@ -5,7 +5,7 @@ import axios from "axios";
 import { CheckIcon, MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import toast from "react-hot-toast";
 
-type AddWorkoutFormProps = {
+type AddExerciseFormProps = {
   exerciseName: string;
   setExerciseName: React.Dispatch<React.SetStateAction<string>>;
   handleSetAddForm: (
@@ -22,7 +22,7 @@ type AddWorkoutFormProps = {
   handleExerciseNameAddForm: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
+export const AddExerciseForm: React.FC<AddExerciseFormProps> = ({
   handleSetAddForm,
   addSetToCurrentWorkout,
   removeLastSetFromCurrentWorkout,
@@ -32,7 +32,6 @@ export const AddWorkoutForm: React.FC<AddWorkoutFormProps> = ({
   handleSelectWorkoutType,
   handleExerciseNameAddForm,
   exerciseName,
-  setExerciseName,
 }) => {
   return (
     <Flex direction="column" gap="2">
