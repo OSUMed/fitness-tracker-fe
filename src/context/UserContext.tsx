@@ -15,7 +15,9 @@ interface PrivateResponse {
 // Define the shape of the context
 export interface UserContextType {
   username: string | null;
+  userId: string | null;
   setUsername: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserId: React.Dispatch<React.SetStateAction<string | null>>;
   historyRecordedWorkouts: workoutFinal[];
   setHistoryRecordedWorkouts: React.Dispatch<
     React.SetStateAction<workoutFinal[]>
@@ -56,6 +58,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
   children,
 }) => {
   const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [historyRecordedWorkouts, setHistoryRecordedWorkouts] = useState<
     workoutFinal[]
   >([]);
@@ -83,20 +86,25 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
           },
         })
         .then((response) => {
-          console.log("response.data is: ", response.data);
-          setUsername(response.data);
+          const { username, userId } = response.data;
+          console.log("account GET response.data is: ", response.data);
+          console.log("account GET response.data is2: ", username, userId);
+          setUsername(username);
+          setUserId(userId);
         })
         .catch((error) => {
           console.error("Error fetching user info:", error);
         });
     }
   }, []);
-
+  console.log("Username and id are: ", username, userId);
   return (
     <UserContext.Provider
       value={{
         username,
         setUsername,
+        setUserId,
+        userId,
         historyRecordedWorkouts,
         setHistoryRecordedWorkouts,
         allSummaryRecordedWorkouts,

@@ -23,6 +23,7 @@
     "classnames": "2.3.2",
     "date-fns": "^3.0.6",
     "js-gym": "^1.0.5",
+    "keen-slider": "^6.8.6",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",

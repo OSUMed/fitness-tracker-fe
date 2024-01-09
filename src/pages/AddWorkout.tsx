@@ -15,7 +15,7 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
 import { UserContextType } from "../context/UserContext";
-import { AddExerciseForm, AddWorkoutForm } from "../components/AddExerciseForm";
+import { AddExerciseForm } from "../components/AddExerciseForm";
 import {
   Cardio,
   CardioSet,
@@ -67,6 +67,7 @@ const AddWorkout = () => {
 
   // useContext Variables:
   const {
+    userId,
     historyRecordedWorkouts,
     setHistoryRecordedWorkouts,
     allSummaryRecordedWorkouts,
@@ -134,7 +135,7 @@ const AddWorkout = () => {
     setWorkoutTypeCounts(newCounts);
   };
 
-  // Form Configurations: Select type, add sets, remove sets
+  // Form Configurations: Select type, sets, remove sets
   const handleSelectWorkoutType = (type: ExerciseType) => {
     setSelectedWorkoutType(type);
 
@@ -328,13 +329,17 @@ const AddWorkout = () => {
       currentExercise.sets.length
     );
 
+    const postData = {
+      userId: userId,
+      id: recordTodaysWorkout.id,
+      date: recordTodaysWorkout.date,
+      exerciseData: currentExercise,
+    };
+    console.log("Post data is: ", postData);
+
     // Add current workout to workouts in server
     axios
-      .post(`${serverAPI}/workoutlogins`, {
-        id: recordTodaysWorkout.id,
-        date: recordTodaysWorkout.date,
-        workout: currentExercise,
-      })
+      .post(`${serverAPI}/workoutlogins`, postData)
       .then((response) => {
         console.log("response is: ", response.data);
       })
