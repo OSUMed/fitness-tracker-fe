@@ -87,15 +87,22 @@ export const AddExerciseForm: React.FC<AddExerciseFormProps> = ({
             ))}
           </div>
         ))}
-        <Button variant="solid" color="green" onClick={addSetToCurrentWorkout}>
+        <Button
+          type="button"
+          variant="solid"
+          color="green"
+          onClick={addSetToCurrentWorkout}
+        >
           <PlusIcon aria-hidden="true" /> Add Set
         </Button>
         <Button
+          type="button"
           variant="soft"
           color="orange"
           onClick={removeLastSetFromCurrentWorkout}
         >
-          <MinusIcon aria-hidden="true" /> Delete Last Set
+          <MinusIcon aria-hidden="true" />
+          Delete Last Set
         </Button>
         <Box className="mt-3 ">
           <Button
