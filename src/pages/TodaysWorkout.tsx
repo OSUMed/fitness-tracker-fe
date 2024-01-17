@@ -38,7 +38,7 @@ import {
 import { defaultWorkouts } from "../util/defaultWorkouts";
 
 const serverAPI = "http://localhost:8080/workouts";
-const AddWorkout = () => {
+const TodaysWorkoutComponent = () => {
   // Form Variables:
   const [exerciseName, setExerciseName] = useState<string>("");
   const [selectedWorkoutType, setSelectedWorkoutType] =
@@ -53,14 +53,14 @@ const AddWorkout = () => {
   const [exerciseNameUpdateTable] = useState<string>("");
 
   // Summary and All History Variables:
-  const [allExercises, setAllExercises] = useState<Exercise[]>(defaultWorkouts);
+  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   // const [allExercisesTemp, setAllExercisesTemp] =
   //   useState<Exercise[]>(defaultWorkouts);
   const [editableRowData, setEditableRowData] = useState<Exercise>();
   const [recordTodaysWorkout, setRecordTodaysWorkout] = useState<TodaysWorkout>(
     {
       id: uuidv4(),
-      date: Date.now(),
+      date: new Date().toISOString(),
       workouts: allExercises,
     }
   );
@@ -68,6 +68,7 @@ const AddWorkout = () => {
   // useContext Variables:
   const {
     userId,
+    username,
     historyRecordedWorkouts,
     setHistoryRecordedWorkouts,
     allSummaryRecordedWorkouts,
@@ -91,7 +92,7 @@ const AddWorkout = () => {
     console.log("allSummaryRecordedWorkouts is: ", allSummaryRecordedWorkouts);
     setRecordTodaysWorkout({
       id: uuidv4(),
-      date: Date.now(),
+      date: new Date().toISOString(),
       workouts: [],
     });
     setAllExercises([]);
@@ -109,7 +110,7 @@ const AddWorkout = () => {
 
     // Exercise names
     const exerciseNamesSummary = recordTodaysWorkout.workouts
-      .map((workout) => workout.exercise_name)
+      .map((workout) => workout.exerciseName)
       .join(", ");
 
     // Total number of sets
@@ -143,13 +144,13 @@ const AddWorkout = () => {
     if (type === ExerciseType.Strength) {
       setCurrentExercise({
         type,
-        exercise_name: "",
+        exerciseName: "",
         sets: [{ reps: "", weight: "" }],
       });
     } else if (type === ExerciseType.Cardio) {
-      setCurrentExercise({ type, exercise_name: "", sets: [{ distance: "" }] });
+      setCurrentExercise({ type, exerciseName: "", sets: [{ distance: "" }] });
     } else if (type === ExerciseType.Stretch) {
-      setCurrentExercise({ type, exercise_name: "", sets: [{ seconds: "" }] });
+      setCurrentExercise({ type, exerciseName: "", sets: [{ seconds: "" }] });
     }
   };
   const addSetToCurrentWorkout = () => {
@@ -243,7 +244,7 @@ const AddWorkout = () => {
     }
     const setValue = e.target.value;
     setExerciseName(setValue);
-    setCurrentExercise({ ...currentExercise, exercise_name: setValue });
+    setCurrentExercise({ ...currentExercise, exerciseName: setValue });
   };
   const handleSetAddForm = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -296,19 +297,21 @@ const AddWorkout = () => {
 
     // Error Handling
     if (!currentExercise) {
-      console.log(
+      console.error(
         "addExerciseToDaysWorkout: currentExercise is empty, returning"
       );
       return;
     }
 
-    if (!currentExercise.exercise_name) {
-      console.log("addExerciseToDaysWorkout: exerciseName is empty, returning");
+    if (!currentExercise.exerciseName) {
+      console.error(
+        "addExerciseToDaysWorkout: exerciseName is empty, returning"
+      );
       return;
     }
 
     if (!selectedWorkoutType) {
-      console.log(
+      console.error(
         "addExerciseToDaysWorkout: selectedWorkoutType is empty, returning"
       );
       return;
@@ -319,7 +322,7 @@ const AddWorkout = () => {
     );
 
     if (isAnySetFieldEmpty) {
-      console.log("addExerciseToDaysWorkout: sets is empty, returning");
+      console.error("addExerciseToDaysWorkout: sets is empty, returning");
       return;
     }
 
@@ -341,14 +344,27 @@ const AddWorkout = () => {
     axios
       .post(`${serverAPI}/workoutlogins`, postData)
       .then((response) => {
-        console.log("response is: ", response.data);
+        const { exercises } = response.data;
+        const filteredServerData = exercises.map((exercise) => {
+          const { exerciseName, type, sets } = exercise;
+          const filteredSets = sets.map(({ id, ...rest }) => rest);
+
+          return {
+            exerciseName,
+            type,
+            sets: filteredSets,
+          };
+        });
+        console.log("POST workoutlogins response is: ", response.data);
+        console.log("serverFilteredData: ", filteredServerData);
+        setAllExercises(filteredServerData);
       })
       .catch((error) => {
         console.log("error is: ", error);
       });
 
     // Update the recordWorkout state
-    setAllExercises([...allExercises, currentExercise]);
+    // setAllExercises([...allExercises, currentExercise]);
     setCurrentExercise(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
@@ -371,7 +387,7 @@ const AddWorkout = () => {
     // let workouts = [...allExercises];
     // workouts.map((workout, i) => {
     //   if (i === index) {
-    //     workout.exercise_name = "Updated Exercise Name";
+    //     workout.exerciseName = "Updated Exercise Name";
     //   }
     // });
     // setAllExercises(workouts);
@@ -395,7 +411,7 @@ const AddWorkout = () => {
       }
       return {
         ...prevData,
-        exercise_name: e.target.value,
+        exerciseName: e.target.value,
       };
     });
   };
@@ -404,7 +420,7 @@ const AddWorkout = () => {
     setAttribute: string,
     setIndex: number
   ) => {
-    console.log("params are: ", e, setAttribute, setIndex);
+    // console.log("params are: ", e, setAttribute, setIndex);
     if (editableRowData) {
       const updatedSets = [...editableRowData.sets];
 
@@ -522,6 +538,7 @@ const AddWorkout = () => {
 
   console.log("allExercises is: ", allExercises[0]);
 
+  console.log("TOdays Workout Username and id are: ", username, userId);
   return (
     <>
       <Box>
@@ -654,7 +671,7 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
         </span>
 
         <span className="block sm:hidden">
-          {format(recordTodaysWorkout.date, "MM/dd/yyyy")}
+          {format(new Date(recordTodaysWorkout.date), "MM/dd/yyyy")}
         </span>
       </Table.Cell>
       <Table.Cell>
@@ -662,7 +679,7 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
         <Box className="block md:hidden mt-2">
           <TextField.Input
             disabled={editingRowIndex !== index}
-            value={workout.exercise_name}
+            value={workout.exerciseName}
           />
         </Box>
         <Box className="block md:hidden">
@@ -694,7 +711,7 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
       <Table.Cell className="hidden md:table-cell">
         <TextField.Input
           disabled={editingRowIndex !== index}
-          value={workout.exercise_name}
+          value={workout.exerciseName}
         />
       </Table.Cell>
       <Table.Cell className="hidden md:table-cell">
@@ -778,7 +795,7 @@ const EditableExerciseRow: React.FC<EditableExerciseRowProps> = ({
       <Table.Cell className="hidden md:table-cell">
         <TextField.Input
           disabled={editingRowIndex !== index}
-          value={editableRowData?.exercise_name}
+          value={editableRowData?.exerciseName}
           onChange={(e) => handleUpdateExerciseName(e)}
         />
       </Table.Cell>
@@ -848,7 +865,7 @@ const WorkoutSummaryMobileView: React.FC<WorkoutSummaryMobileViewProps> = ({
       <Box className="block md:hidden mt-2">
         <TextField.Input
           disabled={editingRowIndex !== index}
-          value={editableRowData?.exercise_name}
+          value={editableRowData?.exerciseName}
           onChange={(e) => handleUpdateExerciseName(e)}
         />
       </Box>
@@ -994,4 +1011,4 @@ const DeleteWorkoutButton: React.FC<DeleteWorkoutButtonProps> = ({
   );
 };
 
-export default AddWorkout;
+export default TodaysWorkoutComponent;
