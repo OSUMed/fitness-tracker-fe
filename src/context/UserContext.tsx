@@ -96,7 +96,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
           console.error("Error fetching user info:", error);
         });
     }
-  }, []);
+  }, [username]);
   console.log("Username and id are: ", username, userId);
   return (
     <UserContext.Provider
