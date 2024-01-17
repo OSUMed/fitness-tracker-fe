@@ -1,4 +1,4 @@
-import React, { Context, useContext, useState } from "react";
+import React, { Context, useContext, useState, useEffect } from "react";
 import {
   Flex,
   TextField,
@@ -37,6 +37,7 @@ import {
 } from "../types/workoutTypes";
 import { defaultWorkouts } from "../util/defaultWorkouts";
 
+const JWT_TOKEN = localStorage.getItem("accessToken");
 const serverAPI = "http://localhost:8080/workouts";
 const TodaysWorkoutComponent = () => {
   // Form Variables:
@@ -77,6 +78,41 @@ const TodaysWorkoutComponent = () => {
     workoutTypeCounts,
     setWorkoutTypeCounts,
   } = useContext<UserContextType>(UserContext as Context<UserContextType>);
+
+  const callGetTodaysWorkout = () => {
+    axios
+      .get(`${serverAPI}/workoutlogins`, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${JWT_TOKEN}`,
+        },
+      })
+      .then((response) => {
+        const { exercises } = response.data;
+        if (exercises.length === 0) {
+          setAllExercises([]);
+          return;
+        }
+        const filteredServerData = exercises.map((exercise) => {
+          const { exerciseName, type, sets } = exercise;
+          const filteredSets = sets.map(({ id, ...rest }) => rest);
+
+          return {
+            exerciseName,
+            type,
+            sets: filteredSets,
+          };
+        });
+        setAllExercises(filteredServerData);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+  };
+
+  useEffect(() => {
+    callGetTodaysWorkout();
+  }, []);
 
   // Finish Today Workout & Save to History
   const finishTodaysWorkout = () => {
