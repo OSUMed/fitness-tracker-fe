@@ -9,26 +9,26 @@ export enum ExerciseType {
   Stretch = "Stretch",
 }
 export interface EditableRowData {
-  exercise_name: string;
+  exerciseName: string;
   type: ExerciseType;
   sets: ExerciseSet[];
 }
 
 export type Strength = {
   type: "Strength";
-  exercise_name: string;
+  exerciseName: string;
   sets: StrengthSet[];
 };
 
 export type Cardio = {
   type: "Cardio";
-  exercise_name: string;
+  exerciseName: string;
   sets: CardioSet[];
 };
 
 export type Stretch = {
   type: "Stretch";
-  exercise_name: string;
+  exerciseName: string;
   sets: StretchSet[];
 };
 export type StrengthSet = {
@@ -46,12 +46,12 @@ export type StretchSet = {
 
 export type WorkoutSummary = {
   id: string;
-  date: number;
+  date: string;
   summaryDetails: string;
 };
 export interface TodaysWorkout {
   id: string;
-  date: number;
+  date: string;
   workouts: AllExercise;
 }
 
