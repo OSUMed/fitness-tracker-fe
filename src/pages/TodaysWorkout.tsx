@@ -432,7 +432,7 @@ const TodaysWorkoutComponent = () => {
     setEditableRowData({ ...allExercises[index] });
   };
 
-  const handleUpdateExercise = (index: number) => {
+  const handleUpdateExercise = (exerciseId: number) => {
     // console.log("updateWorkout workout! _e: ", _event);
     // const updateWorkout = allExercises.find((workout, i) => i === index);
     // let workouts = [...allExercises];
@@ -442,15 +442,30 @@ const TodaysWorkoutComponent = () => {
     //   }
     // });
     // setAllExercises(workouts);
+
     const updateData = {
       userId: userId,
       id: recordTodaysWorkout.id,
       date: recordTodaysWorkout.date,
       exerciseData: editableRowData,
     };
-
+    setEditableRowData((prevData: Exercise | undefined) => {
+      if (!prevData) {
+        return prevData;
+      }
+      return {
+        ...prevData,
+        exerciseId: exerciseId,
+      };
+    });
+    console.log("updateData being sent to server is: ", updateData);
     axios
-      .put(`${serverAPI}/workoutlogins`, updateData)
+      .put(`${serverAPI}/workoutlogins/${exerciseId}`, updateData, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${JWT_TOKEN}`,
+        },
+      })
       .then((response) => {
         const { exercises } = response.data;
         const filteredServerData = exercises.map((exercise) => {
@@ -482,7 +497,6 @@ const TodaysWorkoutComponent = () => {
     // setAllExercises(updatedExercises);
     setEditingRowIndex(null);
     setIsEditing(false);
-    console.log("updateWorkout workout!: ", index);
   };
   const handleUpdateExerciseName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditableRowData((prevData: Exercise | undefined) => {
