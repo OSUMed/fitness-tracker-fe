@@ -15,18 +15,21 @@ export interface EditableRowData {
 }
 
 export type Strength = {
+  exerciseId: number;
   type: "Strength";
   exerciseName: string;
   sets: StrengthSet[];
 };
 
 export type Cardio = {
+  exerciseId: number;
   type: "Cardio";
   exerciseName: string;
   sets: CardioSet[];
 };
 
 export type Stretch = {
+  exerciseId: number;
   type: "Stretch";
   exerciseName: string;
   sets: StretchSet[];
