@@ -442,15 +442,44 @@ const TodaysWorkoutComponent = () => {
     //   }
     // });
     // setAllExercises(workouts);
+    const updateData = {
+      userId: userId,
+      id: recordTodaysWorkout.id,
+      date: recordTodaysWorkout.date,
+      exerciseData: editableRowData,
+    };
 
-    const updatedExercises = allExercises.map((workout, wIndex) => {
-      if (wIndex === index) {
-        return editableRowData as Exercise;
-      }
-      return workout;
-    });
+    axios
+      .put(`${serverAPI}/workoutlogins`, updateData)
+      .then((response) => {
+        const { exercises } = response.data;
+        const filteredServerData = exercises.map((exercise) => {
+          const { id: exerciseId, exerciseName, type, sets } = exercise;
+          const filteredSets = sets.map(({ id, ...rest }) => rest);
 
-    setAllExercises(updatedExercises);
+          return {
+            exerciseId,
+            exerciseName,
+            type,
+            sets: filteredSets,
+          };
+        });
+        console.log("UPDATE workoutlogins response is: ", response.data);
+        console.log("serverFilteredData: ", filteredServerData);
+        setAllExercises(filteredServerData);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+
+    // const updatedExercises = allExercises.map((workout, wIndex) => {
+    //   if (wIndex === index) {
+    //     return editableRowData as Exercise;
+    //   }
+    //   return workout;
+    // });
+    // console.log("Update data to server is: ", updateData, "Index is: ", index); // as Exercise
+    // setAllExercises(updatedExercises);
     setEditingRowIndex(null);
     setIsEditing(false);
     console.log("updateWorkout workout!: ", index);
