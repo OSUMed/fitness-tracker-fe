@@ -93,11 +93,13 @@ const TodaysWorkoutComponent = () => {
           setAllExercises([]);
           return;
         }
+        console.log("exercises get are: ", exercises);
         const filteredServerData = exercises.map((exercise) => {
-          const { exerciseName, type, sets } = exercise;
+          const { exerciseName, type, sets, id: exerciseId } = exercise;
           const filteredSets = sets.map(({ id, ...rest }) => rest);
 
           return {
+            exerciseId,
             exerciseName,
             type,
             sets: filteredSets,
@@ -179,16 +181,28 @@ const TodaysWorkoutComponent = () => {
     // Initialize a new workout when a type is selected
     if (type === ExerciseType.Strength) {
       setCurrentExercise({
+        exerciseId: 0,
         type,
         exerciseName: "",
         sets: [{ reps: "", weight: "" }],
       });
     } else if (type === ExerciseType.Cardio) {
-      setCurrentExercise({ type, exerciseName: "", sets: [{ distance: "" }] });
+      setCurrentExercise({
+        exerciseId: 0,
+        type,
+        exerciseName: "",
+        sets: [{ distance: "" }],
+      });
     } else if (type === ExerciseType.Stretch) {
-      setCurrentExercise({ type, exerciseName: "", sets: [{ seconds: "" }] });
+      setCurrentExercise({
+        exerciseId: 0,
+        type,
+        exerciseName: "",
+        sets: [{ seconds: "" }],
+      });
     }
   };
+
   const addSetToCurrentWorkout = () => {
     if (!currentExercise) return;
 
@@ -382,10 +396,11 @@ const TodaysWorkoutComponent = () => {
       .then((response) => {
         const { exercises } = response.data;
         const filteredServerData = exercises.map((exercise) => {
-          const { exerciseName, type, sets } = exercise;
+          const { id: exerciseId, exerciseName, type, sets } = exercise;
           const filteredSets = sets.map(({ id, ...rest }) => rest);
 
           return {
+            exerciseId,
             exerciseName,
             type,
             sets: filteredSets,
@@ -534,13 +549,47 @@ const TodaysWorkoutComponent = () => {
   //   });
   //   setAllExercisesTemp(updatedWorkouts as Exercise[]);
   // };
-  const handleDeleteExercise = (index: number) => {
-    const deletedWorkout = allExercises.find((_workout, i) => i === index);
-    const updatedWorkouts = allExercises.filter((_workout, i) => i !== index);
-    setAllExercises(updatedWorkouts);
+  const handleDeleteExercise = (exerciseId: number) => {
+    // const deletedWorkout = allExercises.find((_workout, i) => i === exerciseId);
+    // const updatedWorkouts = allExercises.filter(
+    //   (_workout, i) => i !== exerciseId
+    // );
+    const todaysDate = recordTodaysWorkout.date;
+    console.log("delete workout is: ", exerciseId, allExercises);
+    axios
+      .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
+        params: {
+          rawWorkoutDate: todaysDate,
+        },
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${JWT_TOKEN}`,
+        },
+      })
+      .then((response) => {
+        const { exercises } = response.data;
+        if (exercises.length === 0) {
+          setAllExercises([]);
+          return;
+        }
+        const filteredServerData = exercises.map((exercise) => {
+          const { exerciseName, type, sets } = exercise;
+          const filteredSets = sets.map(({ id, ...rest }) => rest);
+
+          return {
+            exerciseName,
+            type,
+            sets: filteredSets,
+          };
+        });
+        setAllExercises(filteredServerData);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+    // setAllExercises(updatedWorkouts);
     setIsEditing(false);
     setEditingRowIndex(null);
-    console.log("delete workout!: ", index, deletedWorkout);
   };
 
   ///////////////////////// Testing Purposes  /////////////////////////
@@ -699,6 +748,7 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
   startRowEditProcess,
   handleDeleteExercise,
 }) => {
+  console.log("in static exercise Row: ", workout);
   return (
     <Table.Row key={index}>
       <Table.Cell>
@@ -782,11 +832,17 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
           index={index}
         />
         <span className="block md:hidden ">
-          <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+          <DeleteWorkoutButton
+            index={workout.exerciseId}
+            onDelete={handleDeleteExercise}
+          />
         </span>
       </Table.Cell>
       <Table.Cell className="hidden md:table-cell">
-        <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+        <DeleteWorkoutButton
+          index={workout.exerciseId}
+          onDelete={handleDeleteExercise}
+        />
       </Table.Cell>
     </Table.Row>
   );
@@ -806,6 +862,7 @@ const EditableExerciseRow: React.FC<EditableExerciseRowProps> = ({
   handleDeleteExercise,
   recordTodaysWorkout,
 }) => {
+  console.log("in EditableExerciseRow: ", workout);
   return (
     <Table.Row key={index}>
       <Table.Cell>
@@ -819,7 +876,7 @@ const EditableExerciseRow: React.FC<EditableExerciseRowProps> = ({
       </Table.Cell>
       <Table.Cell>
         <WorkoutSummaryMobileView
-          index={index}
+          index={workout.exerciseId}
           workout={workout}
           editingRowIndex={editingRowIndex}
           editableRowData={editableRowData as Exercise | undefined}
@@ -870,18 +927,24 @@ const EditableExerciseRow: React.FC<EditableExerciseRowProps> = ({
 
       <Table.Cell className="space-y-4">
         <UpdateWorkoutButton
-          index={index}
+          index={workout.exerciseId}
           onUpdate={handleUpdateExercise}
           setIsEditing={setIsEditing}
           setEditingRowIndex={setEditingRowIndex}
         />
 
         <span className="block md:hidden ">
-          <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+          <DeleteWorkoutButton
+            index={workout.exerciseId}
+            onDelete={handleDeleteExercise}
+          />
         </span>
       </Table.Cell>
       <Table.Cell className="hidden md:table-cell">
-        <DeleteWorkoutButton index={index} onDelete={handleDeleteExercise} />
+        <DeleteWorkoutButton
+          index={workout.exerciseId}
+          onDelete={handleDeleteExercise}
+        />
       </Table.Cell>
     </Table.Row>
   );
@@ -895,6 +958,7 @@ const WorkoutSummaryMobileView: React.FC<WorkoutSummaryMobileViewProps> = ({
   handleUpdateExerciseSet,
   handleUpdateExerciseName,
 }) => {
+  console.log("in WorkoutSummaryMobileView: ", workout);
   return (
     <>
       {workout.type}{" "}
@@ -947,6 +1011,7 @@ const EditWorkoutButton: React.FC<EditWorkoutButtonProps> = ({
   startRowEditProcess,
   index,
 }) => {
+  console.log("in EditWorkoutButton: ", index);
   return (
     <Button
       className="p-20"
@@ -966,6 +1031,7 @@ const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
   onUpdate,
   setEditingRowIndex,
 }) => {
+  console.log("in UpdateWorkoutButton: ", index);
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger>
@@ -990,7 +1056,7 @@ const UpdateWorkoutButton: React.FC<UpdateWorkoutButtonProps> = ({
       <AlertDialog.Content style={{ maxWidth: 450 }}>
         <AlertDialog.Title>Confirm Update</AlertDialog.Title>
         <AlertDialog.Description size="2">
-          Are you sure you want to update this workout?
+          Are you sure you want to update this workout? {index}
         </AlertDialog.Description>
         <Flex gap="3" mt="4" justify="end">
           <AlertDialog.Cancel>
@@ -1017,6 +1083,7 @@ const DeleteWorkoutButton: React.FC<DeleteWorkoutButtonProps> = ({
   index,
   onDelete,
 }) => {
+  console.log("in DeleteWorkoutButton: ", index);
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger>
@@ -1028,7 +1095,7 @@ const DeleteWorkoutButton: React.FC<DeleteWorkoutButtonProps> = ({
       <AlertDialog.Content style={{ maxWidth: 450 }}>
         <AlertDialog.Title>Confirm Deletion</AlertDialog.Title>
         <AlertDialog.Description size="2">
-          Are you sure you want to delete this workout?
+          Are you sure you want to delete this workout? {index}
         </AlertDialog.Description>
         <Flex gap="3" mt="4" justify="end">
           <AlertDialog.Cancel>
