@@ -12,7 +12,6 @@ import { set } from "react-hook-form";
 import { format } from "date-fns";
 import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
 import { UserContext } from "../context/UserContext";
 import { UserContextType } from "../context/UserContext";
 import { AddExerciseForm } from "../components/AddExerciseForm";
@@ -36,6 +35,8 @@ import {
   WorkoutSummaryMobileViewProps,
 } from "../types/workoutTypes";
 import { defaultWorkouts } from "../util/defaultWorkouts";
+import axiosInstance from "../util/axiosInterceptor";
+import axios from "axios";
 
 const JWT_TOKEN = localStorage.getItem("accessToken");
 const serverAPI = "http://localhost:8080/workouts";
@@ -80,13 +81,8 @@ const TodaysWorkoutComponent = () => {
   } = useContext<UserContextType>(UserContext as Context<UserContextType>);
 
   const callGetTodaysWorkout = () => {
-    axios
-      .get(`${serverAPI}/workoutlogins`, {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${JWT_TOKEN}`,
-        },
-      })
+    axiosInstance
+      .get(`${serverAPI}/workoutlogins`)
       .then((response) => {
         const { exercises } = response.data;
         if (exercises.length === 0) {
@@ -391,7 +387,7 @@ const TodaysWorkoutComponent = () => {
     console.log("Post data is: ", postData);
 
     // Add current workout to workouts in server
-    axios
+    axiosInstance
       .post(`${serverAPI}/workoutlogins`, postData)
       .then((response) => {
         const { exercises } = response.data;
@@ -459,13 +455,8 @@ const TodaysWorkoutComponent = () => {
       };
     });
     console.log("updateData being sent to server is: ", updateData);
-    axios
-      .put(`${serverAPI}/workoutlogins/${exerciseId}`, updateData, {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${JWT_TOKEN}`,
-        },
-      })
+    axiosInstance
+      .put(`${serverAPI}/workoutlogins/${exerciseId}`, updateData)
       .then((response) => {
         const { exercises } = response.data;
         const filteredServerData = exercises.map((exercise) => {
@@ -599,14 +590,10 @@ const TodaysWorkoutComponent = () => {
     // );
     const todaysDate = recordTodaysWorkout.date;
     console.log("delete workout is: ", exerciseId, allExercises);
-    axios
+    axiosInstance
       .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
         params: {
           rawWorkoutDate: todaysDate,
-        },
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${JWT_TOKEN}`,
         },
       })
       .then((response) => {
@@ -639,7 +626,7 @@ const TodaysWorkoutComponent = () => {
 
   // const testEndpoint = () => {
   //   console.log("testEndpoint");
-  //   axios
+  //   axiosInstance
   //     .get(`${serverAPI}/workoutlogins`)
   //     .then((response) => {
   //       console.log("response is workoutlogin: ", response.data);

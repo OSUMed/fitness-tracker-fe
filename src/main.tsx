@@ -6,16 +6,17 @@ import { Theme, ThemePanel } from "@radix-ui/themes";
 import { UserContextProvider } from "./context/UserContext";
 import AppRoutes from "./routes/Routes";
 import "@radix-ui/themes/styles.css";
+import axiosInstance from "./util/axiosInterceptor";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Theme>
-      <UserContextProvider>
-        <AppRoutes />
-        {/* <ThemePanel /> */}
-      </UserContextProvider>
-    </Theme>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <Theme>
+    <UserContextProvider>
+      <AppRoutes />
+      {/* <ThemePanel /> */}
+    </UserContextProvider>
+  </Theme>
+  // </React.StrictMode>
 );
 
 // appearance="light"

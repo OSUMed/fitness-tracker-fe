@@ -8,6 +8,7 @@ import {
   Cardio,
   Stretch,
 } from "../types/Workout";
+import axiosInstance from "../util/axiosInterceptor";
 interface PrivateResponse {
   username: string;
 }
@@ -49,6 +50,10 @@ export const UserContext = createContext<UserContextType | undefined>(
   undefined
 );
 
+const clearLocalStorage = () => {
+  localStorage.clear();
+};
+
 interface UserContextProviderProps {
   children: ReactNode;
 }
@@ -72,19 +77,19 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
     Strength: 1,
     Stretch: 1,
   });
+  // useEffect(() => {
+  //   console.log("UserContext username is: ", username);
+  //   if (!username || username == "anonymousUser") {
+  //     localStorage.clear();
+  //   }
+  // }, [username]);
   useEffect(() => {
     // Retrieve the JWT token from local storage
     const jwtToken = localStorage.getItem("accessToken");
-    console.log("jwtToken is: ", jwtToken);
 
     if (jwtToken) {
-      axios
-        .get("http://localhost:8080/account", {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-        })
+      axiosInstance
+        .get("http://localhost:8080/account")
         .then((response) => {
           const { username, userId } = response.data;
           console.log("account GET response.data is: ", response.data);
