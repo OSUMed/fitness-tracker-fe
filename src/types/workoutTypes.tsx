@@ -35,15 +35,18 @@ export type Stretch = {
   sets: StretchSet[];
 };
 export type StrengthSet = {
+  id: number;
   reps: string;
   weight: string;
 };
 
 export type CardioSet = {
+  id: number;
   distance: string;
 };
 
 export type StretchSet = {
+  id: number | null;
   seconds: string;
 };
 
