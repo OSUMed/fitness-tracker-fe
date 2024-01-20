@@ -40,6 +40,28 @@ import axios from "axios";
 
 const JWT_TOKEN = localStorage.getItem("accessToken");
 const serverAPI = "http://localhost:8080/workouts";
+
+function translateResponseForTodaysWorkout(exercises) {
+  console.log("Response exercises are: ", exercises);
+  if (!exercises || exercises.length === 0) {
+    return [];
+  }
+
+  return exercises.map((exercise) => {
+    const { id: exerciseId, exerciseName, type, sets } = exercise;
+    // const formattedSets = sets.map(({ id: setId, ...rest }) => {
+    //   return { id, ...rest };
+    // });
+
+    return {
+      exerciseId,
+      exerciseName,
+      type,
+      sets,
+    };
+  });
+}
+
 const TodaysWorkoutComponent = () => {
   // Form Variables:
   const [exerciseName, setExerciseName] = useState<string>("");
@@ -85,24 +107,16 @@ const TodaysWorkoutComponent = () => {
       .get(`${serverAPI}/workoutlogins`)
       .then((response) => {
         const { exercises } = response.data;
-        if (exercises.length === 0) {
-          setAllExercises([]);
-          return;
+        console.log("GET exercises res: ", exercises);
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("GET workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
         }
-        console.log("exercises get are: ", exercises);
-        const filteredServerData = exercises.map((exercise) => {
-          const { exerciseName, type, sets, id: exerciseId } = exercise;
-          const filteredSets = sets.map(({ id, ...rest }) => rest);
-
-          return {
-            exerciseId,
-            exerciseName,
-            type,
-            sets: filteredSets,
-          };
-        });
-        setAllExercises(filteredServerData);
       })
+
       .catch((error) => {
         console.log("error is: ", error);
       });
@@ -180,21 +194,21 @@ const TodaysWorkoutComponent = () => {
         exerciseId: 0,
         type,
         exerciseName: "",
-        sets: [{ reps: "", weight: "" }],
+        sets: [{ id: 0, reps: "", weight: "" }],
       });
     } else if (type === ExerciseType.Cardio) {
       setCurrentExercise({
         exerciseId: 0,
         type,
         exerciseName: "",
-        sets: [{ distance: "" }],
+        sets: [{ id: 0, distance: "" }],
       });
     } else if (type === ExerciseType.Stretch) {
       setCurrentExercise({
         exerciseId: 0,
         type,
         exerciseName: "",
-        sets: [{ seconds: "" }],
+        sets: [{ id: 0, seconds: "" }],
       });
     }
   };
@@ -209,7 +223,7 @@ const TodaysWorkoutComponent = () => {
 
     switch (currentExercise.type) {
       case ExerciseType.Strength:
-        newSet = { reps: "", weight: "" } as StrengthSet;
+        newSet = { id: 0, reps: "", weight: "" } as StrengthSet;
         updatedStrengthSets = [
           ...(currentExercise.sets as StrengthSet[]),
           newSet,
@@ -220,7 +234,7 @@ const TodaysWorkoutComponent = () => {
         });
         break;
       case ExerciseType.Cardio:
-        newSet = { distance: "" } as CardioSet;
+        newSet = { id: 0, distance: "" } as CardioSet;
         updatedCardioSets = [...(currentExercise.sets as CardioSet[]), newSet];
         setCurrentExercise({
           ...currentExercise,
@@ -228,7 +242,7 @@ const TodaysWorkoutComponent = () => {
         });
         break;
       case ExerciseType.Stretch:
-        newSet = { seconds: "" } as StretchSet;
+        newSet = { id: 0, seconds: "" } as StretchSet;
         updatedStretchSets = [
           ...(currentExercise.sets as StretchSet[]),
           newSet,
@@ -391,20 +405,14 @@ const TodaysWorkoutComponent = () => {
       .post(`${serverAPI}/workoutlogins`, postData)
       .then((response) => {
         const { exercises } = response.data;
-        const filteredServerData = exercises.map((exercise) => {
-          const { id: exerciseId, exerciseName, type, sets } = exercise;
-          const filteredSets = sets.map(({ id, ...rest }) => rest);
-
-          return {
-            exerciseId,
-            exerciseName,
-            type,
-            sets: filteredSets,
-          };
-        });
-        console.log("POST workoutlogins response is: ", response.data);
-        console.log("serverFilteredData: ", filteredServerData);
-        setAllExercises(filteredServerData);
+        console.log("POST exercises res: ", exercises);
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("POST workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
+        }
       })
       .catch((error) => {
         console.log("error is: ", error);
@@ -459,20 +467,14 @@ const TodaysWorkoutComponent = () => {
       .put(`${serverAPI}/workoutlogins/${exerciseId}`, updateData)
       .then((response) => {
         const { exercises } = response.data;
-        const filteredServerData = exercises.map((exercise) => {
-          const { id: exerciseId, exerciseName, type, sets } = exercise;
-          const filteredSets = sets.map(({ id, ...rest }) => rest);
-
-          return {
-            exerciseId,
-            exerciseName,
-            type,
-            sets: filteredSets,
-          };
-        });
-        console.log("UPDATE workoutlogins response is: ", response.data);
-        console.log("serverFilteredData: ", filteredServerData);
-        setAllExercises(filteredServerData);
+        console.log("PUT exercises res: ", exercises);
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("PUT workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
+        }
       })
       .catch((error) => {
         console.log("error is: ", error);
@@ -505,15 +507,17 @@ const TodaysWorkoutComponent = () => {
     setAttribute: string,
     setIndex: number
   ) => {
-    // console.log("params are: ", e, setAttribute, setIndex);
+    console.log("params are: ", setAttribute, setIndex);
     if (editableRowData) {
       const updatedSets = [...editableRowData.sets];
+      console.log("updatedSets are: ", updatedSets);
 
       if (updatedSets[setIndex]) {
         updatedSets[setIndex] = {
           ...updatedSets[setIndex],
           [setAttribute]: e.target.value,
         };
+        console.log("updatedSets[setIndex] are: ", updatedSets[setIndex]);
 
         if (editableRowData.type === "Strength") {
           setEditableRowData({
@@ -598,21 +602,14 @@ const TodaysWorkoutComponent = () => {
       })
       .then((response) => {
         const { exercises } = response.data;
-        if (exercises.length === 0) {
-          setAllExercises([]);
-          return;
+        console.log("DELETE exercises res: ", exercises);
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("DELETE workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
         }
-        const filteredServerData = exercises.map((exercise) => {
-          const { exerciseName, type, sets } = exercise;
-          const filteredSets = sets.map(({ id, ...rest }) => rest);
-
-          return {
-            exerciseName,
-            type,
-            sets: filteredSets,
-          };
-        });
-        setAllExercises(filteredServerData);
       })
       .catch((error) => {
         console.log("error is: ", error);
@@ -652,6 +649,7 @@ const TodaysWorkoutComponent = () => {
   console.log("exerciseNameUpdateTable: ", exerciseNameUpdateTable);
 
   console.log("allExercises is: ", allExercises[0]);
+  console.log("editableRowData is: ", editableRowData);
 
   console.log("TOdays Workout Username and id are: ", username, userId);
   return (
@@ -799,29 +797,35 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
           />
         </Box>
         <Box className="block md:hidden">
-          {workout.sets.map((individualSet, setIndex) => (
-            <Box key={setIndex}>
-              {Object.entries(individualSet).map(
-                ([setAttribute, setValue], attributeIndex) => (
-                  <Box
-                    key={attributeIndex}
-                    className="flex flex mb-2 items-center"
-                  >
-                    <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                      {setAttribute}:
-                    </label>
+          {workout.sets &&
+            workout.sets.map((individualSet, setIndex) => (
+              <Box key={setIndex}>
+                {Object.entries(individualSet).map(
+                  ([setAttribute, setValue], attributeIndex) => {
+                    if (setAttribute === "id") {
+                      return null;
+                    }
+                    return (
+                      <Box
+                        key={attributeIndex}
+                        className="flex flex mb-2 items-center"
+                      >
+                        <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                          {setAttribute}:
+                        </label>
 
-                    <TextField.Input
-                      disabled={editingRowIndex !== index}
-                      className="border-b border-black last:border-b-0 py-2"
-                      key={attributeIndex}
-                      value={setValue}
-                    />
-                  </Box>
-                )
-              )}
-            </Box>
-          ))}
+                        <TextField.Input
+                          disabled={editingRowIndex !== index}
+                          className="border-b border-black last:border-b-0 py-2"
+                          key={attributeIndex}
+                          value={setValue}
+                        />
+                      </Box>
+                    );
+                  }
+                )}
+              </Box>
+            ))}
         </Box>
       </Table.Cell>
       <Table.Cell className="hidden md:table-cell">
@@ -831,29 +835,35 @@ const StaticExerciseRow: React.FC<StaticExerciseRowProps> = ({
         />
       </Table.Cell>
       <Table.Cell className="hidden md:table-cell">
-        {workout.sets.map((individualSet, setIndex) => (
-          <Box key={setIndex}>
-            {Object.entries(individualSet).map(
-              ([setAttribute, setValue], attributeIndex) => (
-                <Box
-                  key={attributeIndex}
-                  className="flex flex-col lg:flex-row mb-2"
-                >
-                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                    {setAttribute}:
-                  </label>
+        {workout.sets &&
+          workout.sets.map((individualSet, setIndex) => (
+            <Box key={setIndex}>
+              {Object.entries(individualSet).map(
+                ([setAttribute, setValue], attributeIndex) => {
+                  if (setAttribute === "id") {
+                    return null;
+                  }
+                  return (
+                    <Box
+                      key={attributeIndex}
+                      className="flex flex mb-2 items-center"
+                    >
+                      <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                        {setAttribute}:
+                      </label>
 
-                  <TextField.Input
-                    disabled={editingRowIndex !== index}
-                    className="border-b border-black last:border-b-0 py-2"
-                    key={attributeIndex}
-                    value={setValue}
-                  />
-                </Box>
-              )
-            )}
-          </Box>
-        ))}
+                      <TextField.Input
+                        disabled={editingRowIndex !== index}
+                        className="border-b border-black last:border-b-0 py-2"
+                        key={attributeIndex}
+                        value={setValue}
+                      />
+                    </Box>
+                  );
+                }
+              )}
+            </Box>
+          ))}
       </Table.Cell>
 
       <Table.Cell className="space-y-4">
@@ -926,30 +936,35 @@ const EditableExerciseRow: React.FC<EditableExerciseRowProps> = ({
         {editableRowData?.sets.map((individualSet, setIndex) => (
           <Box key={setIndex}>
             {Object.entries(individualSet).map(
-              ([setAttribute, setValue], attributeIndex) => (
-                <Box
-                  key={attributeIndex}
-                  className="flex flex-col lg:flex-row mb-2"
-                >
-                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                    {setAttribute}:
-                  </label>
-
-                  <TextField.Input
-                    disabled={editingRowIndex !== index}
-                    className="border-b border-black last:border-b-0 py-2"
+              ([setAttribute, setValue], attributeIndex) => {
+                if (setAttribute === "id") {
+                  return null;
+                }
+                return (
+                  <Box
                     key={attributeIndex}
-                    value={setValue}
-                    onChange={(e) =>
-                      handleUpdateExerciseSet(
-                        e,
-                        setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
-                        setIndex // The 'set' index in the workout's sets array
-                      )
-                    }
-                  />
-                </Box>
-              )
+                    className="flex flex-col lg:flex-row mb-2"
+                  >
+                    <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                      {setAttribute}:
+                    </label>
+
+                    <TextField.Input
+                      disabled={editingRowIndex !== index}
+                      className="border-b border-black last:border-b-0 py-2"
+                      key={attributeIndex}
+                      value={setValue}
+                      onChange={(e) =>
+                        handleUpdateExerciseSet(
+                          e,
+                          setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
+                          setIndex // The 'set' index in the workout's sets array
+                        )
+                      }
+                    />
+                  </Box>
+                );
+              }
             )}
           </Box>
         ))}
@@ -1001,34 +1016,39 @@ const WorkoutSummaryMobileView: React.FC<WorkoutSummaryMobileViewProps> = ({
       </Box>
       <Box className="block md:hidden">
         {editableRowData?.sets.map((individualSet, setIndex) => (
-          <div key={setIndex}>
+          <Box key={setIndex}>
             {Object.entries(individualSet).map(
-              ([setAttribute, setValue], attributeIndex) => (
-                <div
-                  key={attributeIndex}
-                  className="flex flex mb-2 items-center"
-                >
-                  <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
-                    {setAttribute}:
-                  </label>
-
-                  <TextField.Input
-                    disabled={editingRowIndex !== index}
-                    className="border-b border-black last:border-b-0 py-2"
+              ([setAttribute, setValue], attributeIndex) => {
+                if (setAttribute === "id") {
+                  return null;
+                }
+                return (
+                  <Box
                     key={attributeIndex}
-                    value={setValue}
-                    onChange={(e) =>
-                      handleUpdateExerciseSet(
-                        e,
-                        setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
-                        setIndex // The 'set' index in the workout's sets array
-                      )
-                    }
-                  />
-                </div>
-              )
+                    className="flex flex-col lg:flex-row mb-2"
+                  >
+                    <label className="mb-1 text-sm font-medium text-gray-700 pr-3">
+                      {setAttribute}:
+                    </label>
+
+                    <TextField.Input
+                      disabled={editingRowIndex !== index}
+                      className="border-b border-black last:border-b-0 py-2"
+                      key={attributeIndex}
+                      value={setValue}
+                      onChange={(e) =>
+                        handleUpdateExerciseSet(
+                          e,
+                          setAttribute, // The 'set' attribute name (e.g., 'reps', 'weight')
+                          setIndex // The 'set' index in the workout's sets array
+                        )
+                      }
+                    />
+                  </Box>
+                );
+              }
             )}
-          </div>
+          </Box>
         ))}
       </Box>
     </>
