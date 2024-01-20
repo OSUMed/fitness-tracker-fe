@@ -78,13 +78,15 @@ export const AddExerciseForm: React.FC<AddExerciseFormProps> = ({
         {currentExercise?.sets.map((item, index) => (
           <div key={index}>
             <h3>Set {index + 1}</h3>
-            {Object.keys(item).map((key) => (
-              <TextField.Input
-                key={key}
-                placeholder={`${key}`}
-                onChange={(e) => handleSetAddForm(e, key, index)}
-              />
-            ))}
+            {Object.keys(item)
+              .filter((key) => key !== "id")
+              .map((key) => (
+                <TextField.Input
+                  key={key}
+                  placeholder={`${key}`}
+                  onChange={(e) => handleSetAddForm(e, key, index)}
+                />
+              ))}
           </div>
         ))}
         <Button
