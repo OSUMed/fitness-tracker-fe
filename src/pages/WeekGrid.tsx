@@ -5,17 +5,15 @@ import { WorkoutLevel } from "../components/WorkoutLevelBadge";
 import * as Select from "@radix-ui/react-select";
 import axiosInstance from "../util/axiosInterceptor";
 const serverAPI = "http://localhost:8080";
-interface Exercise {
-  name: string;
-}
 
 interface PlannedWorkout {
-  id: string;
+  id: number;
   type: string;
   exercises: { name: string }[];
 }
 
 interface DayPlan {
+  id: number;
   day: string;
   workouts: PlannedWorkout[];
   duration: string;
@@ -24,15 +22,16 @@ interface DayPlan {
 
 const initialPlanData: DayPlan[] = [
   {
+    id: 0,
     day: "Sunday",
     workouts: [
       {
-        id: "1",
+        id: 0,
         type: "Stretch",
         exercises: [{ name: "Exercise 1" }, { name: "Exercise 2" }],
       },
       {
-        id: "2",
+        id: 0,
         type: "Cardio",
         exercises: [{ name: "Running" }, { name: "Jumping Jacks" }],
       },
@@ -41,10 +40,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Light",
   },
   {
+    id: 0,
     day: "Monday",
     workouts: [
       {
-        id: "3",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Push-Ups" }, { name: "Dumbbell Curls" }],
       },
@@ -53,10 +53,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Moderate",
   },
   {
+    id: 0,
     day: "Tuesday",
     workouts: [
       {
-        id: "4",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Squats" }, { name: "Leg Curls" }],
       },
@@ -65,10 +66,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Intense",
   },
   {
+    id: 0,
     day: "Wednesday",
     workouts: [
       {
-        id: "5",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Shoulder Press" }, { name: "Preacher Curls" }],
       },
@@ -77,10 +79,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Intense",
   },
   {
+    id: 0,
     day: "Thursday",
     workouts: [
       {
-        id: "6",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Leg Press" }, { name: "Deadlifts" }],
       },
@@ -89,10 +92,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Light",
   },
   {
+    id: 0,
     day: "Friday",
     workouts: [
       {
-        id: "7",
+        id: 0,
         type: "Chest",
         exercises: [{ name: "Dips" }, { name: "Incline Press" }],
       },
@@ -101,10 +105,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Moderate",
   },
   {
+    id: 0,
     day: "Saturday",
     workouts: [
       {
-        id: "8",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Pull-ups" }, { name: "Bicep Curls" }],
       },
@@ -122,35 +127,28 @@ const WeekGrid = () => {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   useEffect(() => {}, [weekPlan]);
-
+  const makeCall = () => {
+    console.log("Make Call: ");
+    axiosInstance
+      // .get(`${serverAPI}/weekplan/`)
+      .post(`${serverAPI}/weekplan/`, initialPlanData)
+      .then((response) => console.log("POST weekplan res: ", response.data));
+  };
   const getWeekPlanCall = () => {
-    axiosInstance.get(`${serverAPI}/weekplan`).then((response) => {
-      // const { exercises } = response.data;
+    axiosInstance.get(`${serverAPI}/weekplan/`).then((response) => {
       console.log("GET weekplan res: ", response.data);
-      // if (exercises) {
-      //   const filteredServerData =
-      //     translateResponseForTodaysWorkout(exercises);
-      //   console.log("GET workoutlogins response is: ", response.data);
-      //   console.log("serverFilteredData: ", filteredServerData);
-      //   const updatedPlanData = [...weekPlan];
-      //   setWeekPlan(updatedPlanData);
-      // }
     });
   };
-  const postWeekPlanCall = () => {
+  const postWeekPlanCall = (updatedDayPlan) => {
+    const updatedPlanData = weekPlan.map((plan) =>
+      plan.day === updatedDayPlan.day ? updatedDayPlan : plan
+    );
+    console.log("We are sending this to server: ", updatedPlanData);
     axiosInstance
-      .post(`${serverAPI}/weekplan`, weekPlan)
+      .post(`${serverAPI}/weekplan/`, updatedPlanData)
       .then((response) => {
-        // const { exercises } = response.data;
         console.log("POST weekplan res: ", response.data);
-        // if (exercises) {
-        //   const filteredServerData =
-        //     translateResponseForTodaysWorkout(exercises);
-        //   console.log("GET workoutlogins response is: ", response.data);
-        //   console.log("serverFilteredData: ", filteredServerData);
-        //   const updatedPlanData = [...weekPlan];
-        //   setWeekPlan(updatedPlanData);
-        // }
+        setWeekPlan(response.data.dayPlans);
       })
       .catch((error) => {
         console.log("postWeekPlanCall error is: ", error);
@@ -170,14 +168,18 @@ const WeekGrid = () => {
   };
 
   const handleSaveClick = (updatedDayPlan: DayPlan) => {
+    console.log("updatedDayPlan is: ", updatedDayPlan);
+    const backUpPlan = [...weekPlan];
     try {
       setSelectedDay(null);
-      console.log("handleSaveClick pressed!", weekPlan);
-      updateDayPlan(updatedDayPlan);
+      console.log("handleSaveClick pressed!");
+      // updateDayPlan(updatedDayPlan);
+      postWeekPlanCall(updatedDayPlan);
       // const updatedPlanData = [...weekPlan];
       // setWeekPlan(updatedPlanData);
     } catch (error) {
       console.log("error: ", error);
+      // setWeekPlan(updatedPlanData);
     }
     // setIsEditing(true);
   };
@@ -221,9 +223,11 @@ const WeekGrid = () => {
       setUserTemplateWeek(weekPlan);
     }
   };
-
+  console.log("weekPlan is : ", weekPlan);
+  console.log("weekPlan is typeof: ", typeof weekPlan);
   return (
     <div className="space-y-4">
+      <Button onClick={makeCall}>Test me</Button>
       <Box className="space-x-4">
         <Button onClick={handleResetWeek}>Reset Week</Button>
         <Button onClick={loadTemplateWeek}>Load Template Week</Button>
@@ -262,7 +266,7 @@ const DayCard: React.FC<DayCardProps> = ({
   const [dayOutline, setDayOutline] = useState<DayPlan>(dayPlan!);
   const [originalDayPlan, setOriginalDayPlan] = useState<DayPlan>(dayPlan!);
 
-  const handleAddNewExercise = (workoutId: string) => {
+  const handleAddNewExercise = (workoutId: number) => {
     setDayOutline((prevDayOutline) => {
       return {
         ...prevDayOutline,
@@ -278,7 +282,7 @@ const DayCard: React.FC<DayCardProps> = ({
       };
     });
   };
-  const handleRemoveLastExercise = (workoutId: string) => {
+  const handleRemoveLastExercise = (workoutId: number) => {
     setDayOutline((prevDayOutline) => {
       return {
         ...prevDayOutline,
@@ -368,7 +372,7 @@ const DayCard: React.FC<DayCardProps> = ({
     return <div>Loading...</div>;
   }
 
-  const handleWorkoutTypeChange = (workoutId: string, newType: string) => {
+  const handleWorkoutTypeChange = (workoutId: number, newType: string) => {
     const updatedWorkouts = dayOutline.workouts.map((workout) => {
       if (workout.id === workoutId) {
         return { ...workout, type: newType };
@@ -379,7 +383,7 @@ const DayCard: React.FC<DayCardProps> = ({
   };
 
   const handleExerciseNameChange = (
-    workoutId: string,
+    workoutId: number,
     exerciseIndex: number,
     newName: string
   ) => {
@@ -455,8 +459,8 @@ const DayCard: React.FC<DayCardProps> = ({
           dayOutline={dayOutline}
         />
       </Box>
-      {dayOutline.workouts.map((workout) => (
-        <div key={workout.id} className="mb-4">
+      {dayOutline.workouts.map((workout, index) => (
+        <div key={index} className="mb-4">
           {isEditing ? (
             <>
               <label hidden={!isEditing} htmlFor="type">
