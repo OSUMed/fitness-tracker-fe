@@ -403,58 +403,10 @@ const DayCard: React.FC<DayCardProps> = ({
       </h2>
 
       <Box hidden={!isEditing} className="mt-3 mb-3">
-        <Text>Pick Workout Intensity</Text>
-        <Select.Root
-          value={dayOutline.intensity}
-          onValueChange={(value) => {
-            console.log("value is: ", value);
-            setDayOutline({ ...dayOutline, intensity: value });
-          }}
-        >
-          <Select.Trigger
-            className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-blue-500 text-white shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
-            aria-label="Intensities"
-          >
-            <Select.Value>{dayOutline.intensity} </Select.Value>
-            <Select.Icon />
-          </Select.Trigger>
-
-          <Select.Portal>
-            <Select.Content
-              position="popper"
-              className="overflow-hidden bg-white rounded-md shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
-            >
-              <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
-              <Select.Viewport className="p-[10px]">
-                <Select.Group>
-                  <Select.Label className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100">
-                    Intensity
-                  </Select.Label>
-                  <Select.Item
-                    className="px-4 py-2 text-sm hover:bg-blue-50"
-                    value="Light"
-                  >
-                    Light
-                  </Select.Item>
-                  <Select.Item
-                    className="px-4 py-2 text-sm hover:bg-blue-50"
-                    value="Moderate"
-                  >
-                    Moderate
-                  </Select.Item>
-                  <Select.Item
-                    className="px-4 py-2 text-sm hover:bg-blue-50"
-                    value="Intense"
-                  >
-                    Intense
-                  </Select.Item>
-                </Select.Group>
-              </Select.Viewport>
-              <Select.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
-              <Select.Arrow />
-            </Select.Content>
-          </Select.Portal>
-        </Select.Root>
+        <SelectIntensityUI
+          setDayOutline={setDayOutline}
+          dayOutline={dayOutline}
+        />
       </Box>
       {dayOutline.workouts.map((workout) => (
         <div key={workout.id} className="mb-4">
@@ -585,6 +537,71 @@ const DayCard: React.FC<DayCardProps> = ({
         )}
       </Box>
     </Box>
+  );
+};
+interface SelectIntensityUIProps {
+  dayOutline: DayPlan;
+  setDayOutline: (updatedDayPlan: DayPlan) => void;
+}
+const SelectIntensityUI: React.FC<SelectIntensityUIProps> = ({
+  setDayOutline,
+  dayOutline,
+}) => {
+  return (
+    <>
+      <Text>Pick Workout Intensity</Text>
+      <Select.Root
+        value={dayOutline.intensity}
+        onValueChange={(value) => {
+          console.log("value is: ", value);
+          setDayOutline({ ...dayOutline, intensity: value });
+        }}
+      >
+        <Select.Trigger
+          className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-blue-500 text-white shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+          aria-label="Intensities"
+        >
+          <Select.Value>{dayOutline.intensity} </Select.Value>
+          <Select.Icon />
+        </Select.Trigger>
+
+        <Select.Portal>
+          <Select.Content
+            position="popper"
+            className="overflow-hidden bg-white rounded-md shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
+          >
+            <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Viewport className="p-[10px]">
+              <Select.Group>
+                <Select.Label className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100">
+                  Intensity
+                </Select.Label>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Light"
+                >
+                  Light
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Moderate"
+                >
+                  Moderate
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Intense"
+                >
+                  Intense
+                </Select.Item>
+              </Select.Group>
+            </Select.Viewport>
+            <Select.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Arrow />
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
+    </>
   );
 };
 
