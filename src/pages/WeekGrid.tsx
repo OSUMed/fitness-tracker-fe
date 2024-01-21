@@ -10,7 +10,7 @@ interface Exercise {
 interface PlannedWorkout {
   id: string;
   type: string;
-  exercises: Exercise[];
+  exercises: { name: string }[];
 }
 
 interface DayPlan {
