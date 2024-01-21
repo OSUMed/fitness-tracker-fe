@@ -3,6 +3,8 @@ import { WorkoutLevelBadge } from "../components/WorkoutLevelBadge";
 import { Box, Button, Text } from "@radix-ui/themes";
 import { WorkoutLevel } from "../components/WorkoutLevelBadge";
 import * as Select from "@radix-ui/react-select";
+import axiosInstance from "../util/axiosInterceptor";
+const serverAPI = "http://localhost:8080";
 interface Exercise {
   name: string;
 }
@@ -113,35 +115,75 @@ const initialPlanData: DayPlan[] = [
 ];
 
 const WeekGrid = () => {
-  const [planData, setPlanData] = useState<DayPlan[]>(initialPlanData);
+  const [weekPlan, setWeekPlan] = useState<DayPlan[]>(initialPlanData);
   const [userTemplateWeek, setUserTemplateWeek] =
     useState<DayPlan[]>(initialPlanData);
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
-  useEffect(() => {}, [planData]);
+  useEffect(() => {}, [weekPlan]);
+
+  const getWeekPlanCall = () => {
+    axiosInstance.get(`${serverAPI}/weekplan`).then((response) => {
+      // const { exercises } = response.data;
+      console.log("GET weekplan res: ", response.data);
+      // if (exercises) {
+      //   const filteredServerData =
+      //     translateResponseForTodaysWorkout(exercises);
+      //   console.log("GET workoutlogins response is: ", response.data);
+      //   console.log("serverFilteredData: ", filteredServerData);
+      //   const updatedPlanData = [...weekPlan];
+      //   setWeekPlan(updatedPlanData);
+      // }
+    });
+  };
+  const postWeekPlanCall = () => {
+    axiosInstance
+      .post(`${serverAPI}/weekplan`, weekPlan)
+      .then((response) => {
+        // const { exercises } = response.data;
+        console.log("POST weekplan res: ", response.data);
+        // if (exercises) {
+        //   const filteredServerData =
+        //     translateResponseForTodaysWorkout(exercises);
+        //   console.log("GET workoutlogins response is: ", response.data);
+        //   console.log("serverFilteredData: ", filteredServerData);
+        //   const updatedPlanData = [...weekPlan];
+        //   setWeekPlan(updatedPlanData);
+        // }
+      })
+      .catch((error) => {
+        console.log("postWeekPlanCall error is: ", error);
+      });
+  };
+
   const handleEditClick = (day) => {
     console.log("handleEditClick   pressed!");
     // setIsEditing(false);
     setSelectedDay(day);
   };
   const updateDayPlan = (updatedDayPlan: DayPlan) => {
-    const updatedPlanData = planData.map((plan) =>
+    const updatedPlanData = weekPlan.map((plan) =>
       plan.day === updatedDayPlan.day ? updatedDayPlan : plan
     );
-    setPlanData(updatedPlanData);
+    setWeekPlan(updatedPlanData);
   };
 
-  const handleSaveClick = () => {
+  const handleSaveClick = (updatedDayPlan: DayPlan) => {
+    try {
+      setSelectedDay(null);
+      console.log("handleSaveClick pressed!", weekPlan);
+      updateDayPlan(updatedDayPlan);
+      // const updatedPlanData = [...weekPlan];
+      // setWeekPlan(updatedPlanData);
+    } catch (error) {
+      console.log("error: ", error);
+    }
     // setIsEditing(true);
-    setSelectedDay(null);
-    console.log("handleSaveClick pressed!", planData);
-    const updatedPlanData = [...planData];
-    setPlanData(updatedPlanData);
   };
 
   const findPlanForDay = (day: string) => {
-    const dayPlan = planData.find((plan) => plan.day === day);
+    const dayPlan = weekPlan.find((plan) => plan.day === day);
     return dayPlan;
   };
   const handleResetWeek = () => {
@@ -150,14 +192,14 @@ const WeekGrid = () => {
         "Are you sure you want to reset the entire week's workouts?"
       )
     ) {
-      const clearedPlanData = planData.map((dayPlan) => ({
+      const clearedPlanData = weekPlan.map((dayPlan) => ({
         ...dayPlan,
         workouts: [],
         intensity: "LIGHT",
         duration: "",
       }));
 
-      setPlanData(clearedPlanData);
+      setWeekPlan(clearedPlanData);
     }
   };
   const loadTemplateWeek = () => {
@@ -166,7 +208,7 @@ const WeekGrid = () => {
         "Are you sure you want to load the template week's workouts?"
       )
     ) {
-      setPlanData(userTemplateWeek);
+      setWeekPlan(userTemplateWeek);
     }
   };
 
@@ -176,7 +218,7 @@ const WeekGrid = () => {
         "Are you sure you want to save the current week as the template?"
       )
     ) {
-      setUserTemplateWeek(planData);
+      setUserTemplateWeek(weekPlan);
     }
   };
 
@@ -189,7 +231,7 @@ const WeekGrid = () => {
       </Box>
       <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
         <div className="flex overflow-x-auto snap-x snap-mandatory">
-          {planData.map((dayPlan) => (
+          {weekPlan.map((dayPlan) => (
             <DayCard
               key={dayPlan.day}
               dayPlan={dayPlan}
@@ -205,9 +247,9 @@ const WeekGrid = () => {
 };
 
 interface DayCardProps {
-  dayPlan: DayPlan | undefined;
+  dayPlan: DayPlan;
   onEditClick: () => void;
-  handleSaveClick: () => void;
+  handleSaveClick: (dayOutline: DayPlan) => void;
   updateDayPlan: (updatedDayPlan: DayPlan) => void;
 }
 
@@ -286,31 +328,36 @@ const DayCard: React.FC<DayCardProps> = ({
   }, [dayPlan]);
 
   const handleSaveDay = (day) => {
-    setDayOutline((prevDayOutline) => {
-      if (prevDayOutline.day === day) {
-        // Filter out exercises with empty names & with no exercises
-        const filteredWorkouts = prevDayOutline.workouts
-          .map((workout) => {
-            return {
-              ...workout,
-              exercises: workout.exercises.filter(
-                (exercise) => exercise.name !== ""
-              ),
-            };
-          })
-          .filter((workout) => workout.exercises.length > 0);
+    try {
+      setDayOutline((prevDayOutline) => {
+        if (prevDayOutline.day === day) {
+          // Filter out exercises with empty names & with no exercises
+          const filteredWorkouts = prevDayOutline.workouts
+            .map((workout) => {
+              return {
+                ...workout,
+                exercises: workout.exercises.filter(
+                  (exercise) => exercise.name !== ""
+                ),
+              };
+            })
+            .filter((workout) => workout.exercises.length > 0);
 
-        return {
-          ...prevDayOutline,
-          workouts: filteredWorkouts,
-        };
-      }
-      return prevDayOutline;
-    });
-    handleSaveClick();
-    updateDayPlan(dayOutline);
-    // setDayOutline({ ...dayOutline, intensity: originalDayPlan.intensity });
-    setIsEditing(false);
+          return {
+            ...prevDayOutline,
+            workouts: filteredWorkouts,
+          };
+        }
+        return prevDayOutline;
+      });
+      handleSaveClick(dayOutline);
+      // updateDayPlan(dayOutline);
+      // setDayOutline({ ...dayOutline, intensity: originalDayPlan.intensity });
+      setIsEditing(false);
+    } catch (error) {
+      updateDayPlan(originalDayPlan);
+      console.log("Error, returning back to last saved: ", originalDayPlan);
+    }
   };
 
   useEffect(() => {
@@ -318,7 +365,7 @@ const DayCard: React.FC<DayCardProps> = ({
   }, [dayPlan]);
 
   if (!dayPlan) {
-    return <div>Loading...</div>; // Or any other placeholder
+    return <div>Loading...</div>;
   }
 
   const handleWorkoutTypeChange = (workoutId: string, newType: string) => {
