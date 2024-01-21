@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { WorkoutLevelBadge } from "../components/WorkoutLevelBadge";
-import { Box, Button, Select, Text } from "@radix-ui/themes";
+import { Box, Button, Text } from "@radix-ui/themes";
 import { WorkoutLevel } from "../components/WorkoutLevelBadge";
+import * as Select from "@radix-ui/react-select";
 interface Exercise {
   name: string;
 }
@@ -118,16 +119,23 @@ const WeekGrid = () => {
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
+  useEffect(() => {}, [planData]);
   const handleEditClick = (day) => {
     console.log("handleEditClick   pressed!");
     // setIsEditing(false);
     setSelectedDay(day);
   };
+  const updateDayPlan = (updatedDayPlan: DayPlan) => {
+    const updatedPlanData = planData.map((plan) =>
+      plan.day === updatedDayPlan.day ? updatedDayPlan : plan
+    );
+    setPlanData(updatedPlanData);
+  };
 
   const handleSaveClick = () => {
     // setIsEditing(true);
     setSelectedDay(null);
-    console.log("handleSaveClick pressed!");
+    console.log("handleSaveClick pressed!", planData);
     const updatedPlanData = [...planData];
     setPlanData(updatedPlanData);
   };
@@ -187,6 +195,7 @@ const WeekGrid = () => {
               dayPlan={dayPlan}
               onEditClick={() => handleEditClick(dayPlan.day)}
               handleSaveClick={handleSaveClick}
+              updateDayPlan={updateDayPlan}
             />
           ))}
         </div>
@@ -197,14 +206,19 @@ const WeekGrid = () => {
 
 interface DayCardProps {
   dayPlan: DayPlan | undefined;
-
   onEditClick: () => void;
   handleSaveClick: () => void;
+  updateDayPlan: (updatedDayPlan: DayPlan) => void;
 }
 
-const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
+const DayCard: React.FC<DayCardProps> = ({
+  dayPlan,
+  handleSaveClick,
+  updateDayPlan,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [dayOutline, setDayOutline] = useState<DayPlan>(dayPlan!);
+  const [originalDayPlan, setOriginalDayPlan] = useState<DayPlan>(dayPlan!);
 
   const handleAddNewExercise = (workoutId: string) => {
     setDayOutline((prevDayOutline) => {
@@ -266,6 +280,10 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
       return prevDayOutline;
     });
   };
+  useEffect(() => {
+    setDayOutline(dayPlan);
+    setOriginalDayPlan(dayPlan!);
+  }, [dayPlan]);
 
   const handleSaveDay = (day) => {
     setDayOutline((prevDayOutline) => {
@@ -289,6 +307,9 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
       }
       return prevDayOutline;
     });
+    handleSaveClick();
+    updateDayPlan(dayOutline);
+    // setDayOutline({ ...dayOutline, intensity: originalDayPlan.intensity });
     setIsEditing(false);
   };
 
@@ -343,39 +364,96 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
   function convertToWorkoutLevelKey(key: string): WorkoutLevel {
     return key.toUpperCase() as WorkoutLevel;
   }
+  const handleQuickIntensityChange = (
+    day: string,
+    intensityToUpdate: string
+  ) => {
+    console.log("handleQuickIntensityChange: ", day, intensityToUpdate);
+    const intensities = ["Light", "Moderate", "Intense"];
+    let toggleIntensityInd = intensities.findIndex(
+      (intensity) => intensity === intensityToUpdate
+    );
+    toggleIntensityInd = (toggleIntensityInd + 1) % intensities.length;
+    console.log(
+      "New intensity is: ",
+      intensities[toggleIntensityInd],
+      toggleIntensityInd
+    );
+    const newIntensity = intensities[toggleIntensityInd];
+    console.log("updatedWorkouts is: ", newIntensity);
+    setDayOutline({ ...dayPlan, intensity: newIntensity });
+    handleSaveDay(dayOutline.day);
+  };
 
   return (
     <Box className="border rounded-lg p-4 m-2 bg-gray-100 shadow space-y-4">
       <h2 className="font-bold text-lg mb-2">
         {dayPlan.day} <br />
-        <WorkoutLevelBadge
-          workoutLevel={
-            convertToWorkoutLevelKey(dayOutline.intensity) as WorkoutLevel
+        <Box
+          onClick={() =>
+            handleQuickIntensityChange(dayPlan.day, dayPlan.intensity)
           }
-        />{" "}
+        >
+          <WorkoutLevelBadge
+            workoutLevel={
+              convertToWorkoutLevelKey(dayOutline.intensity) as WorkoutLevel
+            }
+          />{" "}
+        </Box>
       </h2>
 
       <Box hidden={!isEditing} className="mt-3 mb-3">
         <Text>Pick Workout Intensity</Text>
         <Select.Root
-          size="2"
-          disabled={!isEditing}
+          value={dayOutline.intensity}
           onValueChange={(value) => {
-            setDayOutline({ ...dayPlan, intensity: value });
+            console.log("value is: ", value);
+            setDayOutline({ ...dayOutline, intensity: value });
           }}
         >
           <Select.Trigger
-            placeholder="Pick A Workout Intensity"
-            variant="surface"
-          />
-          <Select.Content variant="solid" position="popper">
-            <Select.Group>
-              <Select.Label>Intensity</Select.Label>
-              <Select.Item value="LIGHT">Light</Select.Item>
-              <Select.Item value="MODERATE">Moderate</Select.Item>
-              <Select.Item value="INTENSE">Intense</Select.Item>
-            </Select.Group>
-          </Select.Content>
+            className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-blue-500 text-white shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+            aria-label="Intensities"
+          >
+            <Select.Value>{dayOutline.intensity} </Select.Value>
+            <Select.Icon />
+          </Select.Trigger>
+
+          <Select.Portal>
+            <Select.Content
+              position="popper"
+              className="overflow-hidden bg-white rounded-md shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
+            >
+              <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+              <Select.Viewport className="p-[10px]">
+                <Select.Group>
+                  <Select.Label className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100">
+                    Intensity
+                  </Select.Label>
+                  <Select.Item
+                    className="px-4 py-2 text-sm hover:bg-blue-50"
+                    value="Light"
+                  >
+                    Light
+                  </Select.Item>
+                  <Select.Item
+                    className="px-4 py-2 text-sm hover:bg-blue-50"
+                    value="Moderate"
+                  >
+                    Moderate
+                  </Select.Item>
+                  <Select.Item
+                    className="px-4 py-2 text-sm hover:bg-blue-50"
+                    value="Intense"
+                  >
+                    Intense
+                  </Select.Item>
+                </Select.Group>
+              </Select.Viewport>
+              <Select.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+              <Select.Arrow />
+            </Select.Content>
+          </Select.Portal>
         </Select.Root>
       </Box>
       {dayOutline.workouts.map((workout) => (
@@ -495,7 +573,14 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
             >
               Save
             </Button>
-            <Button onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                setIsEditing(false);
+                setDayOutline(originalDayPlan); // Reset to original plan
+              }}
+            >
+              Cancel
+            </Button>
           </Box>
         )}
       </Box>
