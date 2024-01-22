@@ -211,19 +211,21 @@ const WeekGrid = () => {
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   getWeekPlanCall();
-  // }, []);
-  // const deleteCurrentWeek = () => {
-  //   console.log("Make Call: ");
-  //   axiosInstance.delete(`${serverAPI}/weekplan/`).then((response) => {
-  //     console.log("POST weekplan res: ", response.data);
-  //   });
-  //   axiosInstance.post(`${serverAPI}/weekplan/`, newWeek).then((response) => {
-  //     setWeekPlan(response.data);
-  //     console.log("newWeek POST weekplan res: ", response.data);
-  //   });
-  // };
+  useEffect(() => {
+    getWeekPlanCall();
+  }, []);
+
+  const deleteCurrentWeek = () => {
+    console.log("Make Call: ");
+    axiosInstance.delete(`${serverAPI}/weekplan/`).then((response) => {
+      console.log("DELETE weekplan res: ", response.data);
+      setWeekPlan(newWeek);
+    });
+    // axiosInstance.post(`${serverAPI}/weekplan/`, newWeek).then((response) => {
+    //   setWeekPlan(response.data);
+    //   console.log("newWeek DELETE weekplan res: ", response.data);
+    // });
+  };
 
   const getWeekPlanCall = () => {
     axiosInstance.get(`${serverAPI}/weekplan/`).then((response) => {
@@ -336,7 +338,7 @@ const WeekGrid = () => {
         <Box className="space-x-4">
           <Button onClick={loadTemplateWeek}>Load Template Week</Button>
           <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
-          {/* <Button onClick={deleteCurrentWeek}>Delete Current Week</Button> */}
+          <Button onClick={deleteCurrentWeek}>Delete Current Week</Button>
         </Box>
         <Box></Box>
       </Box>
