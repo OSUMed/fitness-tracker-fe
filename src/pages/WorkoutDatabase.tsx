@@ -296,8 +296,10 @@ const WorkoutDatabase = () => {
               </label>
               {workoutType === "cardio" && (
                 <>
-                  <label className="block">
-                    <Text className="text-gray-700">Name</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Name
+                    </Text>
                     <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -306,9 +308,9 @@ const WorkoutDatabase = () => {
                         setCardioForm({ ...cardioForm, name: e.target.value })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
+                  <Box>
                     <Text className="text-gray-700">Duration (minutes)</Text>
                     <input
                       type="string"
@@ -321,10 +323,12 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Distance (optional)</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Distance (optional)
+                    </Text>
                     <TextField.Input
                       type="number"
                       className="form-input mt-1 block w-full"
@@ -336,10 +340,12 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Intensity</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Intensity
+                    </Text>
                     <select
                       className="form-select block w-full mt-1"
                       onChange={(e) =>
@@ -353,10 +359,12 @@ const WorkoutDatabase = () => {
                       <option value="medium">Medium</option>
                       <option value="high">High</option>
                     </select>
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Info Link</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Info Link
+                    </Text>
                     <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -368,10 +376,12 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Notes</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Notes
+                    </Text>
                     <TextArea
                       className="form-textarea mt-1 block w-full"
                       rows={3}
@@ -380,7 +390,7 @@ const WorkoutDatabase = () => {
                         setCardioForm({ ...cardioForm, notes: e.target.value })
                       }
                     ></TextArea>
-                  </label>
+                  </Box>
                 </>
               )}
 
@@ -513,9 +523,11 @@ const WorkoutDatabase = () => {
               )}
 
               {workoutType === "stretch" && (
-                <>
-                  <label className="block">
-                    <Text className="text-gray-700">Name</Text>
+                <Box className="space-y-5">
+                  <Box>
+                    <Text as="label" size="3">
+                      Name
+                    </Text>
                     <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -524,10 +536,12 @@ const WorkoutDatabase = () => {
                         setStretchForm({ ...stretchForm, name: e.target.value })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Duration</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Duration
+                    </Text>
                     <TextField.Input
                       type="number"
                       className="form-input mt-1 block w-full"
@@ -539,10 +553,12 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Difficulty</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Difficulty
+                    </Text>
                     <select
                       className="form-select block w-full mt-1"
                       onChange={(e) =>
@@ -556,10 +572,12 @@ const WorkoutDatabase = () => {
                       <option value="medium">Medium</option>
                       <option value="hard">Hard</option>
                     </select>
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Info Link</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Info Link
+                    </Text>
                     <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -571,10 +589,12 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Notes</Text>
+                  <Box>
+                    <Text as="label" size="3">
+                      Notes
+                    </Text>
                     <TextArea
                       className="form-textarea mt-1 block w-full"
                       rows={3}
@@ -586,8 +606,8 @@ const WorkoutDatabase = () => {
                         })
                       }
                     ></TextArea>
-                  </label>
-                </>
+                  </Box>
+                </Box>
               )}
               <Box className="space-x-4">
                 <Button type="submit" color="green" variant="solid">
