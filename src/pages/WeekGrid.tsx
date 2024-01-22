@@ -346,32 +346,59 @@ const WeekGrid = () => {
   console.log("weekPlan is : ", weekPlan);
   console.log("weekPlan is typeof: ", typeof weekPlan);
   return (
-    <div className="space-y-4">
-      <Box className="flex flex-column justify-between space-x-4">
-        <Box className="space-x-4">
-          <Button onClick={loadTemplateWeek}>Load Template Week</Button>
-          <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
-          <Button onClick={deleteCurrentWeek}>Delete Current Week</Button>
+    <Box>
+      <div className="space-y-4">
+        <Box className="flex flex-column justify-between space-x-4">
+          <Box className="space-x-4">
+            <Button color="sky" onClick={loadTemplateWeek}>
+              Load Template Week
+            </Button>
+            <Button color="grass" onClick={saveTemplateWeek}>
+              Save Week As Template
+            </Button>
+            <Button color="tomato" onClick={deleteCurrentWeek}>
+              Delete Current Week
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              className="mt-6 text-lg py-4 px-8"
+              variant="solid"
+              color="green"
+              onClick={saveCurrentWeek}
+            >
+              Save Current Week
+            </Button>
+          </Box>
         </Box>
-        <Box>
-          <Button onClick={saveCurrentWeek}>Save Current Week</Button>
-        </Box>
-      </Box>
-      <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
-        <div className="flex overflow-x-auto snap-x snap-mandatory">
-          {weekPlan.map((dayPlan) => (
-            <DayCard
-              key={dayPlan.day}
-              dayPlan={dayPlan}
-              onEditClick={() => handleEditClick(dayPlan.day)}
-              handleSaveClick={handleSaveClick}
-              updateDayPlan={updateDayPlan}
-              saveBadgeCurrentWeek={saveBadgeCurrentWeek}
-            />
-          ))}
+        <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
+          <div className="flex overflow-x-auto snap-x snap-mandatory">
+            {weekPlan.map((dayPlan) => (
+              <DayCard
+                key={dayPlan.day}
+                dayPlan={dayPlan}
+                onEditClick={() => handleEditClick(dayPlan.day)}
+                handleSaveClick={handleSaveClick}
+                updateDayPlan={updateDayPlan}
+                saveBadgeCurrentWeek={saveBadgeCurrentWeek}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+
+      <Box className="sticky w-full bg-gray-100 bg-white p-4 shadow-md flex justify-end mt-4">
+        <Button
+          className="mt-6 text-lg py-4 px-8"
+          size="4"
+          variant="solid"
+          color="green"
+          onClick={saveCurrentWeek}
+        >
+          Save Current Week
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
@@ -642,6 +669,7 @@ const DayCard: React.FC<DayCardProps> = ({
               <Button
                 onClick={() => handleRemoveLastExercise(workout.id)}
                 className="text-white py-1 px-3 rounded mt-2"
+                color="gray"
               >
                 -
               </Button>
@@ -651,7 +679,7 @@ const DayCard: React.FC<DayCardProps> = ({
                   handleAddNewExercise(workout.id);
                 }}
               >
-                <Button>+</Button>
+                <Button color="gray">+</Button>
               </form>
             </Box>
           )}
@@ -689,12 +717,14 @@ const DayCard: React.FC<DayCardProps> = ({
               <Button
                 onClick={() => handleRemoveLastWorkout(dayOutline.day)}
                 className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
+                color="cyan"
               >
                 - Exercise
               </Button>
               <Button
                 onClick={() => handleAddNewWorkout(dayOutline.day)}
                 className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
+                color="cyan"
               >
                 + Exercise
               </Button>
@@ -703,6 +733,7 @@ const DayCard: React.FC<DayCardProps> = ({
             <Button
               className="text-white py-1 px-3 rounded mt-2"
               onClick={() => handleSaveDay(dayOutline.day)}
+              color="teal"
             >
               Save
             </Button>
@@ -711,6 +742,7 @@ const DayCard: React.FC<DayCardProps> = ({
                 setIsEditing(false);
                 setDayOutline(originalDayPlan); // Reset to original plan
               }}
+              color="amber"
             >
               Cancel
             </Button>
