@@ -49,6 +49,7 @@ console.log(
 const WorkoutDatabase = () => {
   const [exerciseList, setExerciseList] = useState<AlgoExercise[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchErrorText, setSearchErrorText] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [chosenExercise, setChosenExercise] = useState<AlgoExercise>();
@@ -67,7 +68,7 @@ const WorkoutDatabase = () => {
 
   const [workoutToEdit, setWorkoutToEdit] = useState<UserWorkout>();
 
-  const [workoutType, setWorkoutType] = useState("");
+  const [workoutType, setWorkoutType] = useState<string>("");
 
   const [filter, setFilter] = useState(""); // Filter by workout type
   const [searchQuery, setSearchQuery] = useState(""); // Search for workout name
@@ -226,6 +227,11 @@ const WorkoutDatabase = () => {
     // const results = gymService.findByExercise(JSON.stringify(value));
     console.log("gym searchTerm are: ", searchTerm);
     const results2 = gymService.findByExercise(searchTerm);
+    if (results2.length == 0) {
+      setSearchErrorText("Please submit a valid name");
+    } else {
+      setSearchErrorText(null);
+    }
     // console.log("gym results are: ", results2);
     // console.log("gym results test2 are: ", gymService.findByExercise("squats"));
     // const squats = gymService.findByExercise("squat");
@@ -408,9 +414,15 @@ const WorkoutDatabase = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTermHelper(e.target.value)}
                       />
-                      <Button type="button" onClick={handleSearch}>
-                        Search
-                      </Button>
+                      <Box className="flex flex-col w-1/2 mt-2">
+                        <Text className="text-red-600 text-sm">
+                          {searchErrorText}
+                        </Text>
+
+                        <Button type="button" onClick={handleSearch}>
+                          Search
+                        </Button>
+                      </Box>
                     </div>
                   </Box>
                   <label className="block">
@@ -549,13 +561,18 @@ const WorkoutDatabase = () => {
                   </label>
                 </>
               )}
-
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Submit
-              </button>
+              <Box className="space-x-4">
+                <Button type="submit" color="green" variant="solid">
+                  Submit
+                </Button>
+                <Button
+                  onClick={() => setWorkoutType("")}
+                  color="tomato"
+                  variant="soft"
+                >
+                  Cancel
+                </Button>
+              </Box>
             </form>
             {currentExercises && (
               <div>
