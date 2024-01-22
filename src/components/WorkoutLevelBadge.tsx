@@ -36,7 +36,7 @@ interface Props {
   workoutLevel: WorkoutLevel;
 }
 
-export const WorkoutLevelBadge = ({ workoutLevel }: Props) => {
+export const WorkoutLevelBadge = ({ workoutLevel = "LIGHT" }: Props) => {
   return (
     <Badge
       variant={workoutLevelMap[workoutLevel].style}

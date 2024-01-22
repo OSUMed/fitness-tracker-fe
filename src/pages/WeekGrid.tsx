@@ -19,7 +19,92 @@ interface DayPlan {
   duration: string;
   intensity: string;
 }
-
+const newWeek = [
+  {
+    id: 0,
+    day: "Sunday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Monday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Tuesday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Wednesday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Thursday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Friday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Saturday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+];
 const initialPlanData: DayPlan[] = [
   {
     id: 0,
@@ -126,29 +211,39 @@ const WeekGrid = () => {
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
-  useEffect(() => {}, [weekPlan]);
-  const makeCall = () => {
-    console.log("Make Call: ");
-    axiosInstance
-      // .get(`${serverAPI}/weekplan/`)
-      .post(`${serverAPI}/weekplan/`, initialPlanData)
-      .then((response) => console.log("POST weekplan res: ", response.data));
-  };
+  // useEffect(() => {
+  //   getWeekPlanCall();
+  // }, []);
+  // const deleteCurrentWeek = () => {
+  //   console.log("Make Call: ");
+  //   axiosInstance.delete(`${serverAPI}/weekplan/`).then((response) => {
+  //     console.log("POST weekplan res: ", response.data);
+  //   });
+  //   axiosInstance.post(`${serverAPI}/weekplan/`, newWeek).then((response) => {
+  //     setWeekPlan(response.data);
+  //     console.log("newWeek POST weekplan res: ", response.data);
+  //   });
+  // };
+
   const getWeekPlanCall = () => {
     axiosInstance.get(`${serverAPI}/weekplan/`).then((response) => {
       console.log("GET weekplan res: ", response.data);
+      setWeekPlan(response.data);
     });
   };
   const postWeekPlanCall = (updatedDayPlan) => {
     const updatedPlanData = weekPlan.map((plan) =>
       plan.day === updatedDayPlan.day ? updatedDayPlan : plan
     );
-    console.log("We are sending this to server: ", updatedPlanData);
+    console.log(
+      "We are sending this to server: ",
+      JSON.stringify(updatedPlanData)
+    );
     axiosInstance
-      .post(`${serverAPI}/weekplan/`, updatedPlanData)
+      .post(`${serverAPI}/weekplan/`, JSON.stringify(updatedPlanData))
       .then((response) => {
         console.log("POST weekplan res: ", response.data);
-        setWeekPlan(response.data.dayPlans);
+        setWeekPlan(response.data);
       })
       .catch((error) => {
         console.log("postWeekPlanCall error is: ", error);
@@ -169,7 +264,6 @@ const WeekGrid = () => {
 
   const handleSaveClick = (updatedDayPlan: DayPlan) => {
     console.log("updatedDayPlan is: ", updatedDayPlan);
-    const backUpPlan = [...weekPlan];
     try {
       setSelectedDay(null);
       console.log("handleSaveClick pressed!");
@@ -182,6 +276,17 @@ const WeekGrid = () => {
       // setWeekPlan(updatedPlanData);
     }
     // setIsEditing(true);
+  };
+  const saveUserWeek = () => {
+    axiosInstance
+      .post(`${serverAPI}/weekplan/`, JSON.stringify(weekPlan))
+      .then((response) => {
+        console.log("SAVED weekplan res: ", response.data);
+        setWeekPlan(response.data);
+      })
+      .catch((error) => {
+        console.log("postWeekPlanCall error is: ", error);
+      });
   };
 
   const findPlanForDay = (day: string) => {
@@ -227,11 +332,13 @@ const WeekGrid = () => {
   console.log("weekPlan is typeof: ", typeof weekPlan);
   return (
     <div className="space-y-4">
-      <Button onClick={makeCall}>Test me</Button>
-      <Box className="space-x-4">
-        <Button onClick={handleResetWeek}>Reset Week</Button>
-        <Button onClick={loadTemplateWeek}>Load Template Week</Button>
-        <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
+      <Box className="flex flex-column justify-between space-x-4">
+        <Box className="space-x-4">
+          <Button onClick={loadTemplateWeek}>Load Template Week</Button>
+          <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
+          {/* <Button onClick={deleteCurrentWeek}>Delete Current Week</Button> */}
+        </Box>
+        <Box></Box>
       </Box>
       <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
         <div className="flex overflow-x-auto snap-x snap-mandatory">
@@ -242,6 +349,7 @@ const WeekGrid = () => {
               onEditClick={() => handleEditClick(dayPlan.day)}
               handleSaveClick={handleSaveClick}
               updateDayPlan={updateDayPlan}
+              saveUserWeek={saveUserWeek}
             />
           ))}
         </div>
@@ -261,6 +369,7 @@ const DayCard: React.FC<DayCardProps> = ({
   dayPlan,
   handleSaveClick,
   updateDayPlan,
+  saveUserWeek,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [dayOutline, setDayOutline] = useState<DayPlan>(dayPlan!);
@@ -358,15 +467,16 @@ const DayCard: React.FC<DayCardProps> = ({
       // updateDayPlan(dayOutline);
       // setDayOutline({ ...dayOutline, intensity: originalDayPlan.intensity });
       setIsEditing(false);
+      console.log("handleSaveDay in Child");
     } catch (error) {
       updateDayPlan(originalDayPlan);
       console.log("Error, returning back to last saved: ", originalDayPlan);
     }
   };
 
-  useEffect(() => {
-    setDayOutline(dayPlan);
-  }, [dayPlan]);
+  // useEffect(() => {
+  //   setDayOutline(dayPlan);
+  // }, [dayPlan]);
 
   if (!dayPlan) {
     return <div>Loading...</div>;
@@ -433,7 +543,8 @@ const DayCard: React.FC<DayCardProps> = ({
     const newIntensity = intensities[toggleIntensityInd];
     console.log("updatedWorkouts is: ", newIntensity);
     setDayOutline({ ...dayPlan, intensity: newIntensity });
-    handleSaveDay(dayOutline.day);
+
+    // handleSaveDay(dayOutline.day);
   };
 
   return (
