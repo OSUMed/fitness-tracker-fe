@@ -41,6 +41,10 @@ const initialStretchValues: StretchWorkout = {
 const gymService = new GymService();
 const muscleGroups = gymService.getMuscleGroups();
 console.log("muscleGroups are: ", muscleGroups);
+console.log(
+  "gymService.findByExercise are: ",
+  gymService.findByExercise("squat")
+);
 
 const WorkoutDatabase = () => {
   const [exerciseList, setExerciseList] = useState<AlgoExercise[]>([]);
@@ -123,6 +127,7 @@ const WorkoutDatabase = () => {
       setStrengthForm(initialStrengthValues);
       setStretchForm(initialStretchValues);
       setWorkoutType("");
+      setSearchTerm("");
       setChosenExercise(undefined);
       setExerciseList([]);
     } catch (e) {
@@ -173,7 +178,10 @@ const WorkoutDatabase = () => {
   };
   const postExerciseDetails = (newExercise: UserWorkout) => {
     axiosInstance
-      .post(`${serverAPI}/details/`, newExercise)
+      .post(`${serverAPI}/details/`, {
+        newExercise,
+        exerciseType: newExercise.type,
+      })
       .then((response) => {
         console.log("POST postExerciseDetails res: ", response.data);
         setAllSavedExercise(response.data);
@@ -211,10 +219,20 @@ const WorkoutDatabase = () => {
       notes: "",
     });
   }
+  const squats = gymService.findByExercise("squats");
+  gymService.findByExercise("squat");
+  console.log("Squars rare: ", squats);
   const handleSearch = () => {
-    const results = gymService.findByExercise(searchTerm);
-    setExerciseList(results);
-    setCurrentPage(1);
+    // const results = gymService.findByExercise(JSON.stringify(value));
+    console.log("gym searchTerm are: ", searchTerm);
+    const results2 = gymService.findByExercise(searchTerm);
+    // console.log("gym results are: ", results2);
+    // console.log("gym results test2 are: ", gymService.findByExercise("squats"));
+    // const squats = gymService.findByExercise("squat");
+    console.log("gym results test2 are: ", squats);
+    setExerciseList(results2);
+
+    // setCurrentPage(1);
   };
 
   const setSearchTermHelper = (term: string) => {
@@ -356,7 +374,11 @@ const WorkoutDatabase = () => {
                       // value={selectedWorkoutType ?? ""}
                       onValueChange={(value) => {
                         const values = gymService.getByMuscleGroup(value);
-                        console.log(typeof values, values.exercises);
+                        console.log(
+                          "Search by muscle type: ",
+                          typeof values.exercises,
+                          values
+                        );
                         setExerciseList(values.exercises);
                       }}
                     >
@@ -385,9 +407,10 @@ const WorkoutDatabase = () => {
                         placeholder="Search for an exercise..."
                         value={searchTerm}
                         onChange={(e) => setSearchTermHelper(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                       />
-                      <button onClick={handleSearch}>Search</button>
+                      <Button type="button" onClick={handleSearch}>
+                        Search
+                      </Button>
                     </div>
                   </Box>
                   <label className="block">
