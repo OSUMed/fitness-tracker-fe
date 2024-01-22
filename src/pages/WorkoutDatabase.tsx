@@ -12,15 +12,16 @@ import axiosInstance from "../util/axiosInterceptor";
 const serverAPI = "http://localhost:8080";
 // Initial Values:
 const initialCardioValues: CardioWorkout = {
+  type: "cardio",
   name: "",
   duration: 0,
   distance: 0,
-  intensity: "",
   infoLink: "",
   notes: "",
 };
 
 const initialStrengthValues: StrengthWorkout = {
+  type: "strength",
   name: "",
   muscle: "",
   infoLink: "",
@@ -28,6 +29,7 @@ const initialStrengthValues: StrengthWorkout = {
 };
 
 const initialStretchValues: StretchWorkout = {
+  type: "stretch",
   name: "",
   duration: 0,
   difficulty: "",
@@ -113,15 +115,19 @@ const WorkoutDatabase = () => {
     } else if (workoutType === "stretch") {
       savedWorkout = { ...stretchForm };
     }
-
-    console.log("Saved Workout:", savedWorkout);
-    setAllSavedExercise([...allSavedExercise, savedWorkout] as UserWorkout[]);
-    setCardioForm(initialCardioValues);
-    setStrengthForm(initialStrengthValues);
-    setStretchForm(initialStretchValues);
-    setWorkoutType("");
-    setChosenExercise(undefined);
-    setExerciseList([]);
+    try {
+      console.log("saving exercise via POST request... ", savedWorkout);
+      postExerciseDetails(savedWorkout!);
+      setAllSavedExercise([...allSavedExercise, savedWorkout] as UserWorkout[]);
+      setCardioForm(initialCardioValues);
+      setStrengthForm(initialStrengthValues);
+      setStretchForm(initialStretchValues);
+      setWorkoutType("");
+      setChosenExercise(undefined);
+      setExerciseList([]);
+    } catch (e) {
+      console.log("POST failed: ", e);
+    }
   };
 
   const exercisesPerPage = 5;
@@ -143,13 +149,14 @@ const WorkoutDatabase = () => {
 
     setIsUpdateModalVisible(true);
   };
-  const onSaveUpdatedWorkout = (updatedWorkout) => {
+  const onSaveUpdatedWorkout = (updatedWorkout: UserWorkout) => {
     console.log("onSaveUpdatedWorkout updatedWorkout is: ", updatedWorkout);
-    setAllSavedExercise((prevWorkouts) =>
-      prevWorkouts.map((workout) =>
-        workout.id === updatedWorkout.id ? updatedWorkout : workout
-      )
-    );
+    updateExerciseDetails(updatedWorkout);
+    // setAllSavedExercise((prevWorkouts) =>
+    //   prevWorkouts.map((workout) =>
+    //     workout.id === updatedWorkout.id ? updatedWorkout : workout
+    //   )
+    // );
     setIsUpdateModalVisible(false);
   };
   const deleteDatabaseWorkout = (id) => {
@@ -162,9 +169,17 @@ const WorkoutDatabase = () => {
       setAllSavedExercise(response.data);
     });
   };
-  const postExerciseDetails = () => {
-    axiosInstance.get(`${serverAPI}/details/findAll`).then((response) => {
-      console.log("GET getExerciseDetails res: ", response.data);
+  const postExerciseDetails = (newExercise: UserWorkout) => {
+    axiosInstance
+      .post(`${serverAPI}/details/`, newExercise)
+      .then((response) => {
+        console.log("POST postExerciseDetails res: ", response.data);
+        setAllSavedExercise(response.data);
+      });
+  };
+  const updateExerciseDetails = (newExercise: UserWorkout) => {
+    axiosInstance.put(`${serverAPI}/details/`, newExercise).then((response) => {
+      console.log("PUT updateExerciseDetails res: ", response.data);
       setAllSavedExercise(response.data);
     });
   };
@@ -586,7 +601,7 @@ const WorkoutDatabase = () => {
       {isUpdateModalVisible && (
         <WorkoutUpdateModal
           workout={workoutToEdit}
-          onSave={(updatedWorkout) => {
+          onSaveUpdatedWorkout={(updatedWorkout) => {
             onSaveUpdatedWorkout(updatedWorkout);
           }}
           onCancel={() => setIsUpdateModalVisible(false)}
@@ -610,7 +625,9 @@ const WorkoutCard: React.FC<WorkoutProps> = ({
       <h3 className="font-bold text-lg mb-2">{workout.name}</h3>
       {"type" in workout && (
         <p>
-          Type: {workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
+          Type:{" "}
+          {workout.type &&
+            workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
         </p>
       )}
 
@@ -638,7 +655,7 @@ const WorkoutCard: React.FC<WorkoutProps> = ({
   );
 };
 
-const WorkoutUpdateModal = ({ workout, onSave, onCancel }) => {
+const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
   const [formState, setFormState] = useState(workout);
 
   const handleChange = (e) => {
@@ -652,7 +669,7 @@ const WorkoutUpdateModal = ({ workout, onSave, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("formState is: ", formState);
-    onSave(formState);
+    onSaveUpdatedWorkout(formState);
   };
 
   return (
