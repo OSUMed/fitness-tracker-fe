@@ -1,11 +1,5 @@
 // Workout Types:
 
-type AlgoExercise = {
-  name: string;
-  muscle: string;
-  infoLink: string;
-};
-
 type StrengthWorkout = {
   type: string;
   id: number;
@@ -21,7 +15,6 @@ type CardioWorkout = {
   name: string;
   duration: number;
   distance?: number;
-  intensity: string;
   infoLink: string;
   notes: string;
 };
