@@ -221,10 +221,6 @@ const WeekGrid = () => {
       console.log("DELETE weekplan res: ", response.data);
       setWeekPlan(newWeek);
     });
-    // axiosInstance.post(`${serverAPI}/weekplan/`, newWeek).then((response) => {
-    //   setWeekPlan(response.data);
-    //   console.log("newWeek DELETE weekplan res: ", response.data);
-    // });
   };
 
   const getWeekPlanCall = () => {
@@ -232,6 +228,23 @@ const WeekGrid = () => {
       console.log("GET weekplan res: ", response.data);
       setWeekPlan(response.data);
     });
+  };
+  const saveCurrentWeek = () => {
+    axiosInstance.post(`${serverAPI}/weekplan/`, weekPlan).then((response) => {
+      console.log("GET weekplan res: ", response.data);
+      setWeekPlan(response.data);
+    });
+  };
+  const saveBadgeCurrentWeek = (newDayPlan: DayPlan) => {
+    const updatedPlanData = weekPlan.map((plan) =>
+      plan.day === newDayPlan.day ? newDayPlan : plan
+    );
+    setWeekPlan(updatedPlanData);
+    // axiosInstance
+    //   .post(`${serverAPI}/weekplan/`, updatedPlanData)
+    //   .then((response) => {
+    //     console.log("GET weekplan res: ", response.data);
+    //   });
   };
   const postWeekPlanCall = (updatedDayPlan) => {
     const updatedPlanData = weekPlan.map((plan) =>
@@ -340,7 +353,9 @@ const WeekGrid = () => {
           <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
           <Button onClick={deleteCurrentWeek}>Delete Current Week</Button>
         </Box>
-        <Box></Box>
+        <Box>
+          <Button onClick={saveCurrentWeek}>Save Current Week</Button>
+        </Box>
       </Box>
       <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
         <div className="flex overflow-x-auto snap-x snap-mandatory">
@@ -351,7 +366,7 @@ const WeekGrid = () => {
               onEditClick={() => handleEditClick(dayPlan.day)}
               handleSaveClick={handleSaveClick}
               updateDayPlan={updateDayPlan}
-              saveUserWeek={saveUserWeek}
+              saveBadgeCurrentWeek={saveBadgeCurrentWeek}
             />
           ))}
         </div>
@@ -364,6 +379,7 @@ interface DayCardProps {
   dayPlan: DayPlan;
   onEditClick: () => void;
   handleSaveClick: (dayOutline: DayPlan) => void;
+  saveBadgeCurrentWeek: (dayOutline: DayPlan) => void;
   updateDayPlan: (updatedDayPlan: DayPlan) => void;
 }
 
@@ -371,7 +387,7 @@ const DayCard: React.FC<DayCardProps> = ({
   dayPlan,
   handleSaveClick,
   updateDayPlan,
-  saveUserWeek,
+  saveBadgeCurrentWeek,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [dayOutline, setDayOutline] = useState<DayPlan>(dayPlan!);
@@ -544,8 +560,9 @@ const DayCard: React.FC<DayCardProps> = ({
     );
     const newIntensity = intensities[toggleIntensityInd];
     console.log("updatedWorkouts is: ", newIntensity);
-    setDayOutline({ ...dayPlan, intensity: newIntensity });
-
+    const newDayPlan = { ...dayPlan, intensity: newIntensity };
+    saveBadgeCurrentWeek(newDayPlan);
+    setDayOutline(newDayPlan);
     // handleSaveDay(dayOutline.day);
   };
 
