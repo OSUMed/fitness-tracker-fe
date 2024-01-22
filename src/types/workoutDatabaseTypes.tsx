@@ -1,4 +1,9 @@
 // Workout Types:
+type AlgoExercise = {
+  name: string;
+  muscle: string;
+  infoLink: string;
+};
 
 type StrengthWorkout = {
   type: string;

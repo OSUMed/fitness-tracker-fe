@@ -8,6 +8,8 @@ import "keen-slider/keen-slider.min.css";
 import { allDummyWorkouts } from "../mockdata/defaultworkouts";
 import { WheelControls } from "../components/ReusableSlider";
 import { Workout } from "../types/workoutTypes";
+import axiosInstance from "../util/axiosInterceptor";
+const serverAPI = "http://localhost:8080";
 // Initial Values:
 const initialCardioValues: CardioWorkout = {
   name: "",
@@ -45,8 +47,7 @@ const WorkoutDatabase = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [chosenExercise, setChosenExercise] = useState<AlgoExercise>();
   const [savedExercise, setSavedExercise] = useState<UserWorkout>();
-  const [allSavedExercise, setAllSavedExercise] =
-    useState<UserWorkout[]>(allDummyWorkouts);
+  const [allSavedExercise, setAllSavedExercise] = useState<UserWorkout[]>([]);
 
   const [cardioForm, setCardioForm] =
     useState<CardioWorkout>(initialCardioValues);
@@ -155,6 +156,21 @@ const WorkoutDatabase = () => {
     const newWorkouts = allSavedExercise.filter((workout) => workout.id !== id);
     setAllSavedExercise(newWorkouts);
   };
+  const getExerciseDetails = () => {
+    axiosInstance.get(`${serverAPI}/details/findAll`).then((response) => {
+      console.log("GET getExerciseDetails res: ", response.data);
+      setAllSavedExercise(response.data);
+    });
+  };
+  const postExerciseDetails = () => {
+    axiosInstance.get(`${serverAPI}/details/findAll`).then((response) => {
+      console.log("GET getExerciseDetails res: ", response.data);
+      setAllSavedExercise(response.data);
+    });
+  };
+  useEffect(() => {
+    getExerciseDetails();
+  }, []);
 
   function handleExerciseClick(exercise: AlgoExercise): void {
     console.log("exercise is: ", exercise);
