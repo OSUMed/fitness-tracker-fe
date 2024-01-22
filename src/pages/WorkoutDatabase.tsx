@@ -152,6 +152,7 @@ const WorkoutDatabase = () => {
   const onSaveUpdatedWorkout = (updatedWorkout: UserWorkout) => {
     console.log("onSaveUpdatedWorkout updatedWorkout is: ", updatedWorkout);
     updateExerciseDetails(updatedWorkout);
+
     // setAllSavedExercise((prevWorkouts) =>
     //   prevWorkouts.map((workout) =>
     //     workout.id === updatedWorkout.id ? updatedWorkout : workout
@@ -159,9 +160,10 @@ const WorkoutDatabase = () => {
     // );
     setIsUpdateModalVisible(false);
   };
-  const deleteDatabaseWorkout = (id) => {
-    const newWorkouts = allSavedExercise.filter((workout) => workout.id !== id);
-    setAllSavedExercise(newWorkouts);
+  const deleteDatabaseWorkout = (exerciseDetailId: string) => {
+    deleteExerciseDetails(exerciseDetailId);
+    // const newWorkouts = allSavedExercise.filter((workout) => workout.id !== id);
+    // setAllSavedExercise(newWorkouts);
   };
   const getExerciseDetails = () => {
     axiosInstance.get(`${serverAPI}/details/findAll`).then((response) => {
@@ -177,11 +179,21 @@ const WorkoutDatabase = () => {
         setAllSavedExercise(response.data);
       });
   };
-  const updateExerciseDetails = (newExercise: UserWorkout) => {
-    axiosInstance.put(`${serverAPI}/details/`, newExercise).then((response) => {
-      console.log("PUT updateExerciseDetails res: ", response.data);
-      setAllSavedExercise(response.data);
-    });
+  const updateExerciseDetails = (updatedExercise: UserWorkout) => {
+    axiosInstance
+      .put(`${serverAPI}/details/${updatedExercise.id}`, updatedExercise)
+      .then((response) => {
+        console.log("PUT updateExerciseDetails res: ", response.data);
+        setAllSavedExercise(response.data);
+      });
+  };
+  const deleteExerciseDetails = (exerciseId: string) => {
+    axiosInstance
+      .delete(`${serverAPI}/details/${exerciseId}`)
+      .then((response) => {
+        console.log("DELETE updateExerciseDetails res: ", response.data);
+        setAllSavedExercise(response.data);
+      });
   };
   useEffect(() => {
     getExerciseDetails();
