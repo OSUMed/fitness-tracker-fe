@@ -298,7 +298,7 @@ const WorkoutDatabase = () => {
                 <>
                   <label className="block">
                     <Text className="text-gray-700">Name</Text>
-                    <input
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter exercise name"
@@ -325,7 +325,7 @@ const WorkoutDatabase = () => {
 
                   <label className="block">
                     <Text className="text-gray-700">Distance (optional)</Text>
-                    <input
+                    <TextField.Input
                       type="number"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter distance (km or miles)"
@@ -357,7 +357,7 @@ const WorkoutDatabase = () => {
 
                   <label className="block">
                     <Text className="text-gray-700">Info Link</Text>
-                    <input
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter URL to info"
@@ -385,70 +385,84 @@ const WorkoutDatabase = () => {
               )}
 
               {workoutType === "strength" && (
-                <>
-                  <Box className="text-xl font-medium">
-                    <Text as="label">Search by muscle type</Text>
-                    <Select.Root
-                      size="3"
-                      // value={selectedWorkoutType ?? ""}
-                      onValueChange={(value) => {
-                        const values = gymService.getByMuscleGroup(value);
-                        console.log(
-                          "Search by muscle type: ",
-                          typeof values.exercises,
-                          values
-                        );
-                        setExerciseList(values.exercises);
-                      }}
-                    >
-                      <Select.Trigger
-                        placeholder="Pick A Workout Type"
-                        variant="surface"
-                      />
-                      <Select.Content
-                        variant="solid"
-                        position="popper"
-                        sideOffset={2}
-                      >
-                        <Select.Group>
-                          <Select.Label>Workout Options</Select.Label>
-                          {muscleGroups.map((group, index) => (
-                            <Select.Item key={index} value={group}>
-                              {group}
-                            </Select.Item>
-                          ))}
-                        </Select.Group>
-                      </Select.Content>
-                    </Select.Root>
+                <Box className="space-y-5">
+                  <Box className="text-xl font-medium space-y-3">
                     <Box>
-                      <Text as="label">Search by exercise name</Text>
-                      <TextField.Input
-                        placeholder="Search for an exercise..."
-                        value={searchTerm}
-                        onChange={(e) => {
-                          setSearchTerm(e.target.value);
-                          const values = gymService.findByExercise(
-                            e.target.value
-                          );
-                          setExerciseList(values);
-                        }}
-                        // onChange={(e) => setSearchTermHelper(e.target.value)}
-                      />
+                      <Text as="label" size="3">
+                        Search by muscle type
+                      </Text>
+                      <Box>
+                        <Select.Root
+                          size="3"
+                          // value={selectedWorkoutType ?? ""}
+                          onValueChange={(value) => {
+                            const values = gymService.getByMuscleGroup(value);
+                            console.log(
+                              "Search by muscle type: ",
+                              typeof values.exercises,
+                              values
+                            );
+                            setExerciseList(values.exercises);
+                          }}
+                        >
+                          <Select.Trigger
+                            placeholder="Pick A Workout Type"
+                            variant="surface"
+                          />
+                          <Select.Content
+                            variant="solid"
+                            position="popper"
+                            sideOffset={2}
+                          >
+                            <Select.Group>
+                              <Select.Label>Workout Options</Select.Label>
+                              {muscleGroups.map((group, index) => (
+                                <Select.Item key={index} value={group}>
+                                  {group}
+                                </Select.Item>
+                              ))}
+                            </Select.Group>
+                          </Select.Content>
+                        </Select.Root>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Box>
+                        <Text as="label" size="3">
+                          Search by exercise name
+                        </Text>
+                        <TextField.Input
+                          placeholder="Search for an exercise..."
+                          value={searchTerm}
+                          onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            const values = gymService.findByExercise(
+                              e.target.value
+                            );
+                            setExerciseList(values);
+                          }}
+                          // onChange={(e) => setSearchTermHelper(e.target.value)}
+                        />
+                      </Box>
                     </Box>
                   </Box>
-                  <label className="block">
-                    <Text className="text-gray-700">Name</Text>
-                    <input
+                  <Box>
+                    <Text as="label" size="3">
+                      Name
+                    </Text>
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter exercise name"
                       value={chosenExercise?.name ?? ""}
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Muscle Group</Text>
-                    <input
+                  <Box>
+                    <Text as="label" size="3">
+                      Muscle Group
+                    </Text>
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter muscle group"
@@ -460,11 +474,13 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
+                  </Box>
 
-                  <label className="block">
-                    <Text className="text-gray-700">Info Link</Text>
-                    <input
+                  <Box>
+                    <Text as="label" size="3">
+                      Info Link
+                    </Text>
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter URL to info"
@@ -476,10 +492,11 @@ const WorkoutDatabase = () => {
                         })
                       }
                     />
-                  </label>
-
-                  <label className="block">
-                    <Text className="text-gray-700">Notes</Text>
+                  </Box>
+                  <Box>
+                    <Text as="label" size="3">
+                      Notes
+                    </Text>
                     <TextArea
                       className="form-TextArea mt-1 block w-full"
                       rows={3}
@@ -491,15 +508,15 @@ const WorkoutDatabase = () => {
                         })
                       }
                     ></TextArea>
-                  </label>
-                </>
+                  </Box>
+                </Box>
               )}
 
               {workoutType === "stretch" && (
                 <>
                   <label className="block">
                     <Text className="text-gray-700">Name</Text>
-                    <input
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter stretch name"
@@ -511,7 +528,7 @@ const WorkoutDatabase = () => {
 
                   <label className="block">
                     <Text className="text-gray-700">Duration</Text>
-                    <input
+                    <TextField.Input
                       type="number"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter duration in minutes"
@@ -543,7 +560,7 @@ const WorkoutDatabase = () => {
 
                   <label className="block">
                     <Text className="text-gray-700">Info Link</Text>
-                    <input
+                    <TextField.Input
                       type="text"
                       className="form-input mt-1 block w-full"
                       placeholder="Enter URL to info"
@@ -622,7 +639,7 @@ const WorkoutDatabase = () => {
       </Box>
       <Box>
         <Box className="flex space-x-3 mt-10">
-          <input
+          <TextField.Input
             type="text"
             placeholder="Search by name..."
             value={searchQuery}
@@ -740,7 +757,7 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <Box>
             <label className="text-gray-600">Name:</label>
-            <input
+            <TextField.Input
               type="text"
               name="name"
               value={formState.name}
@@ -752,7 +769,7 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
           {"muscle" in workout && (
             <Box>
               <label className="text-gray-600">Muscle Group:</label>
-              <input
+              <TextField.Input
                 type="text"
                 name="muscle"
                 value={formState.muscle}
@@ -765,7 +782,7 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
           {"duration" in workout && (
             <Box>
               <label className="text-gray-600">Duration (minutes):</label>
-              <input
+              <TextField.Input
                 type="number"
                 name="duration"
                 value={formState.duration}
@@ -809,7 +826,7 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
 
           <Box>
             <label className="text-gray-600">Info Link:</label>
-            <input
+            <TextField.Input
               type="text"
               name="infoLink"
               value={formState.infoLink}
