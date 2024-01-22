@@ -350,13 +350,13 @@ const WeekGrid = () => {
       <div className="space-y-4">
         <Box className="flex flex-column justify-between space-x-4">
           <Box className="space-x-4">
-            <Button color="sky" onClick={loadTemplateWeek}>
-              Load Template Week
-            </Button>
             <Button color="grass" onClick={saveTemplateWeek}>
               Save Week As Template
             </Button>
-            <Button color="tomato" onClick={deleteCurrentWeek}>
+            <Button variant="soft" color="gray" onClick={loadTemplateWeek}>
+              Load Template Week
+            </Button>
+            <Button variant="soft" color="orange" onClick={deleteCurrentWeek}>
               Delete Current Week
             </Button>
           </Box>
@@ -716,14 +716,12 @@ const DayCard: React.FC<DayCardProps> = ({
             <Box className="flex justify-evenly space-x-2">
               <Button
                 onClick={() => handleRemoveLastWorkout(dayOutline.day)}
-                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
                 color="cyan"
               >
                 - Exercise
               </Button>
               <Button
                 onClick={() => handleAddNewWorkout(dayOutline.day)}
-                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
                 color="cyan"
               >
                 + Exercise
@@ -733,7 +731,9 @@ const DayCard: React.FC<DayCardProps> = ({
             <Button
               className="text-white py-1 px-3 rounded mt-2"
               onClick={() => handleSaveDay(dayOutline.day)}
-              color="teal"
+              size="3"
+              variant="solid"
+              color="jade"
             >
               Save
             </Button>
@@ -742,7 +742,8 @@ const DayCard: React.FC<DayCardProps> = ({
                 setIsEditing(false);
                 setDayOutline(originalDayPlan); // Reset to original plan
               }}
-              color="amber"
+              variant="soft"
+              color="orange"
             >
               Cancel
             </Button>
@@ -771,7 +772,7 @@ const SelectIntensityUI: React.FC<SelectIntensityUIProps> = ({
         }}
       >
         <Select.Trigger
-          className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-blue-500 text-white shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+          className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-gray-300 text-gray-800 shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
           aria-label="Intensities"
         >
           <Select.Value>{dayOutline.intensity} </Select.Value>
