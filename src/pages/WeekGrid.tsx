@@ -617,31 +617,17 @@ const DayCard: React.FC<DayCardProps> = ({
         />
       </Box>
       {dayOutline.workouts.map((workout, index) => (
-        <div key={index} className="mb-4">
+        <div key={index} className="mb-4 space-y-2">
           {isEditing ? (
-            <>
-              <label hidden={!isEditing} htmlFor="type">
-                Excercise Type
-              </label>
-              <select
-                id="type"
-                value={workout.type}
-                disabled={!isEditing}
-                hidden={!isEditing}
-                onChange={(e) =>
-                  handleWorkoutTypeChange(workout.id, e.target.value)
-                }
-                className="border rounded px-2 py-1 w-full"
-              >
-                <option value="Stretch">Stretch</option>
-                <option value="Strength">Strength</option>
-                <option value="Cardio">Cardio</option>
-              </select>
-            </>
+            <SelectExerciseType
+              workout={workout}
+              dayOutline={dayOutline}
+              handleWorkoutTypeChange={handleWorkoutTypeChange}
+            />
           ) : (
-            <div className="font-bold text-l mb-1 underline">
+            <Box className="font-bold text-l mb-1 underline">
               {workout.type}
-            </div>
+            </Box>
           )}
           {workout.exercises.map((exercise, index) =>
             isEditing ? (
@@ -675,7 +661,7 @@ const DayCard: React.FC<DayCardProps> = ({
               </Button>
               <form
                 onSubmit={(e) => {
-                  e.preventDefault(); // Prevents the default form submission behavior
+                  e.preventDefault();
                   handleAddNewExercise(workout.id);
                 }}
               >
@@ -816,6 +802,74 @@ const SelectIntensityUI: React.FC<SelectIntensityUIProps> = ({
         </Select.Portal>
       </Select.Root>
     </>
+  );
+};
+
+interface SelectExerciseTypeProps {
+  workout: PlannedWorkout;
+  dayOutline: DayPlan;
+  handleWorkoutTypeChange: (workoutId: number, newType: string) => void;
+}
+
+const SelectExerciseType: React.FC<SelectExerciseTypeProps> = ({
+  workout,
+  dayOutline,
+  handleWorkoutTypeChange,
+}) => {
+  return (
+    <Box>
+      <Text>Excercise Type</Text>
+      <Select.Root
+        value={workout.type}
+        onValueChange={(value) => {
+          handleWorkoutTypeChange(workout.id, value);
+        }}
+      >
+        <Select.Trigger
+          className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-gray-300 text-gray-800 shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
+          aria-label="Intensities"
+        >
+          <Select.Value>{workout.type} </Select.Value>
+          <Select.Icon />
+        </Select.Trigger>
+
+        <Select.Portal>
+          <Select.Content
+            position="popper"
+            className="overflow-hidden bg-white rounded-md shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
+          >
+            <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Viewport className="p-[10px]">
+              <Select.Group>
+                <Select.Label className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100">
+                  Exercise Type
+                </Select.Label>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Stretch"
+                >
+                  Stretch
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Strength"
+                >
+                  Strength
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Cardio"
+                >
+                  Cardio
+                </Select.Item>
+              </Select.Group>
+            </Select.Viewport>
+            <Select.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Arrow />
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
+    </Box>
   );
 };
 
