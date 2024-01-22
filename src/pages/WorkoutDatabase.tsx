@@ -1,4 +1,11 @@
-import { Box, Select, TextField, Text, Button } from "@radix-ui/themes";
+import {
+  Box,
+  Select,
+  TextField,
+  Text,
+  TextArea,
+  Button,
+} from "@radix-ui/themes";
 import React, { useState, useRef, useEffect } from "react";
 import { GymService } from "js-gym";
 import ReactPaginate from "react-paginate";
@@ -251,6 +258,12 @@ const WorkoutDatabase = () => {
     setSearchTerm(term);
   };
 
+  const handleFormClose = () => {
+    setWorkoutType("");
+    setExerciseList([]);
+    setSearchTerm("");
+  };
+
   function clearFilters(
     event: MouseEvent<HTMLButtonElement, MouseEvent>
   ): void {
@@ -259,17 +272,17 @@ const WorkoutDatabase = () => {
   }
 
   return (
-    <div>
+    <Box>
       {" "}
       <Box className="text-4xl font-bold text-center mb-6">
         Workout Database
       </Box>
-      <div className="w-full flex justify-center items-center px-4">
+      <Box className="w-full flex justify-center items-center px-4">
         <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
           <Box className="flex space-x-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <label className="block">
-                <span className="text-gray-700">Workout Type</span>
+                <Text className="text-gray-700">Workout Type</Text>
                 <select
                   className="form-select block w-full mt-1"
                   value={workoutType}
@@ -284,7 +297,7 @@ const WorkoutDatabase = () => {
               {workoutType === "cardio" && (
                 <>
                   <label className="block">
-                    <span className="text-gray-700">Name</span>
+                    <Text className="text-gray-700">Name</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -296,7 +309,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Duration (minutes)</span>
+                    <Text className="text-gray-700">Duration (minutes)</Text>
                     <input
                       type="string"
                       className="form-input mt-1 block w-full"
@@ -311,7 +324,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Distance (optional)</span>
+                    <Text className="text-gray-700">Distance (optional)</Text>
                     <input
                       type="number"
                       className="form-input mt-1 block w-full"
@@ -326,7 +339,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Intensity</span>
+                    <Text className="text-gray-700">Intensity</Text>
                     <select
                       className="form-select block w-full mt-1"
                       onChange={(e) =>
@@ -343,7 +356,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Info Link</span>
+                    <Text className="text-gray-700">Info Link</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -358,15 +371,15 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Notes</span>
-                    <textarea
+                    <Text className="text-gray-700">Notes</Text>
+                    <TextArea
                       className="form-textarea mt-1 block w-full"
                       rows={3}
                       placeholder="Enter any notes"
                       onChange={(e) =>
                         setCardioForm({ ...cardioForm, notes: e.target.value })
                       }
-                    ></textarea>
+                    ></TextArea>
                   </label>
                 </>
               )}
@@ -407,26 +420,24 @@ const WorkoutDatabase = () => {
                         </Select.Group>
                       </Select.Content>
                     </Select.Root>
-                    <div>
+                    <Box>
                       <Text as="label">Search by exercise name</Text>
                       <TextField.Input
                         placeholder="Search for an exercise..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTermHelper(e.target.value)}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          const values = gymService.findByExercise(
+                            e.target.value
+                          );
+                          setExerciseList(values);
+                        }}
+                        // onChange={(e) => setSearchTermHelper(e.target.value)}
                       />
-                      <Box className="flex flex-col w-1/2 mt-2">
-                        <Text className="text-red-600 text-sm">
-                          {searchErrorText}
-                        </Text>
-
-                        <Button type="button" onClick={handleSearch}>
-                          Search
-                        </Button>
-                      </Box>
-                    </div>
+                    </Box>
                   </Box>
                   <label className="block">
-                    <span className="text-gray-700">Name</span>
+                    <Text className="text-gray-700">Name</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -436,7 +447,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Muscle Group</span>
+                    <Text className="text-gray-700">Muscle Group</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -452,7 +463,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Info Link</span>
+                    <Text className="text-gray-700">Info Link</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -468,9 +479,9 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Notes</span>
-                    <textarea
-                      className="form-textarea mt-1 block w-full"
+                    <Text className="text-gray-700">Notes</Text>
+                    <TextArea
+                      className="form-TextArea mt-1 block w-full"
                       rows={3}
                       placeholder="Enter any notes"
                       onChange={(e) =>
@@ -479,7 +490,7 @@ const WorkoutDatabase = () => {
                           notes: e.target.value,
                         })
                       }
-                    ></textarea>
+                    ></TextArea>
                   </label>
                 </>
               )}
@@ -487,7 +498,7 @@ const WorkoutDatabase = () => {
               {workoutType === "stretch" && (
                 <>
                   <label className="block">
-                    <span className="text-gray-700">Name</span>
+                    <Text className="text-gray-700">Name</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -499,7 +510,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Duration</span>
+                    <Text className="text-gray-700">Duration</Text>
                     <input
                       type="number"
                       className="form-input mt-1 block w-full"
@@ -514,7 +525,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Difficulty</span>
+                    <Text className="text-gray-700">Difficulty</Text>
                     <select
                       className="form-select block w-full mt-1"
                       onChange={(e) =>
@@ -531,7 +542,7 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Info Link</span>
+                    <Text className="text-gray-700">Info Link</Text>
                     <input
                       type="text"
                       className="form-input mt-1 block w-full"
@@ -546,8 +557,8 @@ const WorkoutDatabase = () => {
                   </label>
 
                   <label className="block">
-                    <span className="text-gray-700">Notes</span>
-                    <textarea
+                    <Text className="text-gray-700">Notes</Text>
+                    <TextArea
                       className="form-textarea mt-1 block w-full"
                       rows={3}
                       placeholder="Enter any notes"
@@ -557,7 +568,7 @@ const WorkoutDatabase = () => {
                           notes: e.target.value,
                         })
                       }
-                    ></textarea>
+                    ></TextArea>
                   </label>
                 </>
               )}
@@ -565,19 +576,15 @@ const WorkoutDatabase = () => {
                 <Button type="submit" color="green" variant="solid">
                   Submit
                 </Button>
-                <Button
-                  onClick={() => setWorkoutType("")}
-                  color="tomato"
-                  variant="soft"
-                >
+                <Button onClick={handleFormClose} color="tomato" variant="soft">
                   Cancel
                 </Button>
               </Box>
             </form>
             {currentExercises && (
-              <div>
+              <Box>
                 {currentExercises.map((exercise, index) => (
-                  <div
+                  <Box
                     key={index}
                     onClick={() => handleExerciseClick(exercise)}
                     className="cursor-pointer p-4 border border-gray-200 rounded-md hover:bg-gray-100"
@@ -592,7 +599,7 @@ const WorkoutDatabase = () => {
                     >
                       Video & Info Link
                     </a>
-                  </div>
+                  </Box>
                 ))}
                 {exerciseList && exerciseList.length > exercisesPerPage && (
                   <ReactPaginate
@@ -608,13 +615,13 @@ const WorkoutDatabase = () => {
                     activeClassName={"bg-blue-500 text-white"}
                   />
                 )}
-              </div>
+              </Box>
             )}
           </Box>
         </Box>
-      </div>
-      <div>
-        <div className="flex space-x-3 mt-10">
+      </Box>
+      <Box>
+        <Box className="flex space-x-3 mt-10">
           <input
             type="text"
             placeholder="Search by name..."
@@ -632,24 +639,24 @@ const WorkoutDatabase = () => {
             <option value="stretch">Stretch</option>
           </select>
           <Button onClick={clearFilters}>Clear Filters</Button>
-        </div>
-        <div
+        </Box>
+        <Box
           ref={sliderRef}
           className="keen-slider"
           key={filteredWorkouts.length}
         >
           {filteredWorkouts.map((workout, index) => (
-            <div key={index} className="keen-slider__slide p-4">
+            <Box key={index} className="keen-slider__slide p-4">
               <WorkoutCard
                 key={workout.id}
                 workout={workout}
                 onUpdate={updateDatabaseWorkout}
                 onDelete={deleteDatabaseWorkout}
               />
-            </div>
+            </Box>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
       {isUpdateModalVisible && (
         <WorkoutUpdateModal
           workout={workoutToEdit}
@@ -659,7 +666,7 @@ const WorkoutDatabase = () => {
           onCancel={() => setIsUpdateModalVisible(false)}
         />
       )}
-    </div>
+    </Box>
   );
 };
 type WorkoutProps = {
@@ -673,7 +680,7 @@ const WorkoutCard: React.FC<WorkoutProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="border rounded-md p-4 m-2 min-w-[200px] shadow">
+    <Box className="border rounded-md p-4 m-2 min-w-[200px] shadow">
       <h3 className="font-bold text-lg mb-2">{workout.name}</h3>
       {"type" in workout && (
         <p>
@@ -699,11 +706,11 @@ const WorkoutCard: React.FC<WorkoutProps> = ({
       {workout.notes && (
         <p className="mt-2 text-sm text-gray-600">Notes: {workout.notes}</p>
       )}
-      <div className="space-x-3 mt-3">
+      <Box className="space-x-3 mt-3">
         <Button onClick={() => onUpdate(workout.id)}>Update</Button>
         <Button onClick={() => onDelete(workout.id)}>Delete</Button>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
@@ -725,13 +732,13 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <Box className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+      <Box className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">
           Update Workout
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <Box>
             <label className="text-gray-600">Name:</label>
             <input
               type="text"
@@ -740,10 +747,10 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
               onChange={handleChange}
               className="w-full p-2 border rounded"
             />
-          </div>
+          </Box>
 
           {"muscle" in workout && (
-            <div>
+            <Box>
               <label className="text-gray-600">Muscle Group:</label>
               <input
                 type="text"
@@ -752,11 +759,11 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
               />
-            </div>
+            </Box>
           )}
 
           {"duration" in workout && (
-            <div>
+            <Box>
               <label className="text-gray-600">Duration (minutes):</label>
               <input
                 type="number"
@@ -765,11 +772,11 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
               />
-            </div>
+            </Box>
           )}
 
           {"intensity" in workout && (
-            <div>
+            <Box>
               <label className="text-gray-600">Intensity:</label>
               <select
                 name="intensity"
@@ -781,11 +788,11 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
-            </div>
+            </Box>
           )}
 
           {"difficulty" in workout && (
-            <div>
+            <Box>
               <label className="text-gray-600">Difficulty:</label>
               <select
                 name="difficulty"
@@ -797,10 +804,10 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
               </select>
-            </div>
+            </Box>
           )}
 
-          <div>
+          <Box>
             <label className="text-gray-600">Info Link:</label>
             <input
               type="text"
@@ -809,37 +816,37 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
               onChange={handleChange}
               className="w-full p-2 border rounded"
             />
-          </div>
+          </Box>
 
-          <div>
+          <Box>
             <label className="text-gray-600">Notes:</label>
-            <textarea
+            <TextArea
               name="notes"
               value={formState.notes}
               onChange={handleChange}
               className="w-full p-2 border rounded"
               rows={3}
             />
-          </div>
+          </Box>
 
-          <div className="flex justify-end pt-2">
-            <button
-              type="button"
+          <Box className="flex justify-end pt-2">
+            <Button
+              type="Button"
               onClick={onCancel}
               className="px-4 bg-transparent p-3 rounded-lg text-indigo-500 hover:bg-gray-100 hover:text-indigo-400 mr-2"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               className="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
             >
               Update
-            </button>
-          </div>
+            </Button>
+          </Box>
         </form>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
