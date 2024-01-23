@@ -5,6 +5,7 @@ import {
   Text,
   TextArea,
   Button,
+  Card,
 } from "@radix-ui/themes";
 import React, { useState, useRef, useEffect } from "react";
 import { GymService } from "js-gym";
@@ -62,6 +63,7 @@ const WorkoutDatabase = () => {
   const [chosenExercise, setChosenExercise] = useState<AlgoExercise>();
   const [savedExercise, setSavedExercise] = useState<UserWorkout>();
   const [allSavedExercise, setAllSavedExercise] = useState<UserWorkout[]>([]);
+  const [exerciseListFlag, setExerciseListFlag] = useState<boolean>(false);
 
   const [cardioForm, setCardioForm] =
     useState<CardioWorkout>(initialCardioValues);
@@ -279,21 +281,40 @@ const WorkoutDatabase = () => {
       <Box className="w-full flex justify-center items-center px-4">
         <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
           <Box className="flex flex-col  space-y-8 md: flex md:flex-row md:space-x-8">
-            <Box>
+            <Card size="3">
               <form onSubmit={handleSubmit} className="space-y-6">
-                <label className="block">
-                  <Text className="text-gray-700">Workout Type</Text>
-                  <select
-                    className="form-select block w-full mt-1"
-                    value={workoutType}
-                    onChange={(e) => setWorkoutType(e.target.value)}
+                <Select.Root
+                  size="3"
+                  // value={workoutType}
+                  onValueChange={(value) => {
+                    console.log("The value is: ", value);
+                    if (value !== "strength") {
+                      setExerciseListFlag(false);
+                    } else {
+                      setExerciseListFlag(true);
+                    }
+                    setSearchTerm("");
+                    setWorkoutType(value);
+                  }}
+                >
+                  <Select.Trigger
+                    placeholder="Pick A Workout Type"
+                    variant="surface"
+                  />
+                  <Select.Content
+                    variant="solid"
+                    position="popper"
+                    sideOffset={2}
                   >
-                    <option value="">Select a type</option>
-                    <option value="cardio">Cardio</option>
-                    <option value="strength">Strength</option>
-                    <option value="stretch">Stretch</option>
-                  </select>
-                </label>
+                    <Select.Group>
+                      <Select.Label>Select a type</Select.Label>
+                      <Select.Item value="cardio">Cardio</Select.Item>
+                      <Select.Item value="strength">Strength</Select.Item>
+                      <Select.Item value="stretch">Stretch</Select.Item>
+                    </Select.Group>
+                  </Select.Content>
+                </Select.Root>
+
                 {workoutType === "cardio" && (
                   <CardioDatabaseForm
                     cardioForm={cardioForm}
@@ -331,18 +352,21 @@ const WorkoutDatabase = () => {
                   </Button>
                 </Box>
               </form>
-            </Box>
-            <Box>
-              {currentExercises && (
-                <StrengthExerciseSearchResults
-                  handleExerciseClick={handleExerciseClick}
-                  currentExercises={currentExercises}
-                  exerciseList={exerciseList}
-                  handlePageClick={handlePageClick}
-                  exercisesPerPage={exercisesPerPage}
-                />
-              )}
-            </Box>
+            </Card>
+            {exerciseListFlag && (
+              <Card size="3">
+                {currentExercises && (
+                  <StrengthExerciseSearchResults
+                    handleExerciseClick={handleExerciseClick}
+                    currentExercises={currentExercises}
+                    exerciseList={exerciseList}
+                    handlePageClick={handlePageClick}
+                    exercisesPerPage={exercisesPerPage}
+                  />
+                )}
+              </Card>
+            )}
+            {/* </Card> */}
           </Box>
         </Box>
       </Box>
@@ -646,6 +670,7 @@ const StrengthDatabaseForm = ({
                   typeof values.exercises,
                   values
                 );
+
                 setExerciseList(values.exercises);
               }}
             >
