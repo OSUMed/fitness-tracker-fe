@@ -145,7 +145,10 @@ const TodaysWorkoutComponent = () => {
   };
 
   // Post Exercise to Todays Workout Request:
-  const postExerciseToTodaysWorkout = (currentExercise: Exercise) => {
+  const postExerciseToTodaysWorkout = (
+    currentExercise: Exercise,
+    toastMessage: string
+  ) => {
     const postData = {
       userId: userId,
       id: recordTodaysWorkout.id,
@@ -172,12 +175,14 @@ const TodaysWorkoutComponent = () => {
           duration: 3000,
         });
       });
+    showSuccessToast(toastMessage);
   };
 
   // Update Exercise To Todays Workout Request:
   const updateExerciseInTodaysWorkout = (
     updatedExercise: Exercise,
-    exerciseId: number
+    exerciseId: number,
+    toastMessage: string
   ) => {
     const updateData = {
       userId: userId,
@@ -198,6 +203,7 @@ const TodaysWorkoutComponent = () => {
           console.log("serverFilteredData: ", filteredServerData);
           setAllExercises(filteredServerData);
         }
+        showSuccessToast(toastMessage);
       })
       .catch((error) => {
         console.log("error is: ", error);
@@ -205,8 +211,18 @@ const TodaysWorkoutComponent = () => {
   };
 
   // Delete Exercise From Todays Workout Request:
-  const deleteExerciseFromTodaysWorkout = (exerciseId: number) => {
+  const deleteExerciseFromTodaysWorkout = (
+    exerciseId: number,
+    undoFunction: (saveDeletedWorkout: Exercise) => void
+  ) => {
     const todaysDate = recordTodaysWorkout.date;
+    const saveDeletedWorkout = allExercises.find(
+      (workout) => workout.exerciseId === exerciseId
+    );
+    console.log(
+      "deleteExerciseFromTodaysWorkout saveDeletedWorkout ",
+      saveDeletedWorkout
+    );
     axiosInstance
       .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
         params: {
@@ -223,6 +239,7 @@ const TodaysWorkoutComponent = () => {
           console.log("DELETE workoutlogins response is: ", response.data);
           console.log("serverFilteredData: ", filteredServerData);
           setAllExercises(filteredServerData);
+          showDeleteToast(saveDeletedWorkout, undoFunction);
         }
       })
       .catch((error) => {
@@ -495,18 +512,15 @@ const TodaysWorkoutComponent = () => {
       "currentExercise.sets.length is: ",
       currentExercise.sets.length
     );
-    postExerciseToTodaysWorkout(currentExercise);
+    const toastMessage = "Exercise successfully added to today's workout.";
+    postExerciseToTodaysWorkout(currentExercise, toastMessage);
 
     // Update the recordWorkout state
     // setAllExercises([...allExercises, currentExercise]);
     setCurrentExercise(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
-    showSuccessToast("Workout added!");
   };
-
-  // Today Workout Table Logic: Update, Delete
-  // FOUND BUG. Need to update in here only so the confirmation dialog cancel works:
 
   const startRowEditProcess = (index: number) => {
     setIsEditing(true);
@@ -525,7 +539,8 @@ const TodaysWorkoutComponent = () => {
         exerciseId: exerciseId,
       };
     });
-    updateExerciseInTodaysWorkout(editableRowData!, exerciseId);
+    const message = "Exercise details updated successfully.";
+    updateExerciseInTodaysWorkout(editableRowData!, exerciseId, message);
     setEditingRowIndex(null);
     setIsEditing(false);
   };
@@ -626,58 +641,48 @@ const TodaysWorkoutComponent = () => {
   //   });
   //   setAllExercisesTemp(updatedWorkouts as Exercise[]);
   // };
-  const deleteExercise = (exerciseId: number) => {
-    const todaysDate = recordTodaysWorkout.date;
-    axiosInstance
-      .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
-        params: {
-          rawWorkoutDate: todaysDate,
-        },
-      })
-      .then((response) => {
-        const { exercises } = response.data;
-        console.log("DELETE exercises res: ", exercises);
+  // const deleteExercise = (exerciseId: number) => {
+  //   const todaysDate = recordTodaysWorkout.date;
+  //   axiosInstance
+  //     .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
+  //       params: {
+  //         rawWorkoutDate: todaysDate,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       const { exercises } = response.data;
+  //       console.log("DELETE exercises res: ", exercises);
 
-        if (exercises) {
-          const filteredServerData =
-            translateResponseForTodaysWorkout(exercises);
-          console.log("DELETE workoutlogins response is: ", response.data);
-          console.log("serverFilteredData: ", filteredServerData);
-          setAllExercises(filteredServerData);
-        }
-      })
-      .catch((error) => {
-        console.log("error is: ", error);
-      });
-  };
+  //       if (exercises) {
+  //         const filteredServerData =
+  //           translateResponseForTodaysWorkout(exercises);
+  //         console.log("DELETE workoutlogins response is: ", response.data);
+  //         console.log("serverFilteredData: ", filteredServerData);
+  //         setAllExercises(filteredServerData);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log("error is: ", error);
+  //     });
+  // };
   const handleDeleteExercise = (exerciseId: number) => {
-    const deletedWorkout = allExercises.find((_workout, i) => i === exerciseId);
-    // const updatedWorkouts = allExercises.filter(
-    //   (_workout, i) => i !== exerciseId
-    // );
+    const saveDeletedWorkout = allExercises.find(
+      (workout) => workout.exerciseId === exerciseId
+    );
 
+    console.log("handleDeleteExercise saveDeletedWorkout ", saveDeletedWorkout);
     console.log("delete workout is: ", exerciseId, allExercises);
-    deleteExerciseFromTodaysWorkout(exerciseId);
+    deleteExerciseFromTodaysWorkout(exerciseId, undoDeleteAxiosRequest);
 
-    undoDeleteAxiosRequest(exerciseId, deletedWorkout);
     // setAllExercises(updatedWorkouts);
     setIsEditing(false);
     setEditingRowIndex(null);
   };
-  const undoDeleteAxiosRequest = (
-    exerciseId: number,
-    deletedWorkout: Exercise
-  ) => {
-    // const deletedWorkout = allExercises.find((_workout, i) => i === exerciseId);
-    // const updatedWorkouts = allExercises.filter(
-    //   (_workout, i) => i !== exerciseId
-    // );
-
-    console.log("delete workout is: ", exerciseId, allExercises);
-    deleteAxiosRequest(deletedWorkout);
-    // setAllExercises(updatedWorkouts);
-    setIsEditing(false);
-    setEditingRowIndex(null);
+  const undoDeleteAxiosRequest = (saveDeletedWorkout: Exercise) => {
+    toast.dismiss();
+    console.log("undoDeleteAxios saveDeletedWorkout: ", saveDeletedWorkout);
+    const toastMessage = "Exercise restored to today's workout.";
+    postExerciseToTodaysWorkout(saveDeletedWorkout, toastMessage);
   };
 
   ///////////////////////// Testing Purposes  /////////////////////////
@@ -713,6 +718,7 @@ const TodaysWorkoutComponent = () => {
   console.log("editableRowData is: ", editableRowData);
 
   console.log("TOdays Workout Username and id are: ", username, userId);
+  console.log("recordTodaysWorkout are: ", recordTodaysWorkout);
   return (
     <>
       <Box>
@@ -736,7 +742,6 @@ const TodaysWorkoutComponent = () => {
             </Box>
 
             <Box className="space-y-4 flex flex-col justify-end">
-              <Button onClick={showToast}>Try Me for Toasts</Button>
               <Button
                 className="mt-6 text-lg py-4 px-8"
                 size="2"
