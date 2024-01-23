@@ -8,7 +8,7 @@ const serverAPI = "http://localhost:8080";
 
 interface PlannedWorkout {
   id: number;
-  type: string;
+  type?: string;
   exercises: { name: string }[];
 }
 
@@ -19,7 +19,7 @@ interface DayPlan {
   duration: string;
   intensity: string;
 }
-const newWeek = [
+const newWeek: DayPlan[] = [
   {
     id: 0,
     day: "Sunday",
@@ -205,7 +205,7 @@ const initialPlanData: DayPlan[] = [
 ];
 
 const WeekGrid = () => {
-  const [weekPlan, setWeekPlan] = useState<DayPlan[]>(initialPlanData);
+  const [weekPlan, setWeekPlan] = useState<DayPlan[]>(newWeek);
   const [userTemplateWeek, setUserTemplateWeek] =
     useState<DayPlan[]>(initialPlanData);
 
@@ -225,14 +225,19 @@ const WeekGrid = () => {
 
   const getWeekPlanCall = () => {
     axiosInstance.get(`${serverAPI}/weekplan/`).then((response) => {
+      if (response.data.length == 0) {
+        setWeekPlan(newWeek);
+      } else {
+        setWeekPlan(response.data);
+      }
       console.log("GET weekplan res: ", response.data);
-      setWeekPlan(response.data);
     });
   };
   const saveCurrentWeek = () => {
     axiosInstance.post(`${serverAPI}/weekplan/`, weekPlan).then((response) => {
       console.log("GET weekplan res: ", response.data);
       setWeekPlan(response.data);
+      setIsEditing(false);
     });
   };
   const saveBadgeCurrentWeek = (newDayPlan: DayPlan) => {
