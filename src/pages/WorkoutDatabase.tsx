@@ -374,7 +374,7 @@ const WorkoutDatabase = () => {
             {exerciseListFlag && (
               <Card
                 size="3"
-                className="min-h-[300px] min-w-[300px] max-w-[600px] flex flex-col justify-center items-center"
+                className="shadow min-h-[300px] min-w-[300px] max-w-[600px] flex flex-col justify-center items-center"
               >
                 {currentExercises.length === 0 ? (
                   <Text className="text-gray-600 text-lg">No Results</Text>

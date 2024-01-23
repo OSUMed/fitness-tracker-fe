@@ -376,7 +376,7 @@ const WeekGrid = () => {
             </Button>
           </Box>
         </Box>
-        <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
+        <div className="py-4 px-4 bg-gradient-to-br from-gray-50 to-white-100 rounded-lg shadow-2xl">
           <div className="flex overflow-x-auto snap-x snap-mandatory">
             {weekPlan.map((dayPlan) => (
               <DayCard
@@ -809,7 +809,25 @@ const SelectIntensityUI: React.FC<SelectIntensityUIProps> = ({
     </>
   );
 };
+const ColorPicker = () => {
+  const [selectedColor, setSelectedColor] = useState("bg-white");
 
+  const handleColorChange = (event) => {
+    setSelectedColor(tailwindColors[event.target.value]);
+  };
+
+  return (
+    <div className={`${selectedColor} p-5`}>
+      <select onChange={handleColorChange} className="p-2 rounded border">
+        {Object.keys(tailwindColors).map((color) => (
+          <option key={color} value={color}>
+            {color}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
 interface SelectExerciseTypeProps {
   workout: PlannedWorkout;
   dayOutline: DayPlan;
