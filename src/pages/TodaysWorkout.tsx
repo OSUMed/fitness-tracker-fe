@@ -249,7 +249,7 @@ const TodaysWorkoutComponent = () => {
 
   // Finish Today Workout & Save to History
   const finishTodaysWorkout = () => {
-    const daySummary = summarizeDayWorkout();
+    const daySummary = summarizeDayWorkout(allExercises);
     setHistoryRecordedWorkouts([
       ...historyRecordedWorkouts,
       recordTodaysWorkout,
@@ -270,21 +270,22 @@ const TodaysWorkoutComponent = () => {
     setExerciseName("");
     showSuccessToast("Todays workout has been saved!");
   };
-  const summarizeDayWorkout = (): WorkoutSummary => {
+
+  const summarizeDayWorkout = (exercises: Exercise[]) => {
     // Types of workouts performed
     const workoutTypes = new Set(
-      recordTodaysWorkout.workouts.map((workout) => workout.type)
+      exercises.map((exercise: Exercise) => exercise.type)
     );
     const workoutTypesSummary = Array.from(workoutTypes).join(", ");
 
     // Exercise names
-    const exerciseNamesSummary = recordTodaysWorkout.workouts
-      .map((workout) => workout.exerciseName)
+    const exerciseNamesSummary = exercises
+      .map((exercise: Exercise) => exercise.exerciseName)
       .join(", ");
 
     // Total number of sets
-    const totalSets = recordTodaysWorkout.workouts.reduce(
-      (total, workout) => total + workout.sets.length,
+    const totalSets = exercises.reduce(
+      (total: number, exercise: Exercise) => total + exercise.sets.length,
       0
     );
 
