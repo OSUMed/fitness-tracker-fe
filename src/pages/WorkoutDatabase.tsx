@@ -19,6 +19,20 @@ import { allDummyWorkouts } from "../mockdata/defaultworkouts";
 import { WheelControls } from "../components/ReusableSlider";
 import { Workout } from "../types/workoutTypes";
 import axiosInstance from "../util/axiosInterceptor";
+import {
+  WorkoutProps,
+  CardioWorkout,
+  StrengthWorkout,
+  StretchWorkout,
+  UserWorkout,
+  CardioDatabaseFormProps,
+  StrengthDatabaseFormProps,
+  StretchDatabaseFormProps,
+  StrengthExerciseSearchResultsProps,
+  SearchViewUpdateExerciseDatabaseProps,
+  WorkoutUpdateModalProps,
+} from "../types/workoutDatabaseTypes";
+
 const serverAPI = "http://localhost:8080";
 // Initial Values:
 const initialCardioValues: CardioWorkout = {
@@ -404,7 +418,9 @@ const WorkoutDatabase = () => {
   );
 };
 
-const SearchViewUpdateExerciseDatabase = ({
+const SearchViewUpdateExerciseDatabase: React.FC<
+  SearchViewUpdateExerciseDatabaseProps
+> = ({
   setSearchQuery,
   setFilter,
   clearFilters,
@@ -456,7 +472,10 @@ const SearchViewUpdateExerciseDatabase = ({
   );
 };
 
-const CardioDatabaseForm = ({ cardioForm, setCardioForm }) => {
+const CardioDatabaseForm: React.FC<CardioDatabaseFormProps> = ({
+  cardioForm,
+  setCardioForm,
+}) => {
   return (
     <>
       <Box>
@@ -560,7 +579,10 @@ const CardioDatabaseForm = ({ cardioForm, setCardioForm }) => {
     </>
   );
 };
-const StretchDatabaseForm = ({ stretchForm, setStretchForm }) => {
+const StretchDatabaseForm: React.FC<StretchDatabaseFormProps> = ({
+  stretchForm,
+  setStretchForm,
+}) => {
   return (
     <Box className="space-y-5">
       <Box>
@@ -652,7 +674,7 @@ const StretchDatabaseForm = ({ stretchForm, setStretchForm }) => {
     </Box>
   );
 };
-const StrengthDatabaseForm = ({
+const StrengthDatabaseForm: React.FC<StrengthDatabaseFormProps> = ({
   strengthForm,
   setStrengthForm,
   setExerciseList,
@@ -784,7 +806,9 @@ const StrengthDatabaseForm = ({
   );
 };
 
-const StrengthExerciseSearchResults = ({
+const StrengthExerciseSearchResults: React.FC<
+  StrengthExerciseSearchResultsProps
+> = ({
   currentExercises,
   exerciseList,
   handleExerciseClick,
@@ -829,11 +853,7 @@ const StrengthExerciseSearchResults = ({
     </Box>
   );
 };
-type WorkoutProps = {
-  workout: UserWorkout;
-  onUpdate: (id: string) => void;
-  onDelete: (id: string) => void;
-};
+
 const WorkoutCard: React.FC<WorkoutProps> = ({
   workout,
   onUpdate,
