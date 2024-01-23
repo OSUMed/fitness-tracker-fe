@@ -18,6 +18,12 @@ import "keen-slider/keen-slider.min.css";
 import { allDummyWorkouts } from "../mockdata/defaultworkouts";
 import { WheelControls } from "../components/ReusableSlider";
 import { Workout } from "../types/workoutTypes";
+import {
+  FaceIcon,
+  ImageIcon,
+  MagnifyingGlassIcon,
+  SunIcon,
+} from "@radix-ui/react-icons";
 import axiosInstance from "../util/axiosInterceptor";
 import {
   WorkoutProps,
@@ -73,6 +79,7 @@ console.log(
 const WorkoutDatabase = () => {
   const [exerciseList, setExerciseList] = useState<AlgoExercise[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAddFormVisible, setIsAddFormVisible] = useState(false);
   const [searchErrorText, setSearchErrorText] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -150,14 +157,19 @@ const WorkoutDatabase = () => {
     try {
       console.log("saving exercise via POST request... ", savedWorkout);
       postExerciseDetails(savedWorkout!);
-      setAllSavedExercise([...allSavedExercise, savedWorkout] as UserWorkout[]);
+      // setAllSavedExercise([savedWorkout, ...allSavedExercise] as UserWorkout[]);
       setCardioForm(initialCardioValues);
       setStrengthForm(initialStrengthValues);
       setStretchForm(initialStretchValues);
       setWorkoutType("");
       setSearchTerm("");
+      setFilter("");
       setChosenExercise(undefined);
-      setExerciseList([]);
+      const resetExerciseList = exerciseList!.slice(
+        indexOfFirstExercise,
+        indexOfLastExercise
+      );
+      setExerciseList(resetExerciseList);
     } catch (e) {
       console.log("POST failed: ", e);
     }
@@ -212,7 +224,9 @@ const WorkoutDatabase = () => {
       })
       .then((response) => {
         console.log("POST postExerciseDetails res: ", response.data);
-        setAllSavedExercise(response.data);
+        const reversedData = response.data.slice().reverse();
+        setAllSavedExercise(reversedData);
+        setIsAddFormVisible(false);
       });
   };
   const updateExerciseDetails = (updatedExercise: UserWorkout) => {
@@ -279,6 +293,7 @@ const WorkoutDatabase = () => {
     setWorkoutType("");
     setExerciseList([]);
     setSearchTerm("");
+    setIsAddFormVisible(false);
   };
 
   function clearFilters(
@@ -294,45 +309,62 @@ const WorkoutDatabase = () => {
       <Box className="text-4xl font-bold text-center mb-6">
         Workout Database
       </Box>
-      <Box className="w-full flex justify-center items-center px-4">
+      <Button onClick={() => setIsAddFormVisible(true)}>
+        Add Exercise to Database
+      </Button>
+      <Box>
+        <SearchViewUpdateExerciseDatabase
+          setSearchQuery={setSearchQuery}
+          setFilter={setFilter}
+          clearFilters={clearFilters}
+          sliderRef={sliderRef}
+          filteredWorkouts={filteredWorkouts}
+          searchQuery={searchQuery}
+          filter={filter}
+          updateDatabaseWorkout={updateDatabaseWorkout}
+          deleteDatabaseWorkout={deleteDatabaseWorkout}
+        />
+      </Box>
+      {/* <Box className="w-full flex justify-center items-center px-4 mt-5">
         <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
           <Box className="flex flex-col  space-y-8 md: flex md:flex-row md:space-x-8">
-            <Card size="3">
+            <Card size="3" className="min-h-[50px] min-w-[100px]">
               <form onSubmit={handleSubmit} className="space-y-6">
-                <Select.Root
-                  size="3"
-                  // value={workoutType}
-                  onValueChange={(value) => {
-                    console.log("The value is: ", value);
-                    if (value !== "strength") {
-                      setExerciseListFlag(false);
-                    } else {
-                      setExerciseListFlag(true);
-                      const values = gymService.getByMuscleGroup("Chest");
-                      setExerciseList(values.exercises);
-                    }
-                    setSearchTerm("");
-                    setWorkoutType(value);
-                  }}
-                >
-                  <Select.Trigger
-                    placeholder="Pick A Workout Type"
-                    variant="surface"
-                  />
-                  <Select.Content
-                    variant="solid"
-                    position="popper"
-                    sideOffset={2}
+                <Box className="flex justify-center">
+                  <Select.Root
+                    size="3"
+                    // value={workoutType}
+                    onValueChange={(value) => {
+                      console.log("The value is: ", value);
+                      if (value !== "strength") {
+                        setExerciseListFlag(false);
+                      } else {
+                        setExerciseListFlag(true);
+                        const values = gymService.getByMuscleGroup("Chest");
+                        setExerciseList(values.exercises);
+                      }
+                      setSearchTerm("");
+                      setWorkoutType(value);
+                    }}
                   >
-                    <Select.Group>
-                      <Select.Label>Select a type</Select.Label>
-                      <Select.Item value="cardio">Cardio</Select.Item>
-                      <Select.Item value="strength">Strength</Select.Item>
-                      <Select.Item value="stretch">Stretch</Select.Item>
-                    </Select.Group>
-                  </Select.Content>
-                </Select.Root>
-
+                    <Select.Trigger
+                      placeholder="Pick A Workout Type"
+                      variant="surface"
+                    />
+                    <Select.Content
+                      variant="solid"
+                      position="popper"
+                      sideOffset={2}
+                    >
+                      <Select.Group>
+                        <Select.Label>Select a type</Select.Label>
+                        <Select.Item value="cardio">Cardio</Select.Item>
+                        <Select.Item value="strength">Strength</Select.Item>
+                        <Select.Item value="stretch">Stretch</Select.Item>
+                      </Select.Group>
+                    </Select.Content>
+                  </Select.Root>
+                </Box>
                 {workoutType === "cardio" && (
                   <CardioDatabaseForm
                     cardioForm={cardioForm}
@@ -363,8 +395,8 @@ const WorkoutDatabase = () => {
                   </Button>
                   <Button
                     onClick={handleFormClose}
-                    color="tomato"
-                    variant="soft"
+                    color="gray"
+                    variant="surface"
                   >
                     Cancel
                   </Button>
@@ -374,7 +406,7 @@ const WorkoutDatabase = () => {
             {exerciseListFlag && (
               <Card
                 size="3"
-                className="shadow min-h-[300px] min-w-[300px] max-w-[600px] flex flex-col justify-center items-center"
+                className="shadow min-h-[100px] min-w-[300px] max-w-[600px] flex flex-col justify-center items-center"
               >
                 {currentExercises.length === 0 ? (
                   <Text className="text-gray-600 text-lg">No Results</Text>
@@ -391,20 +423,7 @@ const WorkoutDatabase = () => {
             )}
           </Box>
         </Box>
-      </Box>
-      <Box>
-        <SearchViewUpdateExerciseDatabase
-          setSearchQuery={setSearchQuery}
-          setFilter={setFilter}
-          clearFilters={clearFilters}
-          sliderRef={sliderRef}
-          filteredWorkouts={filteredWorkouts}
-          searchQuery={searchQuery}
-          filter={filter}
-          updateDatabaseWorkout={updateDatabaseWorkout}
-          deleteDatabaseWorkout={deleteDatabaseWorkout}
-        />
-      </Box>
+      </Box> */}
       {isUpdateModalVisible && (
         <WorkoutUpdateModal
           workout={workoutToEdit}
@@ -412,6 +431,32 @@ const WorkoutDatabase = () => {
             onSaveUpdatedWorkout(updatedWorkout);
           }}
           onCancel={() => setIsUpdateModalVisible(false)}
+        />
+      )}
+      {isAddFormVisible && (
+        <ExerciseFormModal
+          handleSubmit={handleSubmit}
+          setExerciseListFlag={setExerciseListFlag}
+          setExerciseList={setExerciseList}
+          setSearchTerm={setSearchTerm}
+          setWorkoutType={setWorkoutType}
+          workoutType={workoutType}
+          cardioForm={cardioForm}
+          setCardioForm={setCardioForm}
+          strengthForm={strengthForm}
+          setStrengthForm={setStrengthForm}
+          searchTerm={searchTerm}
+          chosenExercise={chosenExercise}
+          stretchForm={stretchForm}
+          setStretchForm={setStretchForm}
+          handleFormClose={handleFormClose}
+          exerciseListFlag={exerciseListFlag}
+          currentExercises={currentExercises}
+          handleExerciseClick={handleExerciseClick}
+          exerciseList={exerciseList}
+          handlePageClick={handlePageClick}
+          exercisesPerPage={exercisesPerPage}
+          onCancel={() => setIsAddFormVisible(false)}
         />
       )}
     </Box>
@@ -432,24 +477,37 @@ const SearchViewUpdateExerciseDatabase: React.FC<
   deleteDatabaseWorkout,
 }) => {
   return (
-    <Box>
-      <Box className="flex space-x-3 mt-10">
-        <TextField.Input
-          type="text"
-          placeholder="Search by name..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="p-2"
+    <Card className="mt-4 flex space-x-3 mt-10 justify-center align-center shadow">
+      <Box className="flex space-x-3 mt-10 justify-center align-center ">
+        <TextField.Root>
+          <TextField.Slot>
+            <MagnifyingGlassIcon height="16" width="16" />
+          </TextField.Slot>
+          <TextField.Input
+            size="3"
+            type="text"
+            placeholder="Search by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </TextField.Root>
+
+        <Select.Root
+          size="3"
+          // value={filter}
+          onValueChange={(value) => setFilter(value)}
         >
-          <option value="">All Workouts</option>
-          <option value="strength">Strength</option>
-          <option value="cardio">Cardio</option>
-          <option value="stretch">Stretch</option>
-        </select>
+          <Select.Trigger placeholder="Pick A Workout Type" variant="surface" />
+          <Select.Content variant="solid" position="popper" sideOffset={2}>
+            <Select.Group>
+              <Select.Label>All Workouts</Select.Label>
+              <Select.Item value="strength">Strength</Select.Item>
+              <Select.Item value="cardio">Cardio</Select.Item>
+              <Select.Item value="stretch">Stretch</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+
         <Button onClick={clearFilters}>Clear Filters</Button>
       </Box>
       <Box
@@ -468,7 +526,7 @@ const SearchViewUpdateExerciseDatabase: React.FC<
           </Box>
         ))}
       </Box>
-    </Box>
+    </Card>
   );
 };
 
@@ -524,23 +582,28 @@ const CardioDatabaseForm: React.FC<CardioDatabaseFormProps> = ({
         />
       </Box>
 
-      <Box>
+      <Box className="space-x-3">
         <Text as="label" size="3">
           Intensity
         </Text>
-        <select
-          className="form-select block w-full mt-1"
-          onChange={(e) =>
+        <Select.Root
+          size="2"
+          onValueChange={(value) =>
             setCardioForm({
               ...cardioForm,
-              intensity: e.target.value,
+              intensity: value,
             })
           }
         >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+          <Select.Trigger placeholder="Intensity Level" variant="surface" />
+          <Select.Content variant="solid" position="popper" sideOffset={2}>
+            <Select.Group>
+              <Select.Item value="low">Low</Select.Item>
+              <Select.Item value="medium">Medium</Select.Item>
+              <Select.Item value="high">High</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
       </Box>
 
       <Box>
@@ -619,23 +682,28 @@ const StretchDatabaseForm: React.FC<StretchDatabaseFormProps> = ({
         />
       </Box>
 
-      <Box>
+      <Box className="space-x-3">
         <Text as="label" size="3">
           Difficulty
         </Text>
-        <select
-          className="form-select block w-full mt-1"
-          onChange={(e) =>
+        <Select.Root
+          onValueChange={(value) =>
             setStretchForm({
               ...stretchForm,
-              difficulty: e.target.value,
+              difficulty: value,
             })
           }
         >
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </select>
+          <Select.Trigger placeholder="Pick A Workout Type" variant="surface" />
+          <Select.Content variant="solid" position="popper" sideOffset={2}>
+            <Select.Group>
+              <Select.Label>Intesnity Level</Select.Label>
+              <Select.Item value="easy">Easy</Select.Item>
+              <Select.Item value="medium">Medium</Select.Item>
+              <Select.Item value="hard">Hard</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
       </Box>
 
       <Box>
@@ -887,8 +955,20 @@ const WorkoutCard: React.FC<WorkoutProps> = ({
         <p className="mt-2 text-sm text-gray-600">Notes: {workout.notes}</p>
       )}
       <Box className="space-x-3 mt-3">
-        <Button onClick={() => onUpdate(workout.id)}>Update</Button>
-        <Button onClick={() => onDelete(workout.id)}>Delete</Button>
+        <Button
+          color="blue"
+          variant="classic"
+          onClick={() => onUpdate(workout.id)}
+        >
+          Update
+        </Button>
+        <Button
+          color="tomato"
+          variant="classic"
+          onClick={() => onDelete(workout.id)}
+        >
+          Delete
+        </Button>
       </Box>
     </Box>
   );
@@ -1009,18 +1089,11 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
             />
           </Box>
 
-          <Box className="flex justify-end pt-2">
-            <Button
-              type="Button"
-              onClick={onCancel}
-              className="px-4 bg-transparent p-3 rounded-lg text-indigo-500 hover:bg-gray-100 hover:text-indigo-400 mr-2"
-            >
+          <Box className="flex justify-end pt-2 space-x-4">
+            <Button color="gray" variant="surface" onClick={onCancel}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
-            >
+            <Button type="submit" color="blue" variant="solid">
               Update
             </Button>
           </Box>
@@ -1030,4 +1103,139 @@ const WorkoutUpdateModal = ({ workout, onSaveUpdatedWorkout, onCancel }) => {
   );
 };
 
+const ExerciseFormModal = ({
+  handleSubmit,
+  setExerciseListFlag,
+  setExerciseList,
+  setSearchTerm,
+  setWorkoutType,
+  workoutType,
+  cardioForm,
+  setCardioForm,
+  strengthForm,
+  setStrengthForm,
+  searchTerm,
+  chosenExercise,
+  stretchForm,
+  setStretchForm,
+  handleFormClose,
+  exerciseListFlag,
+  currentExercises,
+  handleExerciseClick,
+  exerciseList,
+  handlePageClick,
+  exercisesPerPage,
+  onCancel,
+}) => {
+  return (
+    <Box className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center">
+      <Box className="bg-white p-6 rounded-lg shadow-md">
+        <Box className="">
+          <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
+            <Box className="flex flex-col center-items align-items">
+              <Heading as="h3" className="flex justify-center items-center">
+                Add Exercise
+              </Heading>
+              <Box className="mt-7 flex flex-col  space-y-8 md: flex md:flex-row md:space-x-8">
+                <Card size="3" className="min-h-[50px] min-w-[100px]">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <Box className="flex justify-center">
+                      <Select.Root
+                        size="3"
+                        // value={workoutType}
+                        onValueChange={(value) => {
+                          console.log("The value is: ", value);
+                          if (value !== "strength") {
+                            setExerciseListFlag(false);
+                          } else {
+                            setExerciseListFlag(true);
+                            const values = gymService.getByMuscleGroup("Chest");
+                            setExerciseList(values.exercises);
+                          }
+                          setSearchTerm("");
+                          setWorkoutType(value);
+                        }}
+                      >
+                        <Select.Trigger
+                          placeholder="Pick A Workout Type"
+                          variant="surface"
+                        />
+                        <Select.Content
+                          variant="solid"
+                          position="popper"
+                          sideOffset={2}
+                        >
+                          <Select.Group>
+                            <Select.Label>Select a type</Select.Label>
+                            <Select.Item value="cardio">Cardio</Select.Item>
+                            <Select.Item value="strength">Strength</Select.Item>
+                            <Select.Item value="stretch">Stretch</Select.Item>
+                          </Select.Group>
+                        </Select.Content>
+                      </Select.Root>
+                    </Box>
+                    {workoutType === "cardio" && (
+                      <CardioDatabaseForm
+                        cardioForm={cardioForm}
+                        setCardioForm={setCardioForm}
+                      />
+                    )}
+
+                    {workoutType === "strength" && (
+                      <StrengthDatabaseForm
+                        strengthForm={strengthForm}
+                        setStrengthForm={setStrengthForm}
+                        setExerciseList={setExerciseList}
+                        setSearchTerm={setSearchTerm}
+                        searchTerm={searchTerm}
+                        chosenExercise={chosenExercise}
+                      />
+                    )}
+
+                    {workoutType === "stretch" && (
+                      <StretchDatabaseForm
+                        stretchForm={stretchForm}
+                        setStretchForm={setStretchForm}
+                      />
+                    )}
+                    <Box className="space-x-4">
+                      <Button type="submit" color="green" variant="solid">
+                        Submit
+                      </Button>
+                      <Button
+                        onClick={handleFormClose}
+                        color="gray"
+                        variant="surface"
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+                  </form>
+                </Card>
+                {exerciseListFlag && (
+                  <Card
+                    size="3"
+                    className="shadow min-h-[100px] min-w-[300px] max-w-[600px] flex flex-col justify-center items-center"
+                  >
+                    {currentExercises.length === 0 ? (
+                      <Text className="text-gray-600 text-lg">No Results</Text>
+                    ) : (
+                      <StrengthExerciseSearchResults
+                        handleExerciseClick={handleExerciseClick}
+                        currentExercises={currentExercises}
+                        exerciseList={exerciseList}
+                        handlePageClick={handlePageClick}
+                        exercisesPerPage={exercisesPerPage}
+                      />
+                    )}
+                  </Card>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 export default WorkoutDatabase;
