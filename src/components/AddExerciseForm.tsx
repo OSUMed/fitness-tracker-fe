@@ -42,11 +42,6 @@ export const AddExerciseForm: React.FC<AddExerciseFormProps> = ({
             value={selectedWorkoutType ?? ""}
             onValueChange={(value) => {
               handleSelectWorkoutType(value as ExerciseType);
-              axios.patch("Fake Error").catch(() => {
-                toast.error("Changes could not be saved", {
-                  duration: 3000,
-                });
-              });
             }}
           >
             <Select.Trigger
