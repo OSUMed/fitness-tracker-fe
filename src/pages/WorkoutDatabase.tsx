@@ -292,6 +292,8 @@ const WorkoutDatabase = () => {
                       setExerciseListFlag(false);
                     } else {
                       setExerciseListFlag(true);
+                      const values = gymService.getByMuscleGroup("Chest");
+                      setExerciseList(values.exercises);
                     }
                     setSearchTerm("");
                     setWorkoutType(value);
@@ -354,8 +356,13 @@ const WorkoutDatabase = () => {
               </form>
             </Card>
             {exerciseListFlag && (
-              <Card size="3">
-                {currentExercises && (
+              <Card
+                size="3"
+                className="min-h-[100px] max-h-[500px] min-w-[300px] max-w-[600px] flex flex-col justify-center items-center"
+              >
+                {currentExercises.length === 0 ? (
+                  <Text className="text-gray-600 text-lg">No Results</Text>
+                ) : (
                   <StrengthExerciseSearchResults
                     handleExerciseClick={handleExerciseClick}
                     currentExercises={currentExercises}
@@ -366,7 +373,6 @@ const WorkoutDatabase = () => {
                 )}
               </Card>
             )}
-            {/* </Card> */}
           </Box>
         </Box>
       </Box>
