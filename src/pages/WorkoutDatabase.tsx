@@ -347,41 +347,17 @@ const WorkoutDatabase = () => {
         </Box>
       </Box>
       <Box>
-        <Box className="flex space-x-3 mt-10">
-          <TextField.Input
-            type="text"
-            placeholder="Search by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="p-2"
-          >
-            <option value="">All Workouts</option>
-            <option value="strength">Strength</option>
-            <option value="cardio">Cardio</option>
-            <option value="stretch">Stretch</option>
-          </select>
-          <Button onClick={clearFilters}>Clear Filters</Button>
-        </Box>
-        <Box
-          ref={sliderRef}
-          className="keen-slider"
-          key={filteredWorkouts.length}
-        >
-          {filteredWorkouts.map((workout, index) => (
-            <Box key={index} className="keen-slider__slide p-4">
-              <WorkoutCard
-                key={workout.id}
-                workout={workout}
-                onUpdate={updateDatabaseWorkout}
-                onDelete={deleteDatabaseWorkout}
-              />
-            </Box>
-          ))}
-        </Box>
+        <SearchViewUpdateExerciseDatabase
+          setSearchQuery={setSearchQuery}
+          setFilter={setFilter}
+          clearFilters={clearFilters}
+          sliderRef={sliderRef}
+          filteredWorkouts={filteredWorkouts}
+          searchQuery={searchQuery}
+          filter={filter}
+          updateDatabaseWorkout={updateDatabaseWorkout}
+          deleteDatabaseWorkout={deleteDatabaseWorkout}
+        />
       </Box>
       {isUpdateModalVisible && (
         <WorkoutUpdateModal
@@ -392,6 +368,58 @@ const WorkoutDatabase = () => {
           onCancel={() => setIsUpdateModalVisible(false)}
         />
       )}
+    </Box>
+  );
+};
+
+const SearchViewUpdateExerciseDatabase = ({
+  setSearchQuery,
+  setFilter,
+  clearFilters,
+  sliderRef,
+  filteredWorkouts,
+  searchQuery,
+  filter,
+  updateDatabaseWorkout,
+  deleteDatabaseWorkout,
+}) => {
+  return (
+    <Box>
+      <Box className="flex space-x-3 mt-10">
+        <TextField.Input
+          type="text"
+          placeholder="Search by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="p-2"
+        >
+          <option value="">All Workouts</option>
+          <option value="strength">Strength</option>
+          <option value="cardio">Cardio</option>
+          <option value="stretch">Stretch</option>
+        </select>
+        <Button onClick={clearFilters}>Clear Filters</Button>
+      </Box>
+      <Box
+        ref={sliderRef}
+        className="keen-slider"
+        key={filteredWorkouts.length}
+      >
+        {filteredWorkouts.map((workout, index) => (
+          <Box key={index} className="keen-slider__slide p-4">
+            <WorkoutCard
+              key={workout.id}
+              workout={workout}
+              onUpdate={updateDatabaseWorkout}
+              onDelete={deleteDatabaseWorkout}
+            />
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };
