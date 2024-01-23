@@ -6,6 +6,8 @@ import {
   TextArea,
   Button,
   Card,
+  Heading,
+  Link,
 } from "@radix-ui/themes";
 import React, { useState, useRef, useEffect } from "react";
 import { GymService } from "js-gym";
@@ -791,22 +793,25 @@ const StrengthExerciseSearchResults = ({
 }) => {
   return (
     <Box>
-      {currentExercises.map((exercise, index) => (
+      {currentExercises.map((exercise: any, index: number) => (
         <Box
           key={index}
           onClick={() => handleExerciseClick(exercise)}
           className="cursor-pointer p-4 border border-gray-200 rounded-md hover:bg-gray-100"
         >
-          <h3 className="text-lg font-semibold">{exercise.name}</h3>
-          <p>Muscle Group: {exercise.muscle}</p>
-          <a
+          <Heading size="4" className="text-lg font-semibold">
+            {exercise.name}
+          </Heading>
+          <Text as="p">Muscle Group: {exercise.muscle}</Text>
+          <Link
             href={exercise.infoLink}
+            underline="hover"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            color="blue"
           >
             Video & Info Link
-          </a>
+          </Link>
         </Box>
       ))}
       {exerciseList && exerciseList.length > exercisesPerPage && (
