@@ -279,381 +279,301 @@ const WorkoutDatabase = () => {
       </Box>
       <Box className="w-full flex justify-center items-center px-4">
         <Box className="space-y-7 px-4 items-center flex flex-col md:flex-row md:items-center md:space-x-7">
-          <Box className="flex space-x-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <label className="block">
-                <Text className="text-gray-700">Workout Type</Text>
-                <select
-                  className="form-select block w-full mt-1"
-                  value={workoutType}
-                  onChange={(e) => setWorkoutType(e.target.value)}
-                >
-                  <option value="">Select a type</option>
-                  <option value="cardio">Cardio</option>
-                  <option value="strength">Strength</option>
-                  <option value="stretch">Stretch</option>
-                </select>
-              </label>
-              {workoutType === "cardio" && (
-                <>
-                  <Box>
-                    <Text as="label" size="3">
-                      Name
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter exercise name"
-                      onChange={(e) =>
-                        setCardioForm({ ...cardioForm, name: e.target.value })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text className="text-gray-700">Duration (minutes)</Text>
-                    <input
-                      type="string"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter duration in minutes"
-                      onChange={(e) =>
-                        setCardioForm({
-                          ...cardioForm,
-                          duration: parseInt(e.target.value),
-                        })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Distance (optional)
-                    </Text>
-                    <TextField.Input
-                      type="number"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter distance (km or miles)"
-                      onChange={(e) =>
-                        setCardioForm({
-                          ...cardioForm,
-                          distance: parseInt(e.target.value),
-                        })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Intensity
-                    </Text>
-                    <select
-                      className="form-select block w-full mt-1"
-                      onChange={(e) =>
-                        setCardioForm({
-                          ...cardioForm,
-                          intensity: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Info Link
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter URL to info"
-                      onChange={(e) =>
-                        setCardioForm({
-                          ...cardioForm,
-                          infoLink: e.target.value,
-                        })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Notes
-                    </Text>
-                    <TextArea
-                      className="form-textarea mt-1 block w-full"
-                      rows={3}
-                      placeholder="Enter any notes"
-                      onChange={(e) =>
-                        setCardioForm({ ...cardioForm, notes: e.target.value })
-                      }
-                    ></TextArea>
-                  </Box>
-                </>
-              )}
-
-              {workoutType === "strength" && (
-                <Box className="space-y-5">
-                  <Box className="text-xl font-medium space-y-3">
-                    <Box>
-                      <Text as="label" size="3">
-                        Search by muscle type
-                      </Text>
-                      <Box>
-                        <Select.Root
-                          size="3"
-                          // value={selectedWorkoutType ?? ""}
-                          onValueChange={(value) => {
-                            const values = gymService.getByMuscleGroup(value);
-                            console.log(
-                              "Search by muscle type: ",
-                              typeof values.exercises,
-                              values
-                            );
-                            setExerciseList(values.exercises);
-                          }}
-                        >
-                          <Select.Trigger
-                            placeholder="Pick A Workout Type"
-                            variant="surface"
-                          />
-                          <Select.Content
-                            variant="solid"
-                            position="popper"
-                            sideOffset={2}
-                          >
-                            <Select.Group>
-                              <Select.Label>Workout Options</Select.Label>
-                              {muscleGroups.map((group, index) => (
-                                <Select.Item key={index} value={group}>
-                                  {group}
-                                </Select.Item>
-                              ))}
-                            </Select.Group>
-                          </Select.Content>
-                        </Select.Root>
-                      </Box>
-                    </Box>
-                    <Box>
-                      <Box>
-                        <Text as="label" size="3">
-                          Search by exercise name
-                        </Text>
-                        <TextField.Input
-                          placeholder="Search for an exercise..."
-                          value={searchTerm}
-                          onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            const values = gymService.findByExercise(
-                              e.target.value
-                            );
-                            setExerciseList(values);
-                          }}
-                          // onChange={(e) => setSearchTermHelper(e.target.value)}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Box>
-                    <Text as="label" size="3">
-                      Name
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter exercise name"
-                      value={chosenExercise?.name ?? ""}
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Muscle Group
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter muscle group"
-                      value={chosenExercise?.muscle ?? ""}
-                      onChange={(e) =>
-                        setStrengthForm({
-                          ...strengthForm,
-                          muscle: e.target.value,
-                        })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Info Link
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter URL to info"
-                      value={chosenExercise?.infoLink ?? ""}
-                      onChange={(e) =>
-                        setStrengthForm({
-                          ...strengthForm,
-                          infoLink: e.target.value,
-                        })
-                      }
-                    />
-                  </Box>
-                  <Box>
-                    <Text as="label" size="3">
-                      Notes
-                    </Text>
-                    <TextArea
-                      className="form-TextArea mt-1 block w-full"
-                      rows={3}
-                      placeholder="Enter any notes"
-                      onChange={(e) =>
-                        setStrengthForm({
-                          ...strengthForm,
-                          notes: e.target.value,
-                        })
-                      }
-                    ></TextArea>
-                  </Box>
-                </Box>
-              )}
-
-              {workoutType === "stretch" && (
-                <Box className="space-y-5">
-                  <Box>
-                    <Text as="label" size="3">
-                      Name
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter stretch name"
-                      onChange={(e) =>
-                        setStretchForm({ ...stretchForm, name: e.target.value })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Duration
-                    </Text>
-                    <TextField.Input
-                      type="number"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter duration in minutes"
-                      onChange={(e) =>
-                        setStretchForm({
-                          ...stretchForm,
-                          duration: parseInt(e.target.value),
-                        })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Difficulty
-                    </Text>
-                    <select
-                      className="form-select block w-full mt-1"
-                      onChange={(e) =>
-                        setStretchForm({
-                          ...stretchForm,
-                          difficulty: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="easy">Easy</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
-                    </select>
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Info Link
-                    </Text>
-                    <TextField.Input
-                      type="text"
-                      className="form-input mt-1 block w-full"
-                      placeholder="Enter URL to info"
-                      onChange={(e) =>
-                        setStretchForm({
-                          ...stretchForm,
-                          infoLink: e.target.value,
-                        })
-                      }
-                    />
-                  </Box>
-
-                  <Box>
-                    <Text as="label" size="3">
-                      Notes
-                    </Text>
-                    <TextArea
-                      className="form-textarea mt-1 block w-full"
-                      rows={3}
-                      placeholder="Enter any notes"
-                      onChange={(e) =>
-                        setStretchForm({
-                          ...stretchForm,
-                          notes: e.target.value,
-                        })
-                      }
-                    ></TextArea>
-                  </Box>
-                </Box>
-              )}
-              <Box className="space-x-4">
-                <Button type="submit" color="green" variant="solid">
-                  Submit
-                </Button>
-                <Button onClick={handleFormClose} color="tomato" variant="soft">
-                  Cancel
-                </Button>
-              </Box>
-            </form>
-            {currentExercises && (
-              <Box>
-                {currentExercises.map((exercise, index) => (
-                  <Box
-                    key={index}
-                    onClick={() => handleExerciseClick(exercise)}
-                    className="cursor-pointer p-4 border border-gray-200 rounded-md hover:bg-gray-100"
+          <Box className="flex flex-col  space-y-8 md: flex md:flex-row md:space-x-8">
+            <Box>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <label className="block">
+                  <Text className="text-gray-700">Workout Type</Text>
+                  <select
+                    className="form-select block w-full mt-1"
+                    value={workoutType}
+                    onChange={(e) => setWorkoutType(e.target.value)}
                   >
-                    <h3 className="text-lg font-semibold">{exercise.name}</h3>
-                    <p>Muscle Group: {exercise.muscle}</p>
-                    <a
-                      href={exercise.infoLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
-                    >
-                      Video & Info Link
-                    </a>
-                  </Box>
-                ))}
-                {exerciseList && exerciseList.length > exercisesPerPage && (
-                  <ReactPaginate
-                    previousLabel={"previous"}
-                    nextLabel={"next"}
-                    breakLabel={"..."}
-                    pageCount={Math.ceil(
-                      exerciseList.length / exercisesPerPage
-                    )}
-                    onPageChange={handlePageClick}
-                    containerClassName={"flex justify-center gap-4 my-4"}
-                    pageClassName={"border px-3 py-1 rounded hover:bg-gray-100"}
-                    activeClassName={"bg-blue-500 text-white"}
+                    <option value="">Select a type</option>
+                    <option value="cardio">Cardio</option>
+                    <option value="strength">Strength</option>
+                    <option value="stretch">Stretch</option>
+                  </select>
+                </label>
+                {workoutType === "cardio" && (
+                  <CardioDatabaseForm
+                    cardioForm={cardioForm}
+                    setCardioForm={cardioForm}
                   />
                 )}
-              </Box>
-            )}
+
+                {workoutType === "strength" && (
+                  <Box className="space-y-5">
+                    <Box className="text-xl font-medium space-y-3">
+                      <Box>
+                        <Text as="label" size="3">
+                          Search by muscle type
+                        </Text>
+                        <Box>
+                          <Select.Root
+                            size="3"
+                            // value={selectedWorkoutType ?? ""}
+                            onValueChange={(value) => {
+                              const values = gymService.getByMuscleGroup(value);
+                              console.log(
+                                "Search by muscle type: ",
+                                typeof values.exercises,
+                                values
+                              );
+                              setExerciseList(values.exercises);
+                            }}
+                          >
+                            <Select.Trigger
+                              placeholder="Pick A Workout Type"
+                              variant="surface"
+                            />
+                            <Select.Content
+                              variant="solid"
+                              position="popper"
+                              sideOffset={2}
+                            >
+                              <Select.Group>
+                                <Select.Label>Workout Options</Select.Label>
+                                {muscleGroups.map((group, index) => (
+                                  <Select.Item key={index} value={group}>
+                                    {group}
+                                  </Select.Item>
+                                ))}
+                              </Select.Group>
+                            </Select.Content>
+                          </Select.Root>
+                        </Box>
+                      </Box>
+                      <Box>
+                        <Box>
+                          <Text as="label" size="3">
+                            Search by exercise name
+                          </Text>
+                          <TextField.Input
+                            placeholder="Search for an exercise..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                              setSearchTerm(e.target.value);
+                              const values = gymService.findByExercise(
+                                e.target.value
+                              );
+                              setExerciseList(values);
+                            }}
+                            // onChange={(e) => setSearchTermHelper(e.target.value)}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Text as="label" size="3">
+                        Name
+                      </Text>
+                      <TextField.Input
+                        type="text"
+                        className="form-input mt-1 block w-full"
+                        placeholder="Enter exercise name"
+                        value={chosenExercise?.name ?? ""}
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text as="label" size="3">
+                        Muscle Group
+                      </Text>
+                      <TextField.Input
+                        type="text"
+                        className="form-input mt-1 block w-full"
+                        placeholder="Enter muscle group"
+                        value={chosenExercise?.muscle ?? ""}
+                        onChange={(e) =>
+                          setStrengthForm({
+                            ...strengthForm,
+                            muscle: e.target.value,
+                          })
+                        }
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text as="label" size="3">
+                        Info Link
+                      </Text>
+                      <TextField.Input
+                        type="text"
+                        className="form-input mt-1 block w-full"
+                        placeholder="Enter URL to info"
+                        value={chosenExercise?.infoLink ?? ""}
+                        onChange={(e) =>
+                          setStrengthForm({
+                            ...strengthForm,
+                            infoLink: e.target.value,
+                          })
+                        }
+                      />
+                    </Box>
+                    <Box>
+                      <Text as="label" size="3">
+                        Notes
+                      </Text>
+                      <TextArea
+                        className="form-TextArea mt-1 block w-full"
+                        rows={3}
+                        placeholder="Enter any notes"
+                        onChange={(e) =>
+                          setStrengthForm({
+                            ...strengthForm,
+                            notes: e.target.value,
+                          })
+                        }
+                      ></TextArea>
+                    </Box>
+                  </Box>
+                )}
+
+                {workoutType === "stretch" && (
+                  <Box className="space-y-5">
+                    <Box>
+                      <Text as="label" size="3">
+                        Name
+                      </Text>
+                      <TextField.Input
+                        type="text"
+                        className="form-input mt-1 block w-full"
+                        placeholder="Enter stretch name"
+                        onChange={(e) =>
+                          setStretchForm({
+                            ...stretchForm,
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text as="label" size="3">
+                        Duration
+                      </Text>
+                      <TextField.Input
+                        type="number"
+                        className="form-input mt-1 block w-full"
+                        placeholder="Enter duration in minutes"
+                        onChange={(e) =>
+                          setStretchForm({
+                            ...stretchForm,
+                            duration: parseInt(e.target.value),
+                          })
+                        }
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text as="label" size="3">
+                        Difficulty
+                      </Text>
+                      <select
+                        className="form-select block w-full mt-1"
+                        onChange={(e) =>
+                          setStretchForm({
+                            ...stretchForm,
+                            difficulty: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                      </select>
+                    </Box>
+
+                    <Box>
+                      <Text as="label" size="3">
+                        Info Link
+                      </Text>
+                      <TextField.Input
+                        type="text"
+                        className="form-input mt-1 block w-full"
+                        placeholder="Enter URL to info"
+                        onChange={(e) =>
+                          setStretchForm({
+                            ...stretchForm,
+                            infoLink: e.target.value,
+                          })
+                        }
+                      />
+                    </Box>
+
+                    <Box>
+                      <Text as="label" size="3">
+                        Notes
+                      </Text>
+                      <TextArea
+                        className="form-textarea mt-1 block w-full"
+                        rows={3}
+                        placeholder="Enter any notes"
+                        onChange={(e) =>
+                          setStretchForm({
+                            ...stretchForm,
+                            notes: e.target.value,
+                          })
+                        }
+                      ></TextArea>
+                    </Box>
+                  </Box>
+                )}
+                <Box className="space-x-4">
+                  <Button type="submit" color="green" variant="solid">
+                    Submit
+                  </Button>
+                  <Button
+                    onClick={handleFormClose}
+                    color="tomato"
+                    variant="soft"
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </form>
+            </Box>
+            <Box>
+              {currentExercises && (
+                <Box>
+                  {currentExercises.map((exercise, index) => (
+                    <Box
+                      key={index}
+                      onClick={() => handleExerciseClick(exercise)}
+                      className="cursor-pointer p-4 border border-gray-200 rounded-md hover:bg-gray-100"
+                    >
+                      <h3 className="text-lg font-semibold">{exercise.name}</h3>
+                      <p>Muscle Group: {exercise.muscle}</p>
+                      <a
+                        href={exercise.infoLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        Video & Info Link
+                      </a>
+                    </Box>
+                  ))}
+                  {exerciseList && exerciseList.length > exercisesPerPage && (
+                    <ReactPaginate
+                      previousLabel={"previous"}
+                      nextLabel={"next"}
+                      breakLabel={"..."}
+                      pageCount={Math.ceil(
+                        exerciseList.length / exercisesPerPage
+                      )}
+                      onPageChange={handlePageClick}
+                      containerClassName={"flex justify-center gap-4 my-4"}
+                      pageClassName={
+                        "border px-3 py-1 rounded hover:bg-gray-100"
+                      }
+                      activeClassName={"bg-blue-500 text-white"}
+                    />
+                  )}
+                </Box>
+              )}
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -704,6 +624,111 @@ const WorkoutDatabase = () => {
         />
       )}
     </Box>
+  );
+};
+
+const CardioDatabaseForm = ({ cardioForm, setCardioForm }) => {
+  return (
+    <>
+      <Box>
+        <Text as="label" size="3">
+          Name
+        </Text>
+        <TextField.Input
+          type="text"
+          className="form-input mt-1 block w-full"
+          placeholder="Enter exercise name"
+          onChange={(e) =>
+            setCardioForm({ ...cardioForm, name: e.target.value })
+          }
+        />
+      </Box>
+
+      <Box>
+        <Text className="text-gray-700">Duration (minutes)</Text>
+        <input
+          type="string"
+          className="form-input mt-1 block w-full"
+          placeholder="Enter duration in minutes"
+          onChange={(e) =>
+            setCardioForm({
+              ...cardioForm,
+              duration: parseInt(e.target.value),
+            })
+          }
+        />
+      </Box>
+
+      <Box>
+        <Text as="label" size="3">
+          Distance (optional)
+        </Text>
+        <TextField.Input
+          type="number"
+          className="form-input mt-1 block w-full"
+          placeholder="Enter distance (km or miles)"
+          onChange={(e) =>
+            setCardioForm({
+              ...cardioForm,
+              distance: parseInt(e.target.value),
+            })
+          }
+        />
+      </Box>
+
+      <Box>
+        <Text as="label" size="3">
+          Intensity
+        </Text>
+        <select
+          className="form-select block w-full mt-1"
+          onChange={(e) =>
+            setCardioForm({
+              ...cardioForm,
+              intensity: e.target.value,
+            })
+          }
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </Box>
+
+      <Box>
+        <Text as="label" size="3">
+          Info Link
+        </Text>
+        <TextField.Input
+          type="text"
+          className="form-input mt-1 block w-full"
+          placeholder="Enter URL to info"
+          onChange={(e) =>
+            setCardioForm({
+              ...cardioForm,
+              infoLink: e.target.value,
+            })
+          }
+        />
+      </Box>
+
+      <Box>
+        <Text as="label" size="3">
+          Notes
+        </Text>
+        <TextArea
+          className="form-textarea mt-1 block w-full"
+          rows={3}
+          placeholder="Enter any notes"
+          onChange={(e) =>
+            setCardioForm({
+              ...cardioForm,
+              notes: e.target.value,
+            })
+          }
+        ></TextArea>
+      </Box>
+    </>
   );
 };
 type WorkoutProps = {
