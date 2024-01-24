@@ -12,6 +12,7 @@ import RegisterLogin from "../pages/RegisterLogin";
 import Dashboard from "../pages/Dashboard";
 import NavBar from "../components/NavBar";
 import AboutUs from "../pages/About Us";
+import AdminPage from "../pages/AdminPage";
 import TodaysWorkoutComponent from "../pages/TodaysWorkout";
 import WeekPlanner from "../pages/WeekGrid";
 import WeekGrid from "../pages/WeekGrid";
@@ -26,7 +27,7 @@ const AppRoutes: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  const { username } = userContext;
+  const { username, isAdmin } = userContext;
   console.log("What is the username? ", username);
   return (
     <Router>
@@ -56,6 +57,8 @@ const AppRoutes: React.FC = () => {
                 />
                 <Route path="/weekgrid" element={<WeekGrid />} />
                 <Route path="/workoutdatabase" element={<WorkoutDatabase />} />
+                {/* Admin Route */}
+                {isAdmin && <Route path="/admin" element={<AdminPage />} />}
               </>
             )}
 

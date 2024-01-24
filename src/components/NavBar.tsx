@@ -10,8 +10,11 @@ const NavBar = () => {
   const context = useContext(UserContext);
 
   // Assert that context is not undefined
-  const { username: contextUsername, setUsername: setContextUsername } =
-    context!;
+  const {
+    username: contextUsername,
+    setUsername: setContextUsername,
+    isAdmin,
+  } = context!;
   const navigate = useNavigate();
 
   const location = useLocation();
@@ -58,7 +61,7 @@ const NavBar = () => {
       href: "/signin",
     },
   ];
-
+  console.log("in navbar: ", isAdmin);
   return (
     <nav className="flex justify-between border-b border-blue-500 mb-5 p-5 h-14 items-center">
       <Link to="/">
@@ -69,8 +72,20 @@ const NavBar = () => {
           </div>
         </Link>
       </Link>
+
       {contextUsername ? (
         <ul className="flex space-x-8">
+          {isAdmin && (
+            <Link
+              to={"/admin"}
+              className={classNames({
+                "text-blue-500 hover:text-blue-700 hover:underline transition-colors hidden sm:block":
+                  true,
+              })}
+            >
+              Admin Dashboard
+            </Link>
+          )}
           {authenticatedLinks.map((link) => (
             <li key={link.href}>
               {link.label === "Logout" ? (
