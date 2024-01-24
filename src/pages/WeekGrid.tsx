@@ -4,6 +4,13 @@ import { Box, Button, Text } from "@radix-ui/themes";
 import { WorkoutLevel } from "../components/WorkoutLevelBadge";
 import * as Select from "@radix-ui/react-select";
 import axiosInstance from "../util/axiosInterceptor";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  showRegularDeleteToast,
+  showSuccessToast,
+  showUpdateConfirmationToast,
+  DeleteToastRegular,
+} from "../components/ToastComponents";
 const serverAPI = "http://localhost:8080";
 
 interface PlannedWorkout {
@@ -216,10 +223,11 @@ const WeekGrid = () => {
   }, []);
 
   const deleteCurrentWeek = () => {
-    console.log("Make Call: ");
     axiosInstance.delete(`${serverAPI}/weekplan/`).then((response) => {
       console.log("DELETE weekplan res: ", response.data);
       setWeekPlan(newWeek);
+      const toastMessage = "Current Week Plan Has Been Deleted";
+      showRegularDeleteToast(toastMessage, null);
     });
   };
 
@@ -229,6 +237,8 @@ const WeekGrid = () => {
         setWeekPlan(newWeek);
       } else {
         setWeekPlan(response.data);
+        const toastMessage = "Loaded Template Week";
+        showSuccessToast(toastMessage);
       }
       console.log("GET weekplan res: ", response.data);
     });
@@ -237,7 +247,8 @@ const WeekGrid = () => {
     axiosInstance.post(`${serverAPI}/weekplan/`, weekPlan).then((response) => {
       console.log("GET weekplan res: ", response.data);
       setWeekPlan(response.data);
-      setIsEditing(false);
+      const toastMessage = "Week Plan Has Been Saved";
+      showSuccessToast(toastMessage);
     });
   };
   const saveBadgeCurrentWeek = (newDayPlan: DayPlan) => {
@@ -260,10 +271,12 @@ const WeekGrid = () => {
       JSON.stringify(updatedPlanData)
     );
     axiosInstance
-      .post(`${serverAPI}/weekplan/`, JSON.stringify(updatedPlanData))
+      .post(`${serverAPI}/weekplan/`, updatedPlanData)
       .then((response) => {
         console.log("POST weekplan res: ", response.data);
         setWeekPlan(response.data);
+        const toastMessage = "Week Plan Has Been Saved";
+        showSuccessToast(toastMessage);
       })
       .catch((error) => {
         console.log("postWeekPlanCall error is: ", error);
@@ -336,16 +349,21 @@ const WeekGrid = () => {
       )
     ) {
       setWeekPlan(userTemplateWeek);
+      const toastMessage = "Loaded Template Week";
+      showSuccessToast(toastMessage);
     }
   };
 
   const saveTemplateWeek = () => {
+    toast.success("Successfully toasted!");
     if (
       window.confirm(
         "Are you sure you want to save the current week as the template?"
       )
     ) {
       setUserTemplateWeek(weekPlan);
+      const toastMessage = "Current Week Saved As Template Week";
+      showSuccessToast(toastMessage);
     }
   };
   console.log("weekPlan is : ", weekPlan);
@@ -741,6 +759,7 @@ const DayCard: React.FC<DayCardProps> = ({
           </Box>
         )}
       </Box>
+      <Toaster />
     </Box>
   );
 };

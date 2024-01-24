@@ -18,6 +18,13 @@ import "keen-slider/keen-slider.min.css";
 import { allDummyWorkouts } from "../mockdata/defaultworkouts";
 import { WheelControls } from "../components/ReusableSlider";
 import { Workout } from "../types/workoutTypes";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  showRegularDeleteToast,
+  showSuccessToast,
+  showUpdateConfirmationToast,
+  DeleteToastRegular,
+} from "../components/ToastComponents";
 import {
   FaceIcon,
   ImageIcon,
@@ -227,6 +234,8 @@ const WorkoutDatabase = () => {
         const reversedData = response.data.slice().reverse();
         setAllSavedExercise(reversedData);
         setIsAddFormVisible(false);
+        const toastMessage = "Database Exercise Has Been Added!";
+        showSuccessToast(toastMessage);
       });
   };
   const updateExerciseDetails = (updatedExercise: UserWorkout) => {
@@ -235,6 +244,9 @@ const WorkoutDatabase = () => {
       .then((response) => {
         console.log("PUT updateExerciseDetails res: ", response.data);
         setAllSavedExercise(response.data);
+
+        const toastMessage = "Database Exercise Has Been Updated!";
+        showSuccessToast(toastMessage);
       });
   };
   const deleteExerciseDetails = (exerciseId: string) => {
@@ -243,9 +255,11 @@ const WorkoutDatabase = () => {
       .then((response) => {
         console.log("DELETE updateExerciseDetails res: ", response.data);
         setAllSavedExercise(response.data);
+
+        const toastMessage = "Database Exercise Has Been Deleted.";
+        showRegularDeleteToast(toastMessage, null);
       });
   };
-
   function handleExerciseClick(exercise: AlgoExercise): void {
     console.log("exercise is: ", exercise);
     setChosenExercise(exercise);
@@ -459,6 +473,7 @@ const WorkoutDatabase = () => {
           onCancel={() => setIsAddFormVisible(false)}
         />
       )}
+      <Toaster />
     </Box>
   );
 };
@@ -870,6 +885,7 @@ const StrengthDatabaseForm: React.FC<StrengthDatabaseFormProps> = ({
           }
         ></TextArea>
       </Box>
+      <Toaster />
     </Box>
   );
 };

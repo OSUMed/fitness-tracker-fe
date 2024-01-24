@@ -12,6 +12,18 @@ export const DeleteToast = ({ savedDeletedItem, onUndo }) => (
   </div>
 );
 
+export const DeleteToastRegular = ({ message, onUndo }) => (
+  <div className="bg-orange-500 text-white text-sm p-3 rounded-lg shadow-lg flex justify-between items-center">
+    <span>{message}</span>
+    <button
+      onClick={() => toast.dismiss()}
+      className="bg-white text-red-500 text-xs px-2 py-1 rounded ml-4 hover:bg-gray-100"
+    >
+      Close
+    </button>
+  </div>
+);
+
 export const SuccessToast = ({ message }) => (
   <div className="bg-lime-500 text-white text-sm p-3 rounded-lg shadow-lg flex justify-between items-center">
     <span>{message}</span>
@@ -38,6 +50,7 @@ export const UpdateConfirmationToast = ({ onUpdate }) => (
 
 // Utility functions to show toasts
 export const showDeleteToast = (savedDeletedItem, undoFunction) => {
+  console.log("showDeleteToast triggered!");
   toast.custom(
     <DeleteToast
       savedDeletedItem={savedDeletedItem}
@@ -50,7 +63,22 @@ export const showDeleteToast = (savedDeletedItem, undoFunction) => {
   );
 };
 
+export const showRegularDeleteToast = (message, undoFunction) => {
+  console.log("showRegularDeleteToast triggered!");
+  toast.custom(
+    <DeleteToastRegular
+      message={message}
+      onUndo={() => undoFunction(savedDeletedItem)}
+    />,
+    {
+      duration: 3000,
+      position: "bottom-right",
+    }
+  );
+};
+
 export const showSuccessToast = (message) => {
+  console.log("showSuccessToast triggered!");
   toast.custom(<SuccessToast message={message} />, {
     position: "bottom-right",
     duration: 3000,
@@ -58,6 +86,7 @@ export const showSuccessToast = (message) => {
 };
 
 export const showUpdateConfirmationToast = (updateFunction) => {
+  console.log("showUpdateConfirmationToast triggered!");
   toast.custom(<UpdateConfirmationToast onUpdate={updateFunction} />, {
     position: "bottom-right",
     duration: 3000,

@@ -175,6 +175,7 @@ const TodaysWorkoutComponent = () => {
           duration: 3000,
         });
       });
+
     showSuccessToast(toastMessage);
   };
 
@@ -278,12 +279,21 @@ const TodaysWorkoutComponent = () => {
     );
     const workoutTypesSummary = Array.from(workoutTypes).join(", ");
 
-    // Exercise names
-    const exerciseNamesSummary = exercises
-      .map((exercise: Exercise) => exercise.exerciseName)
-      .join(", ");
-
-    // Total number of sets
+    const exerciseNamesSummary = exercises.reduce(
+      (
+        accumulator: string,
+        exercise: Exercise,
+        index: number,
+        array: Exercise[]
+      ) => {
+        accumulator += exercise.exerciseName;
+        if (index < array.length - 1) {
+          accumulator += ", ";
+        }
+        return accumulator;
+      },
+      ""
+    );
     const totalSets = exercises.reduce(
       (total: number, exercise: Exercise) => total + exercise.sets.length,
       0
