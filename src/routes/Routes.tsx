@@ -12,7 +12,7 @@ import RegisterLogin from "../pages/RegisterLogin";
 import Dashboard from "../pages/Dashboard";
 import NavBar from "../components/NavBar";
 import AboutUs from "../pages/About Us";
-import AddWorkout from "../pages/AddWorkout";
+import TodaysWorkoutComponent from "../pages/TodaysWorkout";
 import WeekPlanner from "../pages/WeekGrid";
 import WeekGrid from "../pages/WeekGrid";
 import { Container } from "@radix-ui/themes";
@@ -50,7 +50,10 @@ const AppRoutes: React.FC = () => {
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/chat" element={<Chat />} />
-                <Route path="/addworkout" element={<AddWorkout />} />
+                <Route
+                  path="/addworkout"
+                  element={<TodaysWorkoutComponent />}
+                />
                 <Route path="/weekgrid" element={<WeekGrid />} />
                 <Route path="/workoutdatabase" element={<WorkoutDatabase />} />
               </>

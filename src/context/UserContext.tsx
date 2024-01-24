@@ -8,6 +8,7 @@ import {
   Cardio,
   Stretch,
 } from "../types/Workout";
+import axiosInstance from "../util/axiosInterceptor";
 interface PrivateResponse {
   username: string;
 }
@@ -15,7 +16,9 @@ interface PrivateResponse {
 // Define the shape of the context
 export interface UserContextType {
   username: string | null;
+  userId: string | null;
   setUsername: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserId: React.Dispatch<React.SetStateAction<string | null>>;
   historyRecordedWorkouts: workoutFinal[];
   setHistoryRecordedWorkouts: React.Dispatch<
     React.SetStateAction<workoutFinal[]>
@@ -47,6 +50,10 @@ export const UserContext = createContext<UserContextType | undefined>(
   undefined
 );
 
+const clearLocalStorage = () => {
+  localStorage.clear();
+};
+
 interface UserContextProviderProps {
   children: ReactNode;
 }
@@ -56,6 +63,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
   children,
 }) => {
   const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [historyRecordedWorkouts, setHistoryRecordedWorkouts] = useState<
     workoutFinal[]
   >([]);
@@ -69,34 +77,39 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
     Strength: 1,
     Stretch: 1,
   });
+  // useEffect(() => {
+  //   console.log("UserContext username is: ", username);
+  //   if (!username || username == "anonymousUser") {
+  //     localStorage.clear();
+  //   }
+  // }, [username]);
   useEffect(() => {
     // Retrieve the JWT token from local storage
     const jwtToken = localStorage.getItem("accessToken");
-    console.log("jwtToken is: ", jwtToken);
 
     if (jwtToken) {
-      axios
-        .get("http://localhost:8080/account", {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-        })
+      axiosInstance
+        .get("http://localhost:8080/account")
         .then((response) => {
-          console.log("response.data is: ", response.data);
-          setUsername(response.data);
+          const { username, userId } = response.data;
+          console.log("account GET response.data is: ", response.data);
+          console.log("account GET response.data is2: ", username, userId);
+          setUsername(username);
+          setUserId(userId);
         })
         .catch((error) => {
           console.error("Error fetching user info:", error);
         });
     }
-  }, []);
-
+  }, [username]);
+  console.log("Username and id are: ", username, userId);
   return (
     <UserContext.Provider
       value={{
         username,
         setUsername,
+        setUserId,
+        userId,
         historyRecordedWorkouts,
         setHistoryRecordedWorkouts,
         allSummaryRecordedWorkouts,
