@@ -17,6 +17,7 @@ interface PrivateResponse {
 export interface UserContextType {
   username: string | null;
   userId: string | null;
+  isAdmin: boolean;
   setUsername: React.Dispatch<React.SetStateAction<string | null>>;
   setUserId: React.Dispatch<React.SetStateAction<string | null>>;
   historyRecordedWorkouts: workoutFinal[];
@@ -64,6 +65,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
 }) => {
   const [username, setUsername] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<string | null>(null);
   const [historyRecordedWorkouts, setHistoryRecordedWorkouts] = useState<
     workoutFinal[]
   >([]);
@@ -91,11 +93,16 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
       axiosInstance
         .get("http://localhost:8080/account")
         .then((response) => {
-          const { username, userId } = response.data;
+          const { username, userId, authorities } = response.data;
           console.log("account GET response.data is: ", response.data);
           console.log("account GET response.data is2: ", username, userId);
           setUsername(username);
           setUserId(userId);
+
+          // Determine if the user has the ROLE_ADMIN authority
+          const adminRole = authorities.includes("ROLE_ADMIN");
+          setIsAdmin(adminRole);
+          console.log("adminRole in useeffect is: ", adminRole);
         })
         .catch((error) => {
           console.error("Error fetching user info:", error);
@@ -103,6 +110,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
     }
   }, [username]);
   console.log("Username and id are: ", username, userId);
+  console.log("admin?: ", isAdmin);
   return (
     <UserContext.Provider
       value={{
@@ -110,6 +118,7 @@ export const UserContextProvider: React.FC<UserContextProviderProps> = ({
         setUsername,
         setUserId,
         userId,
+        isAdmin,
         historyRecordedWorkouts,
         setHistoryRecordedWorkouts,
         allSummaryRecordedWorkouts,
