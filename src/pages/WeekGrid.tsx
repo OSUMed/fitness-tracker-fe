@@ -1,35 +1,129 @@
 import React, { useEffect, useState } from "react";
 import { WorkoutLevelBadge } from "../components/WorkoutLevelBadge";
-import { Box, Button, Select, Text } from "@radix-ui/themes";
+import { Box, Button, Text } from "@radix-ui/themes";
 import { WorkoutLevel } from "../components/WorkoutLevelBadge";
-interface Exercise {
-  name: string;
-}
+import * as Select from "@radix-ui/react-select";
+import axiosInstance from "../util/axiosInterceptor";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  showRegularDeleteToast,
+  showSuccessToast,
+  showUpdateConfirmationToast,
+  DeleteToastRegular,
+} from "../components/ToastComponents";
+const serverAPI = "http://localhost:8080";
 
 interface PlannedWorkout {
-  id: string;
-  type: string;
-  exercises: Exercise[];
+  id: number;
+  type?: string;
+  exercises: { name: string }[];
 }
 
 interface DayPlan {
+  id: number;
   day: string;
   workouts: PlannedWorkout[];
   duration: string;
   intensity: string;
 }
-
-const initialPlanData: DayPlan[] = [
+const newWeek: DayPlan[] = [
   {
+    id: 0,
     day: "Sunday",
     workouts: [
       {
-        id: "1",
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Monday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Tuesday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Wednesday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Thursday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Friday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+  {
+    id: 0,
+    day: "Saturday",
+    workouts: [
+      {
+        id: 0,
+        exercises: [],
+      },
+    ],
+    duration: "",
+    intensity: "Light",
+  },
+];
+const initialPlanData: DayPlan[] = [
+  {
+    id: 0,
+    day: "Sunday",
+    workouts: [
+      {
+        id: 0,
         type: "Stretch",
         exercises: [{ name: "Exercise 1" }, { name: "Exercise 2" }],
       },
       {
-        id: "2",
+        id: 0,
         type: "Cardio",
         exercises: [{ name: "Running" }, { name: "Jumping Jacks" }],
       },
@@ -38,10 +132,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Light",
   },
   {
+    id: 0,
     day: "Monday",
     workouts: [
       {
-        id: "3",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Push-Ups" }, { name: "Dumbbell Curls" }],
       },
@@ -50,10 +145,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Moderate",
   },
   {
+    id: 0,
     day: "Tuesday",
     workouts: [
       {
-        id: "4",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Squats" }, { name: "Leg Curls" }],
       },
@@ -62,10 +158,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Intense",
   },
   {
+    id: 0,
     day: "Wednesday",
     workouts: [
       {
-        id: "5",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Shoulder Press" }, { name: "Preacher Curls" }],
       },
@@ -74,10 +171,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Intense",
   },
   {
+    id: 0,
     day: "Thursday",
     workouts: [
       {
-        id: "6",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Leg Press" }, { name: "Deadlifts" }],
       },
@@ -86,10 +184,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Light",
   },
   {
+    id: 0,
     day: "Friday",
     workouts: [
       {
-        id: "7",
+        id: 0,
         type: "Chest",
         exercises: [{ name: "Dips" }, { name: "Incline Press" }],
       },
@@ -98,10 +197,11 @@ const initialPlanData: DayPlan[] = [
     intensity: "Moderate",
   },
   {
+    id: 0,
     day: "Saturday",
     workouts: [
       {
-        id: "8",
+        id: 0,
         type: "Strength",
         exercises: [{ name: "Pull-ups" }, { name: "Bicep Curls" }],
       },
@@ -112,28 +212,118 @@ const initialPlanData: DayPlan[] = [
 ];
 
 const WeekGrid = () => {
-  const [planData, setPlanData] = useState<DayPlan[]>(initialPlanData);
+  const [weekPlan, setWeekPlan] = useState<DayPlan[]>(newWeek);
   const [userTemplateWeek, setUserTemplateWeek] =
     useState<DayPlan[]>(initialPlanData);
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  useEffect(() => {
+    getWeekPlanCall();
+  }, []);
+
+  const deleteCurrentWeek = () => {
+    axiosInstance.delete(`${serverAPI}/weekplan/`).then((response) => {
+      console.log("DELETE weekplan res: ", response.data);
+      setWeekPlan(newWeek);
+      const toastMessage = "Current Week Plan Has Been Deleted";
+      showRegularDeleteToast(toastMessage, null);
+    });
+  };
+
+  const getWeekPlanCall = () => {
+    axiosInstance.get(`${serverAPI}/weekplan/`).then((response) => {
+      if (response.data.length == 0) {
+        setWeekPlan(newWeek);
+      } else {
+        setWeekPlan(response.data);
+        const toastMessage = "Loaded Template Week";
+        showSuccessToast(toastMessage);
+      }
+      console.log("GET weekplan res: ", response.data);
+    });
+  };
+  const saveCurrentWeek = () => {
+    axiosInstance.post(`${serverAPI}/weekplan/`, weekPlan).then((response) => {
+      console.log("GET weekplan res: ", response.data);
+      setWeekPlan(response.data);
+      const toastMessage = "Week Plan Has Been Saved";
+      showSuccessToast(toastMessage);
+    });
+  };
+  const saveBadgeCurrentWeek = (newDayPlan: DayPlan) => {
+    const updatedPlanData = weekPlan.map((plan) =>
+      plan.day === newDayPlan.day ? newDayPlan : plan
+    );
+    setWeekPlan(updatedPlanData);
+    // axiosInstance
+    //   .post(`${serverAPI}/weekplan/`, updatedPlanData)
+    //   .then((response) => {
+    //     console.log("GET weekplan res: ", response.data);
+    //   });
+  };
+  const postWeekPlanCall = (updatedDayPlan) => {
+    const updatedPlanData = weekPlan.map((plan) =>
+      plan.day === updatedDayPlan.day ? updatedDayPlan : plan
+    );
+    console.log(
+      "We are sending this to server: ",
+      JSON.stringify(updatedPlanData)
+    );
+    axiosInstance
+      .post(`${serverAPI}/weekplan/`, updatedPlanData)
+      .then((response) => {
+        console.log("POST weekplan res: ", response.data);
+        setWeekPlan(response.data);
+        const toastMessage = "Week Plan Has Been Saved";
+        showSuccessToast(toastMessage);
+      })
+      .catch((error) => {
+        console.log("postWeekPlanCall error is: ", error);
+      });
+  };
 
   const handleEditClick = (day) => {
     console.log("handleEditClick   pressed!");
     // setIsEditing(false);
     setSelectedDay(day);
   };
+  const updateDayPlan = (updatedDayPlan: DayPlan) => {
+    const updatedPlanData = weekPlan.map((plan) =>
+      plan.day === updatedDayPlan.day ? updatedDayPlan : plan
+    );
+    setWeekPlan(updatedPlanData);
+  };
 
-  const handleSaveClick = () => {
+  const handleSaveClick = (updatedDayPlan: DayPlan) => {
+    console.log("updatedDayPlan is: ", updatedDayPlan);
+    try {
+      setSelectedDay(null);
+      console.log("handleSaveClick pressed!");
+      // updateDayPlan(updatedDayPlan);
+      postWeekPlanCall(updatedDayPlan);
+      // const updatedPlanData = [...weekPlan];
+      // setWeekPlan(updatedPlanData);
+    } catch (error) {
+      console.log("error: ", error);
+      // setWeekPlan(updatedPlanData);
+    }
     // setIsEditing(true);
-    setSelectedDay(null);
-    console.log("handleSaveClick pressed!");
-    const updatedPlanData = [...planData];
-    setPlanData(updatedPlanData);
+  };
+  const saveUserWeek = () => {
+    axiosInstance
+      .post(`${serverAPI}/weekplan/`, JSON.stringify(weekPlan))
+      .then((response) => {
+        console.log("SAVED weekplan res: ", response.data);
+        setWeekPlan(response.data);
+      })
+      .catch((error) => {
+        console.log("postWeekPlanCall error is: ", error);
+      });
   };
 
   const findPlanForDay = (day: string) => {
-    const dayPlan = planData.find((plan) => plan.day === day);
+    const dayPlan = weekPlan.find((plan) => plan.day === day);
     return dayPlan;
   };
   const handleResetWeek = () => {
@@ -142,14 +332,14 @@ const WeekGrid = () => {
         "Are you sure you want to reset the entire week's workouts?"
       )
     ) {
-      const clearedPlanData = planData.map((dayPlan) => ({
+      const clearedPlanData = weekPlan.map((dayPlan) => ({
         ...dayPlan,
         workouts: [],
         intensity: "LIGHT",
         duration: "",
       }));
 
-      setPlanData(clearedPlanData);
+      setWeekPlan(clearedPlanData);
     }
   };
   const loadTemplateWeek = () => {
@@ -158,55 +348,102 @@ const WeekGrid = () => {
         "Are you sure you want to load the template week's workouts?"
       )
     ) {
-      setPlanData(userTemplateWeek);
+      setWeekPlan(userTemplateWeek);
+      const toastMessage = "Loaded Template Week";
+      showSuccessToast(toastMessage);
     }
   };
 
   const saveTemplateWeek = () => {
+    toast.success("Successfully toasted!");
     if (
       window.confirm(
         "Are you sure you want to save the current week as the template?"
       )
     ) {
-      setUserTemplateWeek(planData);
+      setUserTemplateWeek(weekPlan);
+      const toastMessage = "Current Week Saved As Template Week";
+      showSuccessToast(toastMessage);
     }
   };
-
+  console.log("weekPlan is : ", weekPlan);
+  console.log("weekPlan is typeof: ", typeof weekPlan);
   return (
-    <div className="space-y-4">
-      <Box className="space-x-4">
-        <Button onClick={handleResetWeek}>Reset Week</Button>
-        <Button onClick={loadTemplateWeek}>Load Template Week</Button>
-        <Button onClick={saveTemplateWeek}>Save Week As Template</Button>
-      </Box>
-      <div className="py-4 px-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-2xl">
-        <div className="flex overflow-x-auto snap-x snap-mandatory">
-          {planData.map((dayPlan) => (
-            <DayCard
-              key={dayPlan.day}
-              dayPlan={dayPlan}
-              onEditClick={() => handleEditClick(dayPlan.day)}
-              handleSaveClick={handleSaveClick}
-            />
-          ))}
+    <Box>
+      <div className="space-y-4">
+        <Box className="flex flex-column justify-between space-x-4">
+          <Box className="space-x-4">
+            <Button color="grass" onClick={saveTemplateWeek}>
+              Save Week As Template
+            </Button>
+            <Button variant="soft" color="gray" onClick={loadTemplateWeek}>
+              Load Template Week
+            </Button>
+            <Button variant="soft" color="orange" onClick={deleteCurrentWeek}>
+              Delete Current Week
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              className="mt-6 text-lg py-4 px-8"
+              variant="solid"
+              color="green"
+              onClick={saveCurrentWeek}
+            >
+              Save Current Week
+            </Button>
+          </Box>
+        </Box>
+        <div className="py-4 px-4 bg-gradient-to-br from-gray-50 to-white-100 rounded-lg shadow-2xl">
+          <div className="flex overflow-x-auto snap-x snap-mandatory">
+            {weekPlan.map((dayPlan) => (
+              <DayCard
+                key={dayPlan.day}
+                dayPlan={dayPlan}
+                onEditClick={() => handleEditClick(dayPlan.day)}
+                handleSaveClick={handleSaveClick}
+                updateDayPlan={updateDayPlan}
+                saveBadgeCurrentWeek={saveBadgeCurrentWeek}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+
+      <Box className="sticky w-full bg-gray-100 bg-white p-4 shadow-md flex justify-end mt-4">
+        <Button
+          className="mt-6 text-lg py-4 px-8"
+          size="4"
+          variant="solid"
+          color="green"
+          onClick={saveCurrentWeek}
+        >
+          Save Current Week
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
 interface DayCardProps {
-  dayPlan: DayPlan | undefined;
-
+  dayPlan: DayPlan;
   onEditClick: () => void;
-  handleSaveClick: () => void;
+  handleSaveClick: (dayOutline: DayPlan) => void;
+  saveBadgeCurrentWeek: (dayOutline: DayPlan) => void;
+  updateDayPlan: (updatedDayPlan: DayPlan) => void;
 }
 
-const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
+const DayCard: React.FC<DayCardProps> = ({
+  dayPlan,
+  handleSaveClick,
+  updateDayPlan,
+  saveBadgeCurrentWeek,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [dayOutline, setDayOutline] = useState<DayPlan>(dayPlan!);
+  const [originalDayPlan, setOriginalDayPlan] = useState<DayPlan>(dayPlan!);
 
-  const handleAddNewExercise = (workoutId: string) => {
+  const handleAddNewExercise = (workoutId: number) => {
     setDayOutline((prevDayOutline) => {
       return {
         ...prevDayOutline,
@@ -222,7 +459,7 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
       };
     });
   };
-  const handleRemoveLastExercise = (workoutId: string) => {
+  const handleRemoveLastExercise = (workoutId: number) => {
     setDayOutline((prevDayOutline) => {
       return {
         ...prevDayOutline,
@@ -266,41 +503,54 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
       return prevDayOutline;
     });
   };
-
-  const handleSaveDay = (day) => {
-    setDayOutline((prevDayOutline) => {
-      if (prevDayOutline.day === day) {
-        // Filter out exercises with empty names & with no exercises
-        const filteredWorkouts = prevDayOutline.workouts
-          .map((workout) => {
-            return {
-              ...workout,
-              exercises: workout.exercises.filter(
-                (exercise) => exercise.name !== ""
-              ),
-            };
-          })
-          .filter((workout) => workout.exercises.length > 0);
-
-        return {
-          ...prevDayOutline,
-          workouts: filteredWorkouts,
-        };
-      }
-      return prevDayOutline;
-    });
-    setIsEditing(false);
-  };
-
   useEffect(() => {
     setDayOutline(dayPlan);
+    setOriginalDayPlan(dayPlan!);
   }, [dayPlan]);
 
+  const handleSaveDay = (day) => {
+    try {
+      setDayOutline((prevDayOutline) => {
+        if (prevDayOutline.day === day) {
+          // Filter out exercises with empty names & with no exercises
+          const filteredWorkouts = prevDayOutline.workouts
+            .map((workout) => {
+              return {
+                ...workout,
+                exercises: workout.exercises.filter(
+                  (exercise) => exercise.name !== ""
+                ),
+              };
+            })
+            .filter((workout) => workout.exercises.length > 0);
+
+          return {
+            ...prevDayOutline,
+            workouts: filteredWorkouts,
+          };
+        }
+        return prevDayOutline;
+      });
+      handleSaveClick(dayOutline);
+      // updateDayPlan(dayOutline);
+      // setDayOutline({ ...dayOutline, intensity: originalDayPlan.intensity });
+      setIsEditing(false);
+      console.log("handleSaveDay in Child");
+    } catch (error) {
+      updateDayPlan(originalDayPlan);
+      console.log("Error, returning back to last saved: ", originalDayPlan);
+    }
+  };
+
+  // useEffect(() => {
+  //   setDayOutline(dayPlan);
+  // }, [dayPlan]);
+
   if (!dayPlan) {
-    return <div>Loading...</div>; // Or any other placeholder
+    return <div>Loading...</div>;
   }
 
-  const handleWorkoutTypeChange = (workoutId: string, newType: string) => {
+  const handleWorkoutTypeChange = (workoutId: number, newType: string) => {
     const updatedWorkouts = dayOutline.workouts.map((workout) => {
       if (workout.id === workoutId) {
         return { ...workout, type: newType };
@@ -311,7 +561,7 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
   };
 
   const handleExerciseNameChange = (
-    workoutId: string,
+    workoutId: number,
     exerciseIndex: number,
     newName: string
   ) => {
@@ -343,67 +593,64 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
   function convertToWorkoutLevelKey(key: string): WorkoutLevel {
     return key.toUpperCase() as WorkoutLevel;
   }
+  const handleQuickIntensityChange = (
+    day: string,
+    intensityToUpdate: string
+  ) => {
+    console.log("handleQuickIntensityChange: ", day, intensityToUpdate);
+    const intensities = ["Light", "Moderate", "Intense"];
+    let toggleIntensityInd = intensities.findIndex(
+      (intensity) => intensity === intensityToUpdate
+    );
+    toggleIntensityInd = (toggleIntensityInd + 1) % intensities.length;
+    console.log(
+      "New intensity is: ",
+      intensities[toggleIntensityInd],
+      toggleIntensityInd
+    );
+    const newIntensity = intensities[toggleIntensityInd];
+    console.log("updatedWorkouts is: ", newIntensity);
+    const newDayPlan = { ...dayPlan, intensity: newIntensity };
+    saveBadgeCurrentWeek(newDayPlan);
+    setDayOutline(newDayPlan);
+    // handleSaveDay(dayOutline.day);
+  };
 
   return (
     <Box className="border rounded-lg p-4 m-2 bg-gray-100 shadow space-y-4">
       <h2 className="font-bold text-lg mb-2">
         {dayPlan.day} <br />
-        <WorkoutLevelBadge
-          workoutLevel={
-            convertToWorkoutLevelKey(dayOutline.intensity) as WorkoutLevel
+        <Box
+          onClick={() =>
+            handleQuickIntensityChange(dayPlan.day, dayPlan.intensity)
           }
-        />{" "}
+        >
+          <WorkoutLevelBadge
+            workoutLevel={
+              convertToWorkoutLevelKey(dayOutline.intensity) as WorkoutLevel
+            }
+          />{" "}
+        </Box>
       </h2>
 
       <Box hidden={!isEditing} className="mt-3 mb-3">
-        <Text>Pick Workout Intensity</Text>
-        <Select.Root
-          size="2"
-          disabled={!isEditing}
-          onValueChange={(value) => {
-            setDayOutline({ ...dayPlan, intensity: value });
-          }}
-        >
-          <Select.Trigger
-            placeholder="Pick A Workout Intensity"
-            variant="surface"
-          />
-          <Select.Content variant="solid" position="popper">
-            <Select.Group>
-              <Select.Label>Intensity</Select.Label>
-              <Select.Item value="LIGHT">Light</Select.Item>
-              <Select.Item value="MODERATE">Moderate</Select.Item>
-              <Select.Item value="INTENSE">Intense</Select.Item>
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
+        <SelectIntensityUI
+          setDayOutline={setDayOutline}
+          dayOutline={dayOutline}
+        />
       </Box>
-      {dayOutline.workouts.map((workout) => (
-        <div key={workout.id} className="mb-4">
+      {dayOutline.workouts.map((workout, index) => (
+        <div key={index} className="mb-4 space-y-2">
           {isEditing ? (
-            <>
-              <label hidden={!isEditing} htmlFor="type">
-                Excercise Type
-              </label>
-              <select
-                id="type"
-                value={workout.type}
-                disabled={!isEditing}
-                hidden={!isEditing}
-                onChange={(e) =>
-                  handleWorkoutTypeChange(workout.id, e.target.value)
-                }
-                className="border rounded px-2 py-1 w-full"
-              >
-                <option value="Stretch">Stretch</option>
-                <option value="Strength">Strength</option>
-                <option value="Cardio">Cardio</option>
-              </select>
-            </>
+            <SelectExerciseType
+              workout={workout}
+              dayOutline={dayOutline}
+              handleWorkoutTypeChange={handleWorkoutTypeChange}
+            />
           ) : (
-            <div className="font-bold text-l mb-1 underline">
+            <Box className="font-bold text-l mb-1 underline">
               {workout.type}
-            </div>
+            </Box>
           )}
           {workout.exercises.map((exercise, index) =>
             isEditing ? (
@@ -431,16 +678,17 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
               <Button
                 onClick={() => handleRemoveLastExercise(workout.id)}
                 className="text-white py-1 px-3 rounded mt-2"
+                color="gray"
               >
                 -
               </Button>
               <form
                 onSubmit={(e) => {
-                  e.preventDefault(); // Prevents the default form submission behavior
+                  e.preventDefault();
                   handleAddNewExercise(workout.id);
                 }}
               >
-                <Button>+</Button>
+                <Button color="gray">+</Button>
               </form>
             </Box>
           )}
@@ -477,13 +725,13 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
             <Box className="flex justify-evenly space-x-2">
               <Button
                 onClick={() => handleRemoveLastWorkout(dayOutline.day)}
-                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
+                color="cyan"
               >
                 - Exercise
               </Button>
               <Button
                 onClick={() => handleAddNewWorkout(dayOutline.day)}
-                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded mt-2"
+                color="cyan"
               >
                 + Exercise
               </Button>
@@ -492,13 +740,177 @@ const DayCard: React.FC<DayCardProps> = ({ dayPlan }) => {
             <Button
               className="text-white py-1 px-3 rounded mt-2"
               onClick={() => handleSaveDay(dayOutline.day)}
+              size="3"
+              variant="solid"
+              color="jade"
             >
               Save
             </Button>
-            <Button onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                setIsEditing(false);
+                setDayOutline(originalDayPlan); // Reset to original plan
+              }}
+              variant="soft"
+              color="orange"
+            >
+              Cancel
+            </Button>
           </Box>
         )}
       </Box>
+      <Toaster />
+    </Box>
+  );
+};
+interface SelectIntensityUIProps {
+  dayOutline: DayPlan;
+  setDayOutline: (updatedDayPlan: DayPlan) => void;
+}
+const SelectIntensityUI: React.FC<SelectIntensityUIProps> = ({
+  setDayOutline,
+  dayOutline,
+}) => {
+  return (
+    <>
+      <Text>Pick Workout Intensity</Text>
+      <Select.Root
+        value={dayOutline.intensity}
+        onValueChange={(value) => {
+          console.log("value is: ", value);
+          setDayOutline({ ...dayOutline, intensity: value });
+        }}
+      >
+        <Select.Trigger
+          className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-gray-300 text-gray-800 shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
+          aria-label="Intensities"
+        >
+          <Select.Value>{dayOutline.intensity} </Select.Value>
+          <Select.Icon />
+        </Select.Trigger>
+
+        <Select.Portal>
+          <Select.Content
+            position="popper"
+            className="overflow-hidden bg-white rounded-md shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
+          >
+            <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Viewport className="p-[10px]">
+              <Select.Group>
+                <Select.Label className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100">
+                  Intensity
+                </Select.Label>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Light"
+                >
+                  Light
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Moderate"
+                >
+                  Moderate
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Intense"
+                >
+                  Intense
+                </Select.Item>
+              </Select.Group>
+            </Select.Viewport>
+            <Select.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Arrow />
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
+    </>
+  );
+};
+const ColorPicker = () => {
+  const [selectedColor, setSelectedColor] = useState("bg-white");
+
+  const handleColorChange = (event) => {
+    setSelectedColor(tailwindColors[event.target.value]);
+  };
+
+  return (
+    <div className={`${selectedColor} p-5`}>
+      <select onChange={handleColorChange} className="p-2 rounded border">
+        {Object.keys(tailwindColors).map((color) => (
+          <option key={color} value={color}>
+            {color}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+interface SelectExerciseTypeProps {
+  workout: PlannedWorkout;
+  dayOutline: DayPlan;
+  handleWorkoutTypeChange: (workoutId: number, newType: string) => void;
+}
+
+const SelectExerciseType: React.FC<SelectExerciseTypeProps> = ({
+  workout,
+  dayOutline,
+  handleWorkoutTypeChange,
+}) => {
+  return (
+    <Box>
+      <Text>Excercise Type</Text>
+      <Select.Root
+        value={workout.type}
+        onValueChange={(value) => {
+          handleWorkoutTypeChange(workout.id, value);
+        }}
+      >
+        <Select.Trigger
+          className="inline-flex items-center justify-between rounded-md px-4 py-2 text-sm leading-none h-9 gap-2 bg-gray-300 text-gray-800 shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
+          aria-label="Intensities"
+        >
+          <Select.Value>{workout.type} </Select.Value>
+          <Select.Icon />
+        </Select.Trigger>
+
+        <Select.Portal>
+          <Select.Content
+            position="popper"
+            className="overflow-hidden bg-white rounded-md shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
+          >
+            <Select.ScrollUpButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Viewport className="p-[10px]">
+              <Select.Group>
+                <Select.Label className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100">
+                  Exercise Type
+                </Select.Label>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Stretch"
+                >
+                  Stretch
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Strength"
+                >
+                  Strength
+                </Select.Item>
+                <Select.Item
+                  className="px-4 py-2 text-sm hover:bg-blue-50"
+                  value="Cardio"
+                >
+                  Cardio
+                </Select.Item>
+              </Select.Group>
+            </Select.Viewport>
+            <Select.ScrollDownButton className="flex items-center justify-center h-[25px] bg-white text-violet11 cursor-default" />
+            <Select.Arrow />
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
     </Box>
   );
 };

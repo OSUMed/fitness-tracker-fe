@@ -1,4 +1,4 @@
-import React, { Context, useContext, useState, useEffect } from "react";
+import React, { Context, useContext, useState, useEffect, useRef } from "react";
 import {
   Flex,
   TextField,
@@ -9,6 +9,12 @@ import {
 } from "@radix-ui/themes";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "react-hook-form";
+import {
+  showDeleteToast,
+  showSuccessToast,
+  showUpdateConfirmationToast,
+} from "../components/ToastComponents";
+
 import { format } from "date-fns";
 import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import toast, { Toaster } from "react-hot-toast";
@@ -125,10 +131,126 @@ const TodaysWorkoutComponent = () => {
   useEffect(() => {
     callGetTodaysWorkout();
   }, []);
+  const CustomToast = ({ message }) => {
+    return (
+      <div className="bg-blue-500 text-white text-sm p-3 rounded-lg shadow-lg">
+        {message}
+      </div>
+    );
+  };
+  const showToast = () => {
+    toast.custom(
+      <CustomToast message="This is a custom toast notification!" />
+    );
+  };
+
+  // Post Exercise to Todays Workout Request:
+  const postExerciseToTodaysWorkout = (
+    currentExercise: Exercise,
+    toastMessage: string
+  ) => {
+    const postData = {
+      userId: userId,
+      id: recordTodaysWorkout.id,
+      date: recordTodaysWorkout.date,
+      exerciseData: currentExercise,
+    };
+    console.log("Post data is: ", postData);
+    axiosInstance
+      .post(`${serverAPI}/workoutlogins`, postData)
+      .then((response) => {
+        const { exercises } = response.data;
+        console.log("POST exercises res: ", exercises);
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("POST workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
+        }
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+        toast.error("Changes could not be saved", {
+          duration: 3000,
+        });
+      });
+
+    showSuccessToast(toastMessage);
+  };
+
+  // Update Exercise To Todays Workout Request:
+  const updateExerciseInTodaysWorkout = (
+    updatedExercise: Exercise,
+    exerciseId: number,
+    toastMessage: string
+  ) => {
+    const updateData = {
+      userId: userId,
+      id: recordTodaysWorkout.id,
+      date: recordTodaysWorkout.date,
+      exerciseData: updatedExercise,
+    };
+    console.log("updateData being sent to server is: ", updateData);
+    axiosInstance
+      .put(`${serverAPI}/workoutlogins/${exerciseId}`, updateData)
+      .then((response) => {
+        const { exercises } = response.data;
+        console.log("PUT exercises res: ", exercises);
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("PUT workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
+        }
+        showSuccessToast(toastMessage);
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+  };
+
+  // Delete Exercise From Todays Workout Request:
+  const deleteExerciseFromTodaysWorkout = (
+    exerciseId: number,
+    undoFunction: (saveDeletedWorkout: Exercise) => void
+  ) => {
+    const todaysDate = recordTodaysWorkout.date;
+    const saveDeletedWorkout = allExercises.find(
+      (workout) => workout.exerciseId === exerciseId
+    );
+    console.log(
+      "deleteExerciseFromTodaysWorkout saveDeletedWorkout ",
+      saveDeletedWorkout
+    );
+    axiosInstance
+      .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
+        params: {
+          rawWorkoutDate: todaysDate,
+        },
+      })
+      .then((response) => {
+        const { exercises } = response.data;
+        console.log("DELETE exercises res: ", exercises);
+
+        if (exercises) {
+          const filteredServerData =
+            translateResponseForTodaysWorkout(exercises);
+          console.log("DELETE workoutlogins response is: ", response.data);
+          console.log("serverFilteredData: ", filteredServerData);
+          setAllExercises(filteredServerData);
+          showDeleteToast(saveDeletedWorkout, undoFunction);
+        }
+      })
+      .catch((error) => {
+        console.log("error is: ", error);
+      });
+  };
 
   // Finish Today Workout & Save to History
   const finishTodaysWorkout = () => {
-    const daySummary = summarizeDayWorkout();
+    const daySummary = summarizeDayWorkout(allExercises);
     setHistoryRecordedWorkouts([
       ...historyRecordedWorkouts,
       recordTodaysWorkout,
@@ -147,23 +269,33 @@ const TodaysWorkoutComponent = () => {
     setCurrentExercise(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
-    toast.success("Workout saved!", { duration: 3000 });
+    showSuccessToast("Todays workout has been saved!");
   };
-  const summarizeDayWorkout = (): WorkoutSummary => {
+
+  const summarizeDayWorkout = (exercises: Exercise[]) => {
     // Types of workouts performed
     const workoutTypes = new Set(
-      recordTodaysWorkout.workouts.map((workout) => workout.type)
+      exercises.map((exercise: Exercise) => exercise.type)
     );
     const workoutTypesSummary = Array.from(workoutTypes).join(", ");
 
-    // Exercise names
-    const exerciseNamesSummary = recordTodaysWorkout.workouts
-      .map((workout) => workout.exerciseName)
-      .join(", ");
-
-    // Total number of sets
-    const totalSets = recordTodaysWorkout.workouts.reduce(
-      (total, workout) => total + workout.sets.length,
+    const exerciseNamesSummary = exercises.reduce(
+      (
+        accumulator: string,
+        exercise: Exercise,
+        index: number,
+        array: Exercise[]
+      ) => {
+        accumulator += exercise.exerciseName;
+        if (index < array.length - 1) {
+          accumulator += ", ";
+        }
+        return accumulator;
+      },
+      ""
+    );
+    const totalSets = exercises.reduce(
+      (total: number, exercise: Exercise) => total + exercise.sets.length,
       0
     );
 
@@ -391,43 +523,15 @@ const TodaysWorkoutComponent = () => {
       "currentExercise.sets.length is: ",
       currentExercise.sets.length
     );
-
-    const postData = {
-      userId: userId,
-      id: recordTodaysWorkout.id,
-      date: recordTodaysWorkout.date,
-      exerciseData: currentExercise,
-    };
-    console.log("Post data is: ", postData);
-
-    // Add current workout to workouts in server
-    axiosInstance
-      .post(`${serverAPI}/workoutlogins`, postData)
-      .then((response) => {
-        const { exercises } = response.data;
-        console.log("POST exercises res: ", exercises);
-        if (exercises) {
-          const filteredServerData =
-            translateResponseForTodaysWorkout(exercises);
-          console.log("POST workoutlogins response is: ", response.data);
-          console.log("serverFilteredData: ", filteredServerData);
-          setAllExercises(filteredServerData);
-        }
-      })
-      .catch((error) => {
-        console.log("error is: ", error);
-      });
+    const toastMessage = "Exercise successfully added to today's workout.";
+    postExerciseToTodaysWorkout(currentExercise, toastMessage);
 
     // Update the recordWorkout state
     // setAllExercises([...allExercises, currentExercise]);
     setCurrentExercise(null);
     setSelectedWorkoutType(null);
     setExerciseName("");
-    toast.success("Workout added!", { duration: 3000 });
   };
-
-  // Today Workout Table Logic: Update, Delete
-  // FOUND BUG. Need to update in here only so the confirmation dialog cancel works:
 
   const startRowEditProcess = (index: number) => {
     setIsEditing(true);
@@ -437,22 +541,6 @@ const TodaysWorkoutComponent = () => {
   };
 
   const handleUpdateExercise = (exerciseId: number) => {
-    // console.log("updateWorkout workout! _e: ", _event);
-    // const updateWorkout = allExercises.find((workout, i) => i === index);
-    // let workouts = [...allExercises];
-    // workouts.map((workout, i) => {
-    //   if (i === index) {
-    //     workout.exerciseName = "Updated Exercise Name";
-    //   }
-    // });
-    // setAllExercises(workouts);
-
-    const updateData = {
-      userId: userId,
-      id: recordTodaysWorkout.id,
-      date: recordTodaysWorkout.date,
-      exerciseData: editableRowData,
-    };
     setEditableRowData((prevData: Exercise | undefined) => {
       if (!prevData) {
         return prevData;
@@ -462,35 +550,12 @@ const TodaysWorkoutComponent = () => {
         exerciseId: exerciseId,
       };
     });
-    console.log("updateData being sent to server is: ", updateData);
-    axiosInstance
-      .put(`${serverAPI}/workoutlogins/${exerciseId}`, updateData)
-      .then((response) => {
-        const { exercises } = response.data;
-        console.log("PUT exercises res: ", exercises);
-        if (exercises) {
-          const filteredServerData =
-            translateResponseForTodaysWorkout(exercises);
-          console.log("PUT workoutlogins response is: ", response.data);
-          console.log("serverFilteredData: ", filteredServerData);
-          setAllExercises(filteredServerData);
-        }
-      })
-      .catch((error) => {
-        console.log("error is: ", error);
-      });
-
-    // const updatedExercises = allExercises.map((workout, wIndex) => {
-    //   if (wIndex === index) {
-    //     return editableRowData as Exercise;
-    //   }
-    //   return workout;
-    // });
-    // console.log("Update data to server is: ", updateData, "Index is: ", index); // as Exercise
-    // setAllExercises(updatedExercises);
+    const message = "Exercise details updated successfully.";
+    updateExerciseInTodaysWorkout(editableRowData!, exerciseId, message);
     setEditingRowIndex(null);
     setIsEditing(false);
   };
+
   const handleUpdateExerciseName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditableRowData((prevData: Exercise | undefined) => {
       if (!prevData) {
@@ -587,36 +652,48 @@ const TodaysWorkoutComponent = () => {
   //   });
   //   setAllExercisesTemp(updatedWorkouts as Exercise[]);
   // };
+  // const deleteExercise = (exerciseId: number) => {
+  //   const todaysDate = recordTodaysWorkout.date;
+  //   axiosInstance
+  //     .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
+  //       params: {
+  //         rawWorkoutDate: todaysDate,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       const { exercises } = response.data;
+  //       console.log("DELETE exercises res: ", exercises);
+
+  //       if (exercises) {
+  //         const filteredServerData =
+  //           translateResponseForTodaysWorkout(exercises);
+  //         console.log("DELETE workoutlogins response is: ", response.data);
+  //         console.log("serverFilteredData: ", filteredServerData);
+  //         setAllExercises(filteredServerData);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log("error is: ", error);
+  //     });
+  // };
   const handleDeleteExercise = (exerciseId: number) => {
-    // const deletedWorkout = allExercises.find((_workout, i) => i === exerciseId);
-    // const updatedWorkouts = allExercises.filter(
-    //   (_workout, i) => i !== exerciseId
-    // );
-    const todaysDate = recordTodaysWorkout.date;
+    const saveDeletedWorkout = allExercises.find(
+      (workout) => workout.exerciseId === exerciseId
+    );
+
+    console.log("handleDeleteExercise saveDeletedWorkout ", saveDeletedWorkout);
     console.log("delete workout is: ", exerciseId, allExercises);
-    axiosInstance
-      .delete(`${serverAPI}/workoutlogins/${exerciseId}`, {
-        params: {
-          rawWorkoutDate: todaysDate,
-        },
-      })
-      .then((response) => {
-        const { exercises } = response.data;
-        console.log("DELETE exercises res: ", exercises);
-        if (exercises) {
-          const filteredServerData =
-            translateResponseForTodaysWorkout(exercises);
-          console.log("DELETE workoutlogins response is: ", response.data);
-          console.log("serverFilteredData: ", filteredServerData);
-          setAllExercises(filteredServerData);
-        }
-      })
-      .catch((error) => {
-        console.log("error is: ", error);
-      });
+    deleteExerciseFromTodaysWorkout(exerciseId, undoDeleteAxiosRequest);
+
     // setAllExercises(updatedWorkouts);
     setIsEditing(false);
     setEditingRowIndex(null);
+  };
+  const undoDeleteAxiosRequest = (saveDeletedWorkout: Exercise) => {
+    toast.dismiss();
+    console.log("undoDeleteAxios saveDeletedWorkout: ", saveDeletedWorkout);
+    const toastMessage = "Exercise restored to today's workout.";
+    postExerciseToTodaysWorkout(saveDeletedWorkout, toastMessage);
   };
 
   ///////////////////////// Testing Purposes  /////////////////////////
@@ -652,6 +729,7 @@ const TodaysWorkoutComponent = () => {
   console.log("editableRowData is: ", editableRowData);
 
   console.log("TOdays Workout Username and id are: ", username, userId);
+  console.log("recordTodaysWorkout are: ", recordTodaysWorkout);
   return (
     <>
       <Box>

@@ -43,6 +43,7 @@ const NavBar = () => {
   const authenticatedLinks = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Week Planner", href: "/weekgrid" },
+    { label: "Exercise Database", href: "/workoutdatabase" },
     { label: "Chat", href: "/chat" },
     { label: "Add Workout", href: "/addworkout" },
     { label: "Logout", href: "/logout" },
